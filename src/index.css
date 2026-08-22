@@ -1,0 +1,384 @@
+@import "tailwindcss";
+
+/*
+ * Without this, Tailwind v4's `font-sans`/`font-mono` utilities (and
+ * the default body font, which is `font-sans` under Preflight) point
+ * at the browser's system font stacks — not the Suisse Intl families
+ * declared below. `font-mono` alone is used 140+ times across the
+ * codebase (every uppercase micro-label, status readout, coordinate
+ * readout) and was rendering as system monospace instead of Suisse
+ * Intl Mono. Fallbacks kept in each stack so unsupported weights/
+ * load failures still degrade to a reasonable system font rather
+ * than an unstyled serif.
+ */
+@theme {
+  --font-sans:
+    "Suisse Intl", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Suisse Intl Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/fonts/suisse/SuisseIntl-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/fonts/suisse/SuisseIntl-Book.otf") format("opentype");
+  font-weight: 450;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/fonts/suisse/SuisseIntl-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/fonts/suisse/SuisseIntl-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/fonts/suisse/SuisseIntl-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl";
+  src: url("/fonts/suisse/SuisseIntl-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl Mono";
+  src: url("/fonts/suisse/SuisseIntlMono-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl Mono";
+  src: url("/fonts/suisse/SuisseIntlMono-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Intl Mono";
+  src: url("/fonts/suisse/SuisseIntlMono-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-accent: #6d28d9;
+  --stack-tab-h: 40px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --stack-tab-h: 56px;
+  }
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-black);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+a {
+  font-family: inherit;
+}
+
+/* ================================================================
+   SKIP TO CONTENT
+   ================================================================
+   Offscreen (not just invisible) so it never affects layout while
+   unfocused, and jumps into view the instant it receives keyboard
+   focus — the first Tab stop on every page. */
+
+.skip-to-content {
+  position: fixed;
+  top: -100%;
+  left: 16px;
+  z-index: 100000;
+  padding: 12px 20px;
+  background: var(--color-white);
+  color: var(--color-black);
+  font-family: "Suisse Intl Mono", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 8px;
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+  top: 16px;
+}
+
+/* ================================================================
+   CUSTOM CURSOR
+   ================================================================ */
+
+/* Native cursor hidden only when CustomCursor.tsx has confirmed a
+   fine pointer + no reduced-motion preference. */
+html.custom-cursor-active,
+html.custom-cursor-active * {
+  cursor: none !important;
+}
+
+.cursor-box {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 9999px;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  will-change: transform, width, height;
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.cursor-box--highlight {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cursor-box--label {
+  --cursor-accent: var(--color-accent);
+  border-color: transparent;
+  background: var(--cursor-accent);
+  mix-blend-mode: normal;
+}
+
+/* Thin text-input caret — see CustomCursor.tsx's "text" variant.
+   Solid fill instead of a hairline ring reads better at 2px wide;
+   difference blend keeps it visible over the dark form fields it's
+   used on without needing its own light/dark variant. */
+.cursor-box--text {
+  border-color: transparent;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.cursor-box__label {
+  font-family: "Suisse Intl Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-white);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cursor-box--label .cursor-box__label {
+  opacity: 1;
+}
+
+/* "Scroll" cursor label — layered on top of .cursor-box--label (via
+   CustomCursor.tsx's `data-cursor-variant="scroll"`) for the pinned
+   horizontal-scroll sections (Services/Process). A small blinking
+   pixel-art eye sits next to the "Scroll" text so the hint reads as
+   "keep watching / keep going" rather than a static label. */
+.cursor-box--scroll {
+  gap: 6px;
+}
+
+.cursor-box__eye {
+  display: none;
+  position: relative;
+  flex: none;
+  transform-origin: center;
+  /* Pixel-art eye drawn entirely out of 3px squares via box-shadow —
+     the span itself stays a transparent 3px "phantom" pixel and every
+     other pixel is a shadow offset from it. White sclera/eyelid
+     pixels, one black pupil pixel dead center. Visible footprint ends
+     up 21x15px (18+3 wide, 12+3 tall). */
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow:
+    3px 0 0 0 #fff,
+    6px 0 0 0 #fff,
+    9px 0 0 0 #fff,
+    12px 0 0 0 #fff,
+    15px 0 0 0 #fff,
+    0 3px 0 0 #fff,
+    3px 3px 0 0 #fff,
+    15px 3px 0 0 #fff,
+    18px 3px 0 0 #fff,
+    0 6px 0 0 #fff,
+    18px 6px 0 0 #fff,
+    9px 6px 0 0 #000,
+    0 9px 0 0 #fff,
+    3px 9px 0 0 #fff,
+    15px 9px 0 0 #fff,
+    18px 9px 0 0 #fff,
+    3px 12px 0 0 #fff,
+    6px 12px 0 0 #fff,
+    9px 12px 0 0 #fff,
+    12px 12px 0 0 #fff,
+    15px 12px 0 0 #fff;
+  animation: technico-eye-blink 2.6s ease-in-out infinite;
+}
+
+.cursor-box--scroll .cursor-box__eye {
+  display: block;
+}
+
+@keyframes technico-eye-blink {
+  0%,
+  84%,
+  100% {
+    transform: scaleY(1);
+  }
+  90% {
+    transform: scaleY(0.1);
+  }
+  94% {
+    transform: scaleY(1);
+  }
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: var(--color-white);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  transition: opacity 0.2s ease;
+}
+
+.cursor-dot--label {
+  opacity: 0;
+}
+
+/* ================================================================
+   HIDE SCROLLBAR
+   ================================================================
+   Scrolling stays fully functional — only the visible scrollbar
+   track/thumb is removed. No layout shift: unlike `overflow: hidden`
+   + a manual scroll container, this keeps the native document
+   scroll, so page height and scroll-based triggers (ScrollTrigger,
+   IntersectionObserver, etc.) are unaffected.
+   ================================================================ */
+
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge / IE */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, new Edge */
+  width: 0;
+  height: 0;
+}
+
+/* ================================================================
+   SYSTEM BLINK
+   ================================================================
+   Used by <Blink> and <StatusDot> for organic "living system"
+   flicker on small metadata/labels/status indicators. One soft,
+   brief opacity dip per long cycle — not a pulse or double-flash —
+   so it reads as an occasional, deliberate flicker rather than
+   attention-seeking. Each instance randomizes its own delay/duration
+   (see Blink.tsx) so nothing on the page ever dips in sync.
+   ================================================================ */
+
+@keyframes technico-blink {
+  0%,
+  88%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: var(--blink-min, 0.6);
+  }
+  96% {
+    opacity: 1;
+  }
+}
+
+/* ================================================================
+   QUOTE SCREEN CURSOR
+   ================================================================
+   Sharp on/off blink for QuoteScreen's typing cursor — a soft-dip
+   fade (like technico-blink above) would read as system flicker
+   rather than a text cursor. Pure CSS, `steps(1, end)` for a crisp
+   on/off rather than a fade, so it costs nothing in JS no matter how
+   many QuoteScreen instances are mounted at once.
+   ================================================================ */
+
+@keyframes quote-screen-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.quote-screen-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  animation: quote-screen-blink 1s steps(1, end) infinite;
+}
+
+/* Once the quote has finished typing, slow the blink slightly so it
+   reads as "idle / waiting" rather than still actively typing. */
+.quote-screen-cursor--idle {
+  animation-duration: 1.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-screen-cursor {
+    animation: none;
+    opacity: 1;
+  }
+}
