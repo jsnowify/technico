@@ -131,7 +131,7 @@ export default function Hero() {
               as="p"
               className="mb-8 font-mono text-xs uppercase tracking-[0.2em] text-[#6D28D9]"
             >
-              Technico Solutions Inc.
+              Technico Digital Solutions Inc.
             </RevealText>
 
             <RevealText
@@ -165,7 +165,7 @@ export default function Hero() {
             </ScrambleText>
             <span className="hidden md:block">
               <ScrambleText as="span" variant="micro">
-                Technico Digital Solutions
+                Technico Digital Solutions Inc
               </ScrambleText>
             </span>
             <Blink as="span">

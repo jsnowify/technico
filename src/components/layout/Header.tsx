@@ -3,7 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import TransitionLink from "./TransitionLink";
 import Button from "../../components/ui/Button";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "../../lib/gsap";
+import {
+  gsap,
+  ScrollTrigger,
+  prefersReducedMotion,
+  supportsFinePointer,
+} from "../../lib/gsap";
 
 const NAV_LINKS = [
   { label: "SERVICES", href: "/services", hasDropdown: true },
@@ -318,7 +323,11 @@ const NavItem = ({
   useGSAP(() => {
     const magnetic = magneticRef.current;
 
-    if (!magnetic || prefersReducedMotion) return;
+    // Coarse-pointer devices (phones, and tablets like landscape iPad
+    // that are wide enough to hit the desktop nav layout) never get a
+    // real hover — skip setting up the magnetic quickTo tweens
+    // entirely rather than let a touch tap register as a hover.
+    if (!magnetic || prefersReducedMotion || !supportsFinePointer) return;
 
     const moveX = gsap.quickTo(magnetic, "x", {
       duration: MAGNETIC_PULL_DURATION,
@@ -401,8 +410,16 @@ const NavItem = ({
       ============================================================== */
 
   const handlePointerMove = (event: React.PointerEvent<HTMLAnchorElement>) => {
+    // Matches Button.tsx's useMagnetic fix: touch (and pen-as-touch)
+    // pointers fire pointermove during ordinary scrolling/tapping, so
+    // reacting to those would drag the link toward wherever the
+    // finger last was and, since touch rarely fires a matching
+    // pointerleave, leave it stuck off-center. Only real mouse input
+    // drives the pull.
     if (
       prefersReducedMotion ||
+      !supportsFinePointer ||
+      event.pointerType !== "mouse" ||
       !magneticXRef.current ||
       !magneticYRef.current ||
       !linkRef.current

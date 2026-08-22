@@ -1,6 +1,10 @@
 import { useRef, type PointerEvent, type ReactNode } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion } from "../../lib/gsap";
+import {
+  gsap,
+  prefersReducedMotion,
+  supportsFinePointer,
+} from "../../lib/gsap";
 
 const MAX_TILT = 11; // degrees, each axis
 const LIFT = 24; // px, translateZ on hover
@@ -23,6 +27,15 @@ type TiltCardProps = {
  * the identical quickTo setters used for pointer-move, never a
  * competing gsap.to — otherwise repeated hover/leave cycles silently
  * kill the internal quickTo tween via GSAP's overwrite manager.
+ *
+ * FIX (mobile/tablet): pointer events fire for touch too, so a
+ * finger dragging across a card mid-scroll used to register as a
+ * "hover" and run this tilt math every frame during a scroll —
+ * exactly when a phone/tablet can least afford it — and could leave
+ * the card visibly stuck mid-tilt when pointerleave never fires
+ * cleanly for a touch gesture. Gated on `supportsFinePointer`
+ * (pointer: fine) so touch/coarse-pointer devices, including
+ * landscape iPad, skip the tilt entirely and the card just sits flat.
  */
 export default function TiltCard({ children, className }: TiltCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -39,7 +52,7 @@ export default function TiltCard({ children, className }: TiltCardProps) {
     const card = cardRef.current;
     const glare = glareRef.current;
 
-    if (!card || !glare || prefersReducedMotion) return;
+    if (!card || !glare || prefersReducedMotion || !supportsFinePointer) return;
 
     gsap.set(card, { transformPerspective: 900 });
 
@@ -82,7 +95,17 @@ export default function TiltCard({ children, className }: TiltCardProps) {
   }, []);
 
   const handleMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion || !cardRef.current) return;
+    // Matches Button.tsx's useMagnetic fix: only real mouse input
+    // drives the tilt — touch pointermove during a scroll-drag over
+    // the card is otherwise misread as a hover.
+    if (
+      prefersReducedMotion ||
+      !supportsFinePointer ||
+      event.pointerType !== "mouse" ||
+      !cardRef.current
+    ) {
+      return;
+    }
 
     const rect = cardRef.current.getBoundingClientRect();
 

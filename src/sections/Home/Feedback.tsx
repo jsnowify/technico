@@ -773,7 +773,7 @@ export default function Feedback() {
           className="mx-5 mt-8 flex flex-wrap items-center justify-between gap-y-2 border-t border-white/10 pt-4 font-mono text-[8px] uppercase tracking-[0.15em] text-white/30 sm:mx-6 md:mx-10 lg:mx-12 lg:mt-14 lg:text-[9px] xl:mx-14"
         >
           <ScrambleReveal as="span" variant="micro">
-            Technico Digital Solutions
+            Technico Digital Solutions Inc
           </ScrambleReveal>
 
           <span className="hidden items-center gap-1.5 md:inline-flex">

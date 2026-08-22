@@ -1,6 +1,10 @@
 import { useRef, type PointerEvent } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion } from "../../lib/gsap";
+import {
+  gsap,
+  prefersReducedMotion,
+  supportsFinePointer,
+} from "../../lib/gsap";
 
 const MAX_TILT = 9; // degrees, each axis
 const TARGET_RADIUS = 205; // matches the outer ring's SVG radius
@@ -35,6 +39,13 @@ type OrbitDialProps = {
  *
  * Respects prefers-reduced-motion: renders the static rings with no
  * rotation and no pointer handlers wired up at all.
+ *
+ * The pointer-tilt and target-lock pieces are further gated on
+ * `supportsFinePointer` (pointer: fine) — the ambient ring rotation
+ * still runs on touch/coarse-pointer devices, but the tilt/lock
+ * math is skipped so a touch tap or scroll-drag across the dial on
+ * phones and tablets (landscape iPad included) doesn't get read as
+ * a pointer hover.
  */
 export default function OrbitDial({
   className,
@@ -74,24 +85,33 @@ export default function OrbitDial({
         });
       }
 
-      gsap.set(dial, { transformPerspective: 800 });
-
-      rotateX.current = gsap.quickTo(dial, "rotateX", {
-        duration: 0.6,
-        ease: "power3.out",
-      });
-      rotateY.current = gsap.quickTo(dial, "rotateY", {
-        duration: 0.6,
-        ease: "power3.out",
-      });
-
+      // Pointer-tilt + target-lock are pointer-driven effects, not
+      // just decorative — skip setting them up at all on touch/
+      // coarse-pointer devices (phones, and tablets like landscape
+      // iPad) rather than let a touch tap register as a hover, the
+      // same fix applied to TiltCard and Header's magnetic nav.
+      // The ambient ring rotation above is unaffected either way.
       const target = targetRef.current;
-      if (target) {
-        gsap.set(target, { transformOrigin: "250px 250px" });
-        targetAngle.current = gsap.quickTo(target, "rotation", {
-          duration: 0.5,
+
+      if (supportsFinePointer) {
+        gsap.set(dial, { transformPerspective: 800 });
+
+        rotateX.current = gsap.quickTo(dial, "rotateX", {
+          duration: 0.6,
           ease: "power3.out",
         });
+        rotateY.current = gsap.quickTo(dial, "rotateY", {
+          duration: 0.6,
+          ease: "power3.out",
+        });
+
+        if (target) {
+          gsap.set(target, { transformOrigin: "250px 250px" });
+          targetAngle.current = gsap.quickTo(target, "rotation", {
+            duration: 0.5,
+            ease: "power3.out",
+          });
+        }
       }
 
       return () => {
@@ -107,7 +127,17 @@ export default function OrbitDial({
   );
 
   const handleMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion || !wrapRef.current) return;
+    // Matches Button.tsx's useMagnetic fix: only real mouse input
+    // drives the tilt/target-lock — touch pointermove during a
+    // scroll-drag over the dial is otherwise misread as a hover.
+    if (
+      prefersReducedMotion ||
+      !supportsFinePointer ||
+      event.pointerType !== "mouse" ||
+      !wrapRef.current
+    ) {
+      return;
+    }
 
     const rect = wrapRef.current.getBoundingClientRect();
 

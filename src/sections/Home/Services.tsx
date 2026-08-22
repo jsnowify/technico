@@ -903,7 +903,7 @@ export default function Services() {
 
           <div className="mt-16 flex items-center justify-between border-t border-black/10 pt-4 font-mono text-[8px] uppercase tracking-[0.15em] text-black/35 lg:mt-20 lg:text-[9px]">
             <ScrambleReveal as="span" variant="micro">
-              Technico Digital Solutions
+              Technico Digital Solutions Inc
             </ScrambleReveal>
             <span className="hidden items-center gap-1.5 md:inline-flex">
               <StatusDot />

@@ -761,7 +761,7 @@ export default function Process() {
                 variant="display"
                 className="block text-[2.5rem] font-semibold leading-[0.98] sm:text-[3.25rem] lg:text-[4.25rem] xl:text-[4.75rem]"
               >
-                Technico Digital Solutions
+                Technico Digital Solutions Inc
               </ScrambleText>
               <ScrambleText
                 as="span"
@@ -1032,7 +1032,7 @@ export default function Process() {
           <div className="relative z-10 mt-10">
             <div className="flex items-center justify-between border-t border-black/10 pt-4 font-mono text-[8px] uppercase tracking-[0.15em] text-black/30 lg:text-[9px]">
               <ScrambleReveal as="span" variant="micro">
-                Technico Digital Solutions
+                Technico Digital Solutions Inc
               </ScrambleReveal>
               <span className="hidden items-center gap-1.5 md:inline-flex">
                 <StatusDot />

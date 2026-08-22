@@ -353,7 +353,7 @@ export default function Introduction() {
               className="mt-10 flex items-center justify-between border-t border-white/10 pt-4 font-mono text-[8px] uppercase tracking-[0.15em] text-white/30 lg:mt-14 lg:text-[9px]"
             >
               <ScrambleText as="span" variant="micro">
-                Technico Digital Solutions
+                Technico Digital Solutions Inc
               </ScrambleText>
               <Blink as="span">
                 <ScrambleText as="span" variant="micro">

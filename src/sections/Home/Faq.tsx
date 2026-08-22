@@ -453,7 +453,7 @@ export default function FAQ() {
       >
         <div className="flex flex-wrap items-center justify-between gap-y-2 border-t border-white/10 pt-4 font-mono text-[8px] uppercase tracking-[0.15em] text-white/30 lg:text-[9px]">
           <ScrambleReveal as="span" variant="micro">
-            Technico Digital Solutions
+            Technico Digital Solutions Inc
           </ScrambleReveal>
 
           <span className="hidden items-center gap-1.5 md:inline-flex">
