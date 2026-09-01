@@ -18,6 +18,7 @@ import Footer from "@/components/layout/Footer";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import BottomGlassBlur from "@/components/layout/BottomGlassBlur";
 import { getAllServices } from "@/lib/content/services";
+import { IS_PRODUCTION } from "@/lib/env";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,16 +37,30 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+  // Staging/preview deploys must never be indexed — see
+  // https://developers.google.com/search/docs/crawling-indexing/block-indexing.
+  // This <meta name="robots"> tag is the reliable way to do that (as
+  // opposed to robots.txt, which only blocks crawling and can't stop
+  // an already-linked URL from still showing up in results).
+  robots: IS_PRODUCTION
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      }
+    : {
+        index: false,
+        follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
+      },
   icons: {
     icon: "/favicon.ico",
   },

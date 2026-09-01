@@ -1,7 +1,9 @@
 import Link from "next/link";
 import TextRevealBlock from "@/components/motion/TextRevealBlock";
+import ScrollFillText from "@/components/motion/ScrollFillText";
 import GlossyButton from "@/components/ui/GlossyButton";
 import HoverImageSwap from "@/components/services/HoverImageSwap";
+import StatCounter from "./StatCounter";
 
 /* ================================================================
    SERVICES MARKET OVERVIEW
@@ -76,14 +78,99 @@ import HoverImageSwap from "@/components/services/HoverImageSwap";
    ================================================================ */
 
 const STATS = [
-  { value: "1.37M", label: "Employer Businesses In Canada" },
-  { value: "$21.1B", label: "Canadian Digital Advertising Market" },
-  { value: "+16%", label: "Digital Ad Market Growth In 2025" },
+  {
+    value: "1.37M",
+    label: "Employer Businesses In Canada",
+    // Two office buildings — represents the employer-business count.
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+        <path
+          d="M4 21V4.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1V21"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M14 21v-8.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V21"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M2 21h20"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M7 8h1M7 12h1M7 16h1"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    value: "$21.1B",
+    label: "Canadian Digital Advertising Market",
+    // Coin with a dollar sign — represents ad-spend market size.
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+        <path
+          d="M12 6.5v11M9.5 9.25c0-1.1 1.12-2 2.5-2s2.5.65 2.5 1.75-1.12 1.75-2.5 1.75-2.5.65-2.5 1.75S10.62 15 12 15s2.5-.65 2.5-1.75"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    value: "+16%",
+    label: "Digital Ad Market Growth In 2025",
+    // Trending-up arrow — represents year-over-year growth.
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+        <path
+          d="M3 17l6-6 4 4 8-8"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M15 7h6v6"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
   {
     value: "#1",
     label: "Search Remains Canada\u2019s Largest Digital Ad Category",
+    // Magnifying glass — represents search as an ad category.
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+        <circle
+          cx="10.5"
+          cy="10.5"
+          r="6.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M20 20l-4.35-4.35"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
   },
-] as const;
+];
 
 const IMPROVE_ITEMS = [
   {
@@ -174,19 +261,32 @@ export default function ServicesMarketOverview() {
     <>
       {/* Intro */}
       <section className="bg-white-bg">
-        <div className="mx-auto max-w-[100rem] px-6 pt-20 sm:pt-28 sm:px-10 md:pt-32 lg:px-16 xl:px-20 2xl:px-24">
+        <div className="w-full px-5 pt-20 sm:pt-28 md:pt-32">
           <span className="mb-8 block font-mono text-xs tracking-[0.14em] text-black-text/50 uppercase sm:mb-10 sm:text-sm">
             Overview
           </span>
 
           {/* Sentence 1, heading fragment */}
           <h2 className="max-w-5xl text-4xl leading-[1.1] font-semibold tracking-tight text-black-text capitalize sm:text-5xl md:text-6xl md:leading-[1.08] lg:text-[64px]">
-            Technico Digital Solutions provides{" "}
+            <TextRevealBlock
+              as="div"
+              lines={["Technico Digital Solutions"]}
+              className="inline-block align-baseline"
+              revealColorDark="#000000"
+              scrollTrigger
+            />{" "}
+            provides{" "}
             <Link
               href="/services"
               className="text-purple-secondary underline decoration-1 underline-offset-4 hover:text-purple-accent"
             >
-              digital marketing services
+              <TextRevealBlock
+                as="div"
+                lines={["digital marketing services"]}
+                className="inline-block align-baseline"
+                revealColorDark="#000000"
+                scrollTrigger
+              />
             </Link>{" "}
             for businesses seeking to improve
           </h2>
@@ -201,10 +301,14 @@ export default function ServicesMarketOverview() {
         </div>
 
         {/* Sentence 2, heading fragment — right-aligned per the mock */}
-        <div className="mx-auto mt-28 max-w-[100rem] px-6 sm:mt-36 sm:px-10 md:mt-44 lg:px-16 xl:px-20 2xl:px-24">
-          <h2 className="ml-auto max-w-4xl text-right text-4xl leading-[1.1] font-semibold tracking-tight text-black-text capitalize sm:text-5xl md:text-6xl md:leading-[1.08] lg:text-[64px]">
-            Our digital experts support businesses across
-          </h2>
+        <div className="w-full mt-28 px-5 sm:mt-36 md:mt-44">
+          <TextRevealBlock
+            as="h2"
+            lines={["Our digital experts support businesses across"]}
+            className="ml-auto max-w-4xl text-right text-4xl leading-[1.1] font-semibold tracking-tight text-black-text capitalize sm:text-5xl md:text-6xl md:leading-[1.08] lg:text-[64px]"
+            revealColorDark="#000000"
+            scrollTrigger
+          />
 
           {/* Sentence 2, list + image (list left, image right) */}
           <div className="mt-14 sm:mt-16 md:mt-20">
@@ -220,11 +324,18 @@ export default function ServicesMarketOverview() {
         {/* Sentence 3+4, heading fragment — full section width, not
             capped down to a narrow centered column like the closing
             statements below. */}
-        <div className="mx-auto mt-28 max-w-[100rem] px-6 sm:mt-36 sm:px-10 md:mt-44 lg:px-16 xl:px-20 2xl:px-24">
+        <div className="w-full mt-28 px-5 sm:mt-36 md:mt-44">
           <h2 className="w-full text-4xl leading-[1.1] font-semibold tracking-tight text-black-text capitalize sm:text-5xl md:text-6xl md:leading-[1.08] lg:text-[64px]">
-            You don&rsquo;t have to rely on just one marketing channel to grow
-            your business. We look at where your customers are searching, what
-            they see when they land on your website, and how
+            <TextRevealBlock
+              as="div"
+              lines={[
+                "You don\u2019t have to rely on just one marketing channel to grow your business.",
+              ]}
+              className="inline-block align-baseline text-black-text"
+              revealColorDark="#000000"
+              scrollTrigger
+            />{" "}
+            <ScrollFillText text="We look at where your customers are searching, what they see when they land on your website, and how" />
           </h2>
 
           {/* Sentence 3+4, list + image (image left, list right) */}
@@ -269,11 +380,14 @@ export default function ServicesMarketOverview() {
               >
                 <span
                   aria-hidden="true"
-                  className="mx-auto mb-7 block h-8 w-8 rounded-full border border-black-text/15 sm:mb-9"
+                  className="mx-auto mb-7 flex h-8 w-8 items-center justify-center rounded-full border border-black-text/15 text-black-text/60 sm:mb-9"
+                >
+                  {stat.icon}
+                </span>
+                <StatCounter
+                  value={stat.value}
+                  className="text-4xl font-semibold tracking-tight text-black-text sm:text-5xl"
                 />
-                <p className="text-4xl font-semibold tracking-tight text-black-text sm:text-5xl">
-                  {stat.value}
-                </p>
                 <p className="mt-4 text-xs font-medium tracking-wide text-black-text/50 uppercase sm:mt-5 sm:text-sm">
                   {stat.label}
                 </p>
@@ -285,30 +399,31 @@ export default function ServicesMarketOverview() {
 
       {/* Closing */}
       <section className="bg-white-bg">
-        <div className="mx-auto max-w-5xl px-6 pt-8 pb-20 sm:px-8 sm:pb-28 md:pb-32 lg:px-12">
-          {/* Closing, part 1 — centered, two-tone */}
-          <p className="text-center text-3xl leading-[1.3] font-semibold tracking-tight capitalize sm:text-4xl md:text-5xl md:leading-[1.25]">
+        <div className="w-full px-5 pt-8 pb-20 sm:pb-28 md:pb-32">
+          {/* Closing, part 1 — right-aligned, balanced wrap, pushed
+              toward the right edge (20px gutter) rather than
+              centered in a narrow container, so it visually leads
+              into part 2 below it sitting on the left. The bold
+              lead-in is static; only the dimmed clause after it
+              scroll-fills word by word. */}
+          <p className="ml-auto max-w-2xl text-right text-balance text-3xl leading-[1.3] font-semibold tracking-tight capitalize sm:text-4xl md:text-5xl md:leading-[1.25] lg:max-w-3xl">
             <span className="sr-only">Start here: </span>
             <span className="text-black-text">
               A website and a few social media accounts can give your business
               an online presence,
             </span>{" "}
-            <span className="text-black-text/35">
-              but that doesn&rsquo;t automatically bring in customers,
-              especially in a competitive market like Vancouver.
-            </span>
+            <ScrollFillText text="but that doesn’t automatically bring in customers, especially in a competitive market like Vancouver." />
           </p>
 
-          {/* Closing, part 2 — left-aligned, two-tone */}
-          <p className="mt-20 text-left text-3xl leading-[1.3] font-semibold tracking-tight capitalize sm:mt-24 sm:text-4xl md:text-5xl md:leading-[1.25]">
+          {/* Closing, part 2 — left-aligned, balanced wrap, pushed
+              toward the left edge (20px gutter), mirroring part 1.
+              Same static-lead-in + scroll-fill-clause pattern. */}
+          <p className="mr-auto mt-20 max-w-2xl text-left text-balance text-3xl leading-[1.3] font-semibold tracking-tight capitalize sm:mt-24 sm:text-4xl md:text-5xl md:leading-[1.25] lg:max-w-3xl">
             <span className="text-black-text">
               That&rsquo;s where the digital marketers at Technico Digital
               Solutions come in.
             </span>{" "}
-            <span className="text-black-text/35">
-              We look at how customers find your business, what happens when
-              they reach your website, and where potential leads drop off.
-            </span>
+            <ScrollFillText text="We look at how customers find your business, what happens when they reach your website, and where potential leads drop off." />
           </p>
 
           <p className="mx-auto mt-14 max-w-2xl text-center font-mono text-sm leading-relaxed tracking-wide text-black-text/50 uppercase sm:mt-16 sm:text-base">
