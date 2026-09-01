@@ -8,6 +8,8 @@ import {
   SITE_PHONE,
   SITE_EMAIL,
   SOCIAL_LINKS,
+  SITE_ADDRESS,
+  SERVICE_AREAS,
 } from "@/lib/constants";
 import JsonLd from "@/components/seo/JsonLd";
 import Header from "@/components/layout/Header";
@@ -56,10 +58,18 @@ export const viewport: Viewport = {
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "LocalBusiness",
   name: SITE_NAME,
   url: SITE_URL,
   sameAs: Object.values(SOCIAL_LINKS),
+  address: {
+    "@type": "PostalAddress",
+    ...SITE_ADDRESS,
+  },
+  areaServed: SERVICE_AREAS.map((area) => ({
+    "@type": "Place",
+    name: area,
+  })),
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",

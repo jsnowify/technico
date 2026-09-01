@@ -10,6 +10,20 @@ import {
 } from "react";
 import { FAQS, type FaqItem } from "@/lib/constants";
 import { ScrollTrigger } from "@/lib/gsap";
+import JsonLd from "@/components/seo/JsonLd";
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
 
 /* ================================================================
    FAQ (eleventh section)
@@ -238,6 +252,7 @@ export default function FAQ() {
 
   return (
     <section className="bg-white-bg">
+      <JsonLd data={faqJsonLd} />
       <div className="mx-auto max-w-6xl px-6 pt-24 pb-24 sm:pt-28 sm:pb-28 md:pt-32 md:pb-32">
         {/* Eyebrow */}
         <div className="flex items-center justify-center gap-3">

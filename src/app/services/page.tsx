@@ -5,9 +5,9 @@ import ServicesAccordion from "@/components/services/ServicesAccordion";
 import ServicesMarketOverview from "@/components/services/ServicesMarketOverview";
 
 export const metadata = buildMetadata({
-  title: "Services",
+  title: "Digital Marketing Services",
   description:
-    "Our digital solutions — web development, design, and technology consulting.",
+    "SEO, web development, paid advertising, social media, and email marketing for businesses across Canada. Data-driven digital marketing services from Technico Digital Solutions.",
   path: "/services",
 });
 

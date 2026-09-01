@@ -37,6 +37,33 @@ export const SITE_PHONE_HREF = "tel:+17787195588";
 export const SITE_EMAIL = "info@technicosolutions.com";
 export const SITE_EMAIL_HREF = "mailto:info@technicosolutions.com";
 
+/**
+ * TODO: replace with your real registered business address. This is
+ * a placeholder — do not deploy with fake address data, since
+ * incorrect NAP (name/address/phone) in structured data can get a
+ * listing flagged or suppressed. Used by the LocalBusiness JSON-LD
+ * in app/layout.tsx.
+ */
+export const SITE_ADDRESS = {
+  streetAddress: "REPLACE_WITH_STREET_ADDRESS",
+  addressLocality: "Vancouver",
+  addressRegion: "BC",
+  postalCode: "REPLACE_WITH_POSTAL_CODE",
+  addressCountry: "CA",
+};
+
+/**
+ * Regions called out in client testimonials (see FEEDBACK below) —
+ * used as `areaServed` in the LocalBusiness JSON-LD so structured
+ * data reflects where clients actually are, not just the HQ city.
+ */
+export const SERVICE_AREAS = [
+  "Vancouver, BC",
+  "Calgary, AB",
+  "Maple Ridge, BC",
+  "Alberta",
+] as const;
+
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
