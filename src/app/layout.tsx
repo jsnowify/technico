@@ -64,6 +64,14 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  // Proves domain ownership to Google Search Console — renders as
+  // <meta name="google-site-verification" content="..." />. Kept
+  // independent of the noindex/robots logic above: Search Console
+  // still needs to be able to verify staging too if you ever check
+  // a staging property there, so this isn't gated on IS_PRODUCTION.
+  verification: {
+    google: "iB53T08hbGrfdsAmrKTVhocsuFV5rgOwT5imiFu2Iu8",
+  },
 };
 
 export const viewport: Viewport = {
