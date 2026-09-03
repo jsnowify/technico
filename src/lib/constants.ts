@@ -161,6 +161,37 @@ export const FAQS: FaqItem[] = [
 ];
 
 /**
+ * Content for the Services page FAQ section
+ * (components/services/ServicesFAQ.tsx). Separate from FAQS above,
+ * which is the homepage FAQ — this is the FAQ block scoped to
+ * /services. Uses the same FaqItem shape (plain string answer) as
+ * FAQS above, for consistency with the rest of this file. Copy is
+ * supplied verbatim — do not rewrite, shorten, or paraphrase it here.
+ */
+export const SERVICES_FAQS: FaqItem[] = [
+  {
+    question: "Would my business benefit from digital marketing strategies?",
+    answer:
+      "Yes, very much. Online marketing helps you reach a broader audience, increase brand visibility, and drive sales. Let’s tailor strategies to your specific needs, so you can connect with potential customers and stay competitive.",
+  },
+  {
+    question: "How does digital marketing bring measurable results?",
+    answer:
+      "Digital agencies like Technico Digital Solutions track key performance indicators (KPIs) such as website traffic, lead generation, and conversion rates. We use data-driven strategies to optimize campaigns to make sure the efforts align with your business objectives. By regularly monitoring these KPIs, we adjust tactics for continuous improvement and measurable success.",
+  },
+  {
+    question: "Are digital marketing services ideal for start-up businesses?",
+    answer:
+      "Yes, marketing services are perfect for startup businesses looking to generate leads and gain more business. If you’re a small startup or a medium-sized business, our services help increase visibility, attract customers, and drive growth. With our strong digital strategy, you can compete effectively and expand faster.",
+  },
+  {
+    question: "Why is digital marketing important for brand recognition?",
+    answer:
+      "Digital marketing (aka online marketing) is vital for brand recognition because it helps your brand reach a wider audience through multiple digital channels. By using targeted campaigns, content creation, and social media strategies, digital marketing increases visibility, engages potential customers, and strengthens brand presence.",
+  },
+];
+
+/**
  * Content for the horizontal-scroll services strip
  * (components/home/Services.tsx). Copy is supplied verbatim — do not
  * rewrite, shorten, or paraphrase it here.

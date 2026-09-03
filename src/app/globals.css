@@ -15,4 +15,8 @@
 
   --color-purple-secondary: #6b26d9;
   --color-purple-accent: #6b26d9;
+
+  /* Second alternating panel color for ServicesIndustriesStack — sampled
+     directly from the mock (#EC4899 / Tailwind's pink-500). */
+  --color-pink-accent: #ec4899;
 }

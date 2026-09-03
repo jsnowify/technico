@@ -3,6 +3,11 @@ import { getAllServices } from "@/lib/content/services";
 import ServicesHero from "@/components/services/ServicesHero";
 import ServicesAccordion from "@/components/services/ServicesAccordion";
 import ServicesMarketOverview from "@/components/services/ServicesMarketOverview";
+import ServicesMarketStats from "@/components/services/ServicesMarketStats";
+import ServicesTailoredStrategy from "@/components/services/ServicesTailoredStrategy";
+import ServicesChapterReel from "@/components/services/ServicesChapterReel";
+import ServicesAgencyIntro from "@/components/services/ServicesAgencyIntro";
+import ServicesFAQ from "@/components/services/ServicesFAQ";
 
 export const metadata = buildMetadata({
   title: "Digital Marketing Services",
@@ -18,7 +23,12 @@ export default async function ServicesPage() {
     <>
       <ServicesHero />
       <ServicesMarketOverview />
+      <ServicesMarketStats />
       <ServicesAccordion services={services} />
+      <ServicesTailoredStrategy />
+      <ServicesChapterReel />
+      <ServicesAgencyIntro />
+      <ServicesFAQ />
     </>
   );
 }

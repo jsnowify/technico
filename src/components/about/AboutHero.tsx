@@ -9,30 +9,29 @@ import SlidingText from "@/components/motion/SlidingText";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 
 /* ================================================================
-   SERVICES HERO
+   ABOUT HERO
    ================================================================
-   Rebuilt on the same pattern as home/Hero.tsx's backdrop, minus the
-   stats bar (that's homepage-specific). Used to run a vanilla-three.js
-   fragment-shader background (FractalGlass); that's been removed
-   project-wide, so this is now a plain static `next/image` backdrop.
+   Copied from services/ServicesHero.tsx's two-column layout: left
+   text column on plain bg-black-bg, right image panel (backdrop +
+   floating circle + overlapping white card) instead of the previous
+   centered single-column layout. Same idle-float + scroll-parallax
+   treatment on the circle, same reasoning for the two nested refs
+   (see ServicesHero.tsx's comment — two tweens on one element would
+   fight over `transform`).
 
-   ASSET: reuses the same backdrop as home/Hero.tsx (rather than a
-   separate services-only image) so the two heroes are visibly the
-   same design system, not just similarly styled.
-     /technico-digital-solutions-inc-bg.webp
+   Only the copy (headline, subhead, card text) and button variant
+   change; layout, classes, and animation are the same as
+   ServicesHero.tsx so the two pages read as the same design system.
 
-   FLOATING ASSET: same idle-float + scroll-parallax treatment as
-   home/Hero.tsx's square (two nested refs, one per tween, same
-   reasoning as there — a shared element would fight over transform),
-   but using the circle asset instead of the square, so this page
-   reads as the same family without being a literal duplicate.
-     /technico-digital-solutions-inc-circle.png
+   ASSETS (expected in /public, already used elsewhere in the site):
+     /technico-digital-solutions-inc-bg.webp     (home/Hero.tsx)
+     /technico-digital-solutions-inc-circle.png  (ServicesHero.tsx)
    ================================================================ */
 
 const HERO_IMAGE = "/technico-digital-solutions-inc-bg.webp";
 const HERO_CIRCLE = "/technico-digital-solutions-inc-circle.png";
 
-export default function ServicesHero() {
+export default function AboutHero() {
   const sectionRef = useRef<HTMLElement>(null);
   // Hover state for the "Free Strategy" link's SlidingText — same
   // mechanic as ui/Button.tsx (local state driving the slide-up/out,
@@ -42,7 +41,7 @@ export default function ServicesHero() {
   // idle float both animate `y`/transform, and GSAP tweens a
   // property by writing the element's whole transform each tick —
   // two tweens sharing one element would silently overwrite each
-  // other. Same reasoning home/Hero.tsx documents for its square.
+  // other. Same reasoning ServicesHero.tsx documents for its circle.
   const parallaxRef = useRef<HTMLDivElement>(null);
   const floatRef = useRef<HTMLDivElement>(null);
 
@@ -95,22 +94,20 @@ export default function ServicesHero() {
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 md:items-stretch">
         {/* LEFT — text column. Plain bg-black-bg, no backdrop image
             here (that's reserved for the right panel now), so the
-            headline stays high-contrast the way the reference's
-            plain-cream left column does. */}
+            headline stays high-contrast — same pattern as
+            ServicesHero's left column. */}
         <div className="flex flex-col justify-center gap-6 px-5 pt-24 pb-14 sm:px-5 sm:pt-32 sm:pb-16 md:justify-start md:px-5 md:pt-32 lg:px-5 lg:pt-36 xl:pt-40">
           <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[104px]">
-            Digital Marketing Services That
-            <br />
-            Deliver Real Business Growth
+            Your Trusted Digital Marketers For Business Transformation
           </h1>
 
-          {/* Divider — same beat as the reference's thin rule between
+          {/* Divider — same beat as ServicesHero's thin rule between
               the headline and the supporting line underneath it. */}
           <div className="h-px w-full max-w-md bg-white/15" />
 
           <p className="max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-            Join the growing number of clients who trust Technico Digital
-            Solutions.
+            At Technico Solutions, We&apos;re Your Trusted Digital Marketers,
+            All About Driving Results That Matter.
           </p>
 
           <div className="w-full max-w-xs sm:w-auto">
@@ -121,10 +118,8 @@ export default function ServicesHero() {
         </div>
 
         {/* RIGHT — image panel. Backdrop lives here now instead of
-            spanning the whole section, mirroring the reference's
-            photo column. Circle asset + floating card sit on top of
-            it, same idea as the reference's "Start Selling Product"
-            card overlapping the photo. */}
+            spanning the whole section, mirroring ServicesHero's photo
+            column. Circle asset + floating card sit on top of it. */}
         <div className="relative isolate min-h-[320px] overflow-hidden sm:min-h-[420px] md:min-h-[640px] lg:min-h-[820px] xl:min-h-[880px]">
           <div className="absolute inset-0 -z-20 scale-125">
             <Image
@@ -157,13 +152,11 @@ export default function ServicesHero() {
             </div>
           </div>
 
-          {/* Floating accent card — reference's overlapping white
-              card, kept white (rather than dark) so it still pops
-              against the image the way it does on the light version;
-              a dark card here would nearly disappear into the photo. */}
+          {/* Floating accent card — same overlapping white card as
+              ServicesHero, copy adjusted for the About page. */}
           <div className="absolute bottom-6 left-6 max-w-[220px] rounded-[5px] bg-white-primary px-5 py-4 shadow-xl sm:bottom-8 sm:left-8">
             <p className="font-mono text-[11px] tracking-wide text-black-primary/50">
-              S . 000
+              A . 000
             </p>
             <p className="mt-1 text-sm leading-snug font-medium text-black-primary">
               Free strategy call, no commitment

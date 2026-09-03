@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import SlidingText from "@/components/motion/SlidingText";
 
-type ButtonVariant = "primary" | "secondary" | "light";
+type ButtonVariant = "primary" | "secondary" | "light" | "white-static";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps {
@@ -22,6 +22,12 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // backgrounds, where `primary`'s black fill would disappear.
   light:
     "bg-white-primary text-black-primary hover:bg-black-primary hover:text-white-primary",
+  // Same white pill as `light`, but stays white on hover instead of
+  // inverting to black — for spots where the invert would clash
+  // (e.g. a white pill floating on a dark image, where a black hover
+  // state would vanish into the backdrop).
+  "white-static":
+    "bg-white-primary text-black-primary hover:bg-white-primary hover:text-black-primary",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

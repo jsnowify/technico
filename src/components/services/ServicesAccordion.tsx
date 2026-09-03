@@ -14,6 +14,16 @@ import type { Service } from "@/lib/content/types";
 import SlidingText from "@/components/motion/SlidingText";
 import { gsap, prefersReducedMotion, supportsFinePointer } from "@/lib/gsap";
 
+// Ribbon fill, alternating per row index (purple, pink, purple, ...)
+// — ported from AboutFieldsAccordion.tsx's RIBBON_COLORS. Cycled via
+// `index % colors.length` inside useRowHighlightRibbon so it still
+// works regardless of how many services are passed in, unlike
+// About's fixed 3-item array for its fixed 3 fields.
+const RIBBON_COLORS = [
+  "var(--color-purple-accent)",
+  "var(--color-pink-accent)",
+];
+
 /* ----------------------------------------------------------------
     SLIDING ROW HIGHLIGHT — LIQUID RIBBON
     ----------------------------------------------------------------
@@ -96,7 +106,10 @@ function buildRibbonPath(points: Record<PointKey, PointSpring>) {
   ].join(" ");
 }
 
-function useRowHighlightRibbon(wrapRef: RefObject<HTMLDivElement | null>) {
+function useRowHighlightRibbon(
+  wrapRef: RefObject<HTMLDivElement | null>,
+  colors: string[],
+) {
   const pathRef = useRef<SVGPathElement>(null);
   const points = useRef(makePointSprings());
   const opacity = useRef(0);
@@ -187,6 +200,15 @@ function useRowHighlightRibbon(wrapRef: RefObject<HTMLDivElement | null>) {
       bottomPct: ((elRect.bottom - wrapRect.top) / height) * 100,
       opacity: 1,
     };
+
+    // Alternate ribbon fill per row (purple, pink, purple, ...) —
+    // ported from AboutFieldsAccordion.tsx. Swapped as an inline
+    // style the instant the target moves to a new row; the path's
+    // own `transition: fill 300ms ease` (see JSX below) softens the
+    // swap instead of it snapping instantly.
+    if (pathRef.current) {
+      pathRef.current.style.fill = colors[index % colors.length];
+    }
 
     // First appearance: snap straight to position (only the opacity
     // fades in) rather than springing in from a resting 0,0 — moving
@@ -569,7 +591,7 @@ function AccordionRow({
           className="group relative z-10 flex w-full items-center px-6 py-10 text-left sm:px-10 sm:py-14 md:px-14"
         >
           <span className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6">
-            <span className="min-w-0 text-[clamp(1.75rem,8vw,6rem)] leading-[0.95] font-normal tracking-tight break-words text-white/20 uppercase transition-colors duration-300 group-hover:text-white">
+            <span className="min-w-0 text-[clamp(1.75rem,8vw,104px)] leading-[0.95] font-medium tracking-tight break-words text-white/20 normal-case transition-colors duration-300 group-hover:text-white">
               {service.title}
             </span>
             <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/15 font-mono text-sm text-white/40 transition-[color,border-color,transform] duration-300 group-hover:translate-x-1 group-hover:border-white/70 group-hover:text-white sm:h-12 sm:w-12">
@@ -605,7 +627,7 @@ function AccordionRow({
             </button>
 
             <div className="min-w-0 text-right">
-              <h2 className="text-[clamp(1.75rem,8vw,6rem)] leading-[0.95] font-normal tracking-tight break-words text-white uppercase">
+              <h2 className="text-[clamp(1.75rem,8vw,104px)] leading-[0.95] font-medium tracking-tight break-words text-white normal-case">
                 {service.title}
               </h2>
               {service.subtitle && (
@@ -676,8 +698,10 @@ export default function ServicesAccordion({
 
   const rowsWrapRef = useRef<HTMLDivElement>(null);
   const headerRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const { pathRef, setTargetFromIndex, hide } =
-    useRowHighlightRibbon(rowsWrapRef);
+  const { pathRef, setTargetFromIndex, hide } = useRowHighlightRibbon(
+    rowsWrapRef,
+    RIBBON_COLORS,
+  );
   // Persists across the scroll-effect's re-runs (it re-runs whenever
   // openSlug changes) so the hysteresis below has continuity instead
   // of resetting to "no active row" on every open/close.
@@ -920,7 +944,12 @@ export default function ServicesAccordion({
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
         >
-          <path ref={pathRef} className="fill-purple-accent" d="" opacity={0} />
+          <path
+            ref={pathRef}
+            d=""
+            opacity={0}
+            style={{ transition: "fill 300ms ease" }}
+          />
         </svg>
 
         {services.map((service, index) => (

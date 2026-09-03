@@ -62,6 +62,17 @@ interface TextRevealBlockProps {
    * exactly when the visitor is looking at it.
    */
   scrollTrigger?: boolean;
+  /**
+   * Horizontal alignment of the lines within the block. Defaults to
+   * "center" (this component's original/only behavior, used by
+   * ServicesHero and ServicesMarketOverview's centered/inline
+   * copy). Pass "start" when this heading sits in a left-aligned
+   * layout next to body copy — otherwise each line centers within
+   * its own width independent of the text below it, so a
+   * multi-line heading drifts out of alignment with everything
+   * else on the page instead of sharing one left edge.
+   */
+  align?: "center" | "start";
 }
 
 export default function TextRevealBlock({
@@ -83,6 +94,7 @@ export default function TextRevealBlock({
   duration = 0.6,
   delay = 0.15,
   scrollTrigger = false,
+  align = "center",
 }: TextRevealBlockProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -149,7 +161,10 @@ export default function TextRevealBlock({
 
   return (
     <Tag className={className}>
-      <div ref={containerRef} className="flex flex-col items-center">
+      <div
+        ref={containerRef}
+        className={`flex flex-col ${align === "start" ? "items-start" : "items-center"}`}
+      >
         {lines.map((line, i) => (
           <span key={i} className="relative inline-block overflow-hidden">
             {line}

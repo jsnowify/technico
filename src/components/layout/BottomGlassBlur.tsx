@@ -36,6 +36,20 @@
  * straight through to whatever's actually underneath it.
  */
 
+/**
+ * Shared with any section that needs to keep real content clear of
+ * this strip (see ServicesIndustriesStack) — exported from here
+ * rather than duplicated as matching magic numbers elsewhere, so the
+ * two can never quietly drift out of sync.
+ *
+ * BOTTOM_GLASS_BLUR_HEIGHT_CLASSES is this component's own height.
+ * BOTTOM_SAFE_PADDING_CLASSES is a bottom padding a few rem taller
+ * than that at every breakpoint — enough clearance that text sitting
+ * against it reads as "above the strip", not "fading into it".
+ */
+export const BOTTOM_GLASS_BLUR_HEIGHT_CLASSES = "h-20 sm:h-24 lg:h-28";
+export const BOTTOM_SAFE_PADDING_CLASSES = "pb-28 sm:pb-32 lg:pb-40";
+
 const BLUR_STEPS = [0.5, 1, 2, 4, 8, 12, 18, 26] as const;
 
 const LAYERS = (() => {
@@ -58,7 +72,7 @@ export default function BottomGlassBlur() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[90] h-20 sm:h-24 lg:h-28"
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-[90] ${BOTTOM_GLASS_BLUR_HEIGHT_CLASSES}`}
     >
       {LAYERS.map((layer, i) => (
         <div
