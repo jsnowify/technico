@@ -4,6 +4,7 @@ import { Fragment, useMemo, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import Link from "next/link";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 /* ================================================================
    SCROLL FILL TEXT
@@ -42,6 +43,18 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
    readers/SEO and marks the per-character markup `aria-hidden`,
    since splitting into single-letter spans would otherwise read
    character-by-character to assistive tech.
+
+   MOBILE DEGRADE: the per-character sweep is the most expensive
+   scroll-tied animation in the codebase — every char is its own DOM
+   node and `color` is a paint (not compositor) property, so a long
+   accent paragraph can mean hundreds of nodes repainting on every
+   scroll tick. That's the kind of "excessive scrub work on mobile"
+   design-engineering.md warns against, and on small screens (same
+   `sm` breakpoint as everywhere else, via useIsMobile) it's not a
+   trade worth making — so below that breakpoint, accent mode quietly
+   falls back to the plain word-level opacity fade (same markup/cost
+   as non-accent mode) with `color` set once to `finalColor` instead
+   of animated. Desktop keeps the full character sweep.
 
    Optional `segments` (non-accent mode only) — an alternative to
    `text` for a run that isn't one plain string, e.g. a heading with
@@ -91,6 +104,9 @@ export default function ScrollFillText({
   className?: string;
 }) {
   const containerRef = useRef<HTMLSpanElement>(null);
+  const isMobile = useIsMobile();
+  // Full per-character sweep only on desktop — see MOBILE DEGRADE above.
+  const useCharSweep = accent && !isMobile;
 
   const plainWords = useMemo(
     () => (text ?? "").split(/\s+/).filter(Boolean),
@@ -115,21 +131,27 @@ export default function ScrollFillText({
   useGSAP(
     () => {
       const wordEls = containerRef.current?.querySelectorAll<HTMLElement>(
-        accent ? "[data-fill-char]" : "[data-fill-word]",
+        useCharSweep ? "[data-fill-char]" : "[data-fill-word]",
       );
       if (!wordEls || wordEls.length === 0) return;
 
       if (prefersReducedMotion) {
         gsap.set(
           wordEls,
-          accent
+          useCharSweep
             ? { opacity: targetOpacity, color: finalColor }
             : { opacity: targetOpacity },
         );
         return;
       }
 
-      if (!accent) {
+      if (!useCharSweep) {
+        // Plain word-level opacity fade — used as-is for non-accent
+        // callers, and as the cheaper mobile fallback for accent
+        // callers (color is set once below, never tweened).
+        if (accent) {
+          gsap.set(wordEls, { color: finalColor });
+        }
         gsap.set(wordEls, { opacity: restOpacity });
 
         gsap.to(wordEls, {
@@ -187,16 +209,24 @@ export default function ScrollFillText({
         targetOpacity,
         restOpacity,
         accent,
+        useCharSweep,
         accentColor,
         finalColor,
       ],
     },
   );
 
-  if (!accent) {
+  if (!useCharSweep) {
+    // Non-accent callers, and accent callers on mobile (see MOBILE
+    // DEGRADE above) — same cheap word-level markup either way. When
+    // this is the mobile fallback for an accent caller, `color` is
+    // set inline up front (matching what the effect above also sets)
+    // so there's no flash of the wrong color before JS runs.
+    const style = accent ? { color: finalColor } : undefined;
+
     if (segmentWords) {
       return (
-        <span ref={containerRef} className={className}>
+        <span ref={containerRef} className={className} style={style}>
           {segmentWords.map(({ word, href, className: wordClassName }, i) => (
             <Fragment key={segmentWords[i].key}>
               {href ? (
@@ -223,7 +253,7 @@ export default function ScrollFillText({
     }
 
     return (
-      <span ref={containerRef} className={className}>
+      <span ref={containerRef} className={className} style={style}>
         {plainWords.map((word, i) => (
           <Fragment key={i}>
             <span data-fill-word className="inline">
@@ -236,6 +266,7 @@ export default function ScrollFillText({
     );
   }
 
+  // Desktop-only full character sweep.
   return (
     <span ref={containerRef} className={className}>
       <span className="sr-only">{text}</span>

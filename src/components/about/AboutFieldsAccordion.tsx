@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useGSAP } from "@gsap/react";
 import Button from "@/components/ui/Button";
+import Cta from "@/components/ui/CTA";
 import SlidingText from "@/components/motion/SlidingText";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 import { gsap, prefersReducedMotion, supportsFinePointer } from "@/lib/gsap";
@@ -177,11 +178,7 @@ const FIELDS: FieldItem[] = [
 
 // Placeholder tints only — swap for real per-field photos/renders,
 // keyed the same way once they exist (see HoverImageSwap.tsx).
-const IMAGE_TINTS = [
-  "bg-black-text/10",
-  "bg-purple-secondary/15",
-  "bg-black-text/15",
-];
+const IMAGE_TINTS = ["bg-white/10", "bg-purple-secondary/15", "bg-white/15"];
 
 // Ribbon fill per row index — purple, pink, purple. Uses the theme's
 // CSS variables directly (see globals.css @theme block) so it stays
@@ -616,10 +613,10 @@ function FieldRow({
           className="group relative z-10 flex w-full items-center px-5 py-8 text-left sm:px-8 sm:py-10"
         >
           <span className="mx-auto flex w-full max-w-3xl items-center justify-between gap-6">
-            <span className="min-w-0 text-[28px] leading-[0.95] font-medium tracking-tight break-words text-black-text/25 transition-colors duration-300 group-hover:text-black-text sm:text-[104px]">
+            <span className="min-w-0 text-[28px] leading-[0.95] font-medium tracking-tight break-words text-white/25 transition-colors duration-300 group-hover:text-white sm:text-[64px]">
               {item.label}
             </span>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-black-text/20 font-mono text-sm text-black-text/40 transition-[color,border-color,transform] duration-300 group-hover:translate-x-1 group-hover:border-black-text/70 group-hover:text-black-text sm:h-12 sm:w-12">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/20 font-mono text-sm text-white/40 transition-[color,border-color,transform] duration-300 group-hover:translate-x-1 group-hover:border-white/70 group-hover:text-white sm:h-12 sm:w-12">
               X
             </span>
           </span>
@@ -652,7 +649,7 @@ function FieldRow({
               V
             </button>
 
-            <h3 className="min-w-0 text-right text-[28px] leading-[0.95] font-medium tracking-tight break-words text-white sm:text-[104px]">
+            <h3 className="min-w-0 text-right text-[28px] leading-[0.95] font-medium tracking-tight break-words text-white sm:text-[64px]">
               {item.label}
             </h3>
           </div>
@@ -848,7 +845,7 @@ export default function AboutFieldsAccordion() {
     <section
       ref={sectionRef}
       aria-label="About: our fields"
-      className="w-full bg-white-bg"
+      className="w-full bg-black-bg"
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center px-5 pt-24 sm:pt-32">
         {/* Image well — flat placeholder tint, swapped per
@@ -869,7 +866,7 @@ export default function AboutFieldsAccordion() {
         onPointerLeave={(e) => {
           if (e.pointerType === "mouse") hide();
         }}
-        className="relative mt-16 divide-y divide-black-text/15 border-t border-black-text/15 sm:mt-20"
+        className="relative mt-16 divide-y divide-white/15 border-t border-white/15 sm:mt-20"
       >
         {/* Sliding highlight ribbon — see useRowHighlightRibbon
             above. Sits behind the row content (headers are z-10).
@@ -922,6 +919,17 @@ export default function AboutFieldsAccordion() {
           />
         ))}
       </div>
+
+      {/* Closing CTA — sits after the last row, as the final element
+          of the section. Uses the shared Cta component
+          (src/components/ui/CTA.tsx) — its one maroon/orange-burst
+          design — instead of the old hand-rolled purple/pink
+          gradient card that used to live inline here. */}
+      <Cta
+        title="Take your brand to the next level"
+        description="Our team of experts will help you connect with the right audience and grow your business."
+        cta={{ label: "Free Strategy", href: SITE_PHONE_HREF }}
+      />
     </section>
   );
 }

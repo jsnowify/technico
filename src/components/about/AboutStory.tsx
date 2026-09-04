@@ -1,155 +1,257 @@
 /* ================================================================
    ABOUT STORY
    ================================================================
-   Second section of the About page. Editorial, wide-format layout.
-   Each chapter — number, label, body paragraphs — is its own row
-   with its own image, and the rows alternate sides: chapter 1 is
-   image-left/text-right, chapter 2 is text-left/image-right, and
-   so on.
+   Second section of the About page. Reworked from the previous
+   alternating sticky-image/text rows into an editorial, image-free
+   layout modeled on a reference design (HackFirst-style About):
 
-   Each chapter carries an `accent` used only to color its
-   number/label pill (About → purple, Mission → pink). The section
-   itself stays on the plain page background throughout — no
-   full-bleed colored panels. All paragraphs (including what used
-   to be a styled "intro" line) share one plain treatment now —
-   no special-cased emphasis line.
+     1. A "hero" block per chapter — tag pill ("// LABEL"), a large
+        chapter-label headline, and that chapter's first paragraph
+        as the intro line. Matches the reference's tight, top-
+        anchored spacing: pill sits close to the heading, heading
+        sits close to the intro paragraph — no divider/hairline
+        above the pill.
+     2. A caption row underneath, separated from the hero block by
+        a larger gap (this is where the reference puts its
+        breathing room, not above the pill) — a short, all-caps
+        two-line label on the left (derived from the chapter's own
+        copy, no invented content) paired with the chapter's
+        remaining paragraph(s) on the right, in a fixed-width-label
+        / flexible-body grid.
 
-   The image is sticky on desktop: it pins in place while the
-   paragraphs for that chapter scroll past, and releases once the
-   row's content (its tallest column, i.e. the text) reaches its
-   end — standard flex + sticky behavior, no ScrollTrigger/JS
-   needed. On small screens every row collapses to a single column
-   (image on top, text below) and stickiness is disabled, since
-   there's nothing to scroll past in a single-column layout.
+   HORIZONTAL POSITION: the reference doesn't hug the left edge
+   with a normal container gutter — the whole block sits inset from
+   the left by roughly 30% of the viewport on large screens, reading
+   as intentionally placed rather than full-bleed-left like a
+   default site container. Mobile/tablet keep the normal, smaller
+   gutter (there's no room to indent 30% on a phone); the larger
+   left inset only kicks in from `lg` up, paired with a
+   comparatively smaller right gutter so the text column doesn't get
+   pushed too narrow.
 
-   Body paragraphs use ScrollFillText in `accent` mode: each word
-   starts dim and, as the row scrolls through the viewport, flashes
-   purple mid-fill before settling to solid black — same scroll-tied
-   fill as the rest of the site, with a bit of purple sparkle on top.
-   Reduced-motion collapses this straight to full-opacity black text
-   (handled inside ScrollFillText), so content is still correct and
-   crawlable by construction, per the "content first, animation
-   second" rule in consideration.md.
+   CHAPTER DIVIDER: a 0.5px horizontal hairline (`bg-white/15`) sits
+   between chapters (never above the first one), with two small "+"
+   cross marks along it — echoing the thin rule-with-"+"-marks
+   treatment at the bottom of the reference design, applied here as
+   a between-chapter separator instead. On `lg`/`xl`, where the
+   section's own left padding insets the content by 22%/26%, the
+   divider cancels that inset with a matching negative left margin
+   plus an equal width increase (`-ml-[22%] w-[calc(100%+22%)]`,
+   `xl:-ml-[26%] xl:w-[calc(100%+26%)]`) so it reaches the true left
+   edge of the content container while its right edge stays put —
+   rather than a viewport-width (`100vw`) breakout, which depends on
+   no ancestor clipping the overflow and turned out unreliable here.
+
+   The "A . 00X" kicker + hairline divider used in an earlier
+   version (as an opener above each chapter's pill) isn't part of
+   the reference's per-chapter rhythm, so it's been removed from
+   there. Chapters are separated from each other purely by the
+   larger outer gap between them.
+
+   No sticky/video column, so no ScrollTrigger/JS is needed for
+   layout — it's a normal top-to-bottom flex column on every
+   breakpoint.
+
+   TAG PILL: the "// LABEL" marker is now a filled solid pill (the
+   chapter's accent color as the background) with white text, rather
+   than a transparent/outlined pill with accent-colored text.
+
+   PARAGRAPH TYPOGRAPHY: both the hero intro paragraph and the
+   caption row's body paragraph(s) use a tighter `leading-snug` line
+   height and `tracking-tight` letter spacing, instead of the looser
+   `leading-relaxed` / default tracking used before.
+
+   MOTION — swapped relative to how ServicesMarketOverview pairs
+   these two (there, RevealUpText is on the big headings and
+   ScrollFillText's accent sweep is on the small captions
+   underneath). Here it's the opposite, per chapter:
+     - The short left-hand LABEL (caption) uses ScrollFillText in
+       `accent` mode — each word dim, then a purple/pink sweep,
+       then settles solid white, same scroll-tied fill as the rest
+       of the site.
+     - The PARAGRAPHS (the hero intro line and the caption row's
+       body copy) use RevealUpText — word-by-word rise-in-from-
+       below-a-mask, replaying on restart/reverse as the row
+       crosses its trigger.
+   Both components already collapse cleanly under prefers-reduced-
+   motion (straight to the settled state), so content stays correct
+   and crawlable by construction either way — same "content first,
+   animation second" rule as consideration.md.
    ================================================================ */
 
 import ScrollFillText from "@/components/motion/ScrollFillText";
+import RevealUpText from "@/components/motion/RevealUpText";
+import Cta from "@/components/ui/CTA";
+import { SITE_PHONE_HREF } from "@/lib/constants";
 
 interface StoryChapter {
   number: string;
   label: string;
+  /** Short, two-line all-caps caption shown left of the body copy
+   *  in each chapter's row — kept separate from `paragraphs` so it
+   *  can be a punchier fragment rather than a full sentence. */
+  caption: string[];
   paragraphs: string[];
-  /** Accent used for the number/label pill. */
+  /** Accent used for the tag pill background and the ScrollFillText sweep. */
   accent: "purple" | "pink";
 }
 
 const STORY: StoryChapter[] = [
   {
-    number: "01",
+    number: "001",
     label: "About",
     accent: "purple",
+    caption: ["DATA-DRIVEN.", "RESULTS-DRIVEN."],
     paragraphs: [
       "We focus on building online visibility and creating long-term growth for brands like yours.",
       "With our data-driven approach and modern digital marketing tactics, we make sure your strategies hit the mark every time. Forget generic solutions, our digital marketers deliver strategies that actually work.",
     ],
   },
   {
-    number: "02",
+    number: "002",
     label: "Mission",
     accent: "pink",
+    caption: ["SEEN, HEARD,", "REMEMBERED."],
     paragraphs: [
-      "Our Mission \u2014 To Make Every Business Seen, Heard, and Remembered.",
       "We help businesses grow by leveraging digital marketing channels that connect with target audiences. No fluff, just smart, innovative marketing strategies that hit the right message. Our goal? To simplify digital growth and make it accessible and effective for every client.",
       "Our team at Technico Digital Solutions believes in strategy that scales, creativity that connects, and marketing that makes an impact. By tapping into the right digital marketing tactics, we increase brand awareness and help you reach potential customers for your business expansion.",
     ],
   },
+  {
+    // Adapted from the "Approach" field's copy in
+    // AboutFieldsAccordion.tsx — same wording, reshaped from that
+    // component's heading + bullet-list + linked-paragraph content
+    // into this section's flat intro-paragraph / caption-row-
+    // paragraph shape (no JSX/links here, so the inline SERP link
+    // is folded into plain text; nothing invented).
+    number: "003",
+    label: "Approach",
+    accent: "purple",
+    caption: ["STRATEGY FIRST,", "CONSISTENT EXECUTION."],
+    paragraphs: [
+      "Our approach starts with discovering important customer behaviours and analyzing trends to stay ahead of the curve, building integrated campaigns across SEO, social, design, and content that speak directly to your target, and measuring success through web analytics, key performance indicators (KPIs), and transparent reporting, so you always know where your business stands.",
+      "Our digital marketing positions your brand on top of search engine results pages (SERPs) and social media channels. We fine-tune campaigns to build brand awareness. It's all about results, not just reach.",
+    ],
+  },
 ];
 
-const ACCENT_PILL_BG: Record<StoryChapter["accent"], string> = {
+// Per-chapter accent — tag pill fill color and ScrollFillText sweep
+// color, so About reads purple and Mission reads pink, distinct
+// from the site-wide `--color-purple-accent` brand token used solid
+// elsewhere.
+const ACCENT_BG: Record<StoryChapter["accent"], string> = {
   purple: "bg-purple-accent",
   pink: "bg-pink-accent",
 };
 
+const ACCENT_FILL_COLOR: Record<StoryChapter["accent"], string> = {
+  purple: "#8B5CF6",
+  pink: "#F472B6",
+};
+
 export default function AboutStory() {
   return (
-    <section aria-label="About: About, Mission" className="w-full bg-white-bg">
-      <div className="w-full px-5 pt-12 pb-24 sm:pt-14 sm:pb-32 md:pt-16">
-        {/* Kicker row — same mirrored-label header as
-            services/ServicesMarketOverview.tsx's "S.001 / Overview /
-            S.001" strip (same index left and right, section name
-            centered), using "A.001" for the About page. */}
-        <div className="mb-10 flex items-center justify-between gap-6 sm:mb-12 md:mb-14">
-          <span className="font-mono text-xs tracking-[0.14em] text-black-text/50 uppercase sm:text-sm">
-            A.001
-          </span>
-          <span className="font-mono text-xs tracking-[0.14em] text-black-text/50 uppercase sm:text-sm">
-            Story
-          </span>
-          <span className="font-mono text-xs tracking-[0.14em] text-black-text/50 uppercase sm:text-sm">
-            A.001
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-24">
-          {STORY.map((chapter, ci) => (
+    <section
+      aria-label="About: About, Mission, Approach"
+      className="relative w-full bg-black-bg"
+    >
+      <div className="w-full px-5 pt-12 pb-24 sm:pt-14 sm:pb-32 sm:px-10 md:pt-16 md:px-16 lg:pt-20 lg:pr-16 lg:pl-[22%] xl:pr-24 xl:pl-[26%]">
+        <div className="flex flex-col gap-20 sm:gap-24">
+          {STORY.map((chapter, index) => (
             <div
               key={chapter.label}
-              className={`flex flex-col gap-10 lg:items-start lg:gap-16 ${
-                ci % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"
-              }`}
+              className="flex flex-col gap-16 sm:gap-20 lg:gap-24"
             >
-              {/* Image — alternates sides per chapter via the
-                row-reverse above. Sticky on desktop only: pins at
-                `lg:top-24` and holds position while the sibling
-                text column (taller, since it has the body
-                paragraphs) scrolls past. It naturally lets go once
-                the row itself ends, i.e. once the last paragraph of
-                this chapter has passed — no manual scroll math
-                needed, that's just how sticky + a taller sibling in
-                the same flex row behaves. Tune `lg:top-24` to match
-                the sticky header's actual height. Plain placeholder
-                box stands in for the real image/video for now. */}
-              <div className="lg:sticky lg:top-24 lg:w-[42%] lg:flex-shrink-0">
-                <video
-                  className="aspect-[3/4] w-full bg-black-text/10 object-cover"
-                  src="https://res.cloudinary.com/dp9bjis3z/video/upload/f_auto,q_auto:best/v1788415571/videos/technico-about_qkthtx.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
+              {/* Chapter divider — a 0.5px hairline with two small
+                  "+" cross marks along it, echoing the thin
+                  scroll-bar-style rule (with its own "+" marks) at
+                  the bottom of the reference design. Only rendered
+                  between chapters, never above the first one. The
+                  negative left margin + matching width increase on
+                  lg/xl cancels this section's own left inset so the
+                  hairline reaches the container's true left edge
+                  (its right edge stays where it already was). */}
+              {index > 0 && (
+                <div
+                  aria-hidden="true"
+                  className="relative h-[0.5px] w-full bg-white/15 lg:-ml-[22%] lg:w-[calc(100%+22%)] xl:-ml-[26%] xl:w-[calc(100%+26%)]"
+                >
+                  <span className="absolute top-1/2 left-[30%] -translate-x-1/2 -translate-y-1/2 font-mono text-xs text-white/40 select-none">
+                    +
+                  </span>
+                  <span className="absolute top-1/2 left-[70%] -translate-x-1/2 -translate-y-1/2 font-mono text-xs text-white/40 select-none">
+                    +
+                  </span>
+                </div>
+              )}
+              {/* Hero block — tag pill, big headline, intro line.
+                  Spacing here is tight (gap-3/4) to match the
+                  reference: pill hugs the heading, heading hugs
+                  the intro paragraph. No divider above the pill. */}
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <span
+                  className={`inline-block w-fit px-3 py-1.5 font-mono text-xs tracking-[0.14em] text-white uppercase ${ACCENT_BG[chapter.accent]}`}
+                >
+                  {"// "}
+                  {chapter.label}
+                </span>
+
+                <h2 className="text-[56px] leading-[0.95] font-medium tracking-tight text-white sm:text-[80px] md:text-[96px]">
+                  {chapter.label}
+                </h2>
+
+                {chapter.paragraphs[0] && (
+                  <p className="max-w-2xl text-base leading-snug tracking-tight font-normal text-white/70 sm:text-lg">
+                    <RevealUpText text={chapter.paragraphs[0]} />
+                  </p>
+                )}
               </div>
 
-              {/* Copy */}
-              <div className="flex flex-col gap-10 lg:flex-1">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-6">
-                    <span className="text-6xl font-medium tracking-tight text-black-text sm:text-7xl">
-                      {chapter.number}
-                    </span>
-                    <span className="h-px flex-1 bg-black-text/15" />
+              {/* Caption / body row — short left-hand label paired
+                  with the chapter's remaining paragraph(s). This is
+                  where the reference's larger breathing room sits
+                  (the gap above, on the parent), not above the
+                  pill. Fixed label column on desktop, stacks on
+                  mobile. */}
+              {chapter.paragraphs.length > 1 && (
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr] lg:gap-16">
+                  <div className="font-mono text-sm leading-relaxed tracking-wide text-white uppercase sm:text-base">
+                    {chapter.caption.map((line) => (
+                      <div key={line}>
+                        <ScrollFillText
+                          text={line}
+                          accent
+                          accentColor={ACCENT_FILL_COLOR[chapter.accent]}
+                          finalColor="var(--color-white-primary)"
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-6">
-                    <span
-                      className={`inline-block px-5 py-2 text-[28px] leading-none font-medium tracking-tight text-white-primary sm:text-[104px] ${ACCENT_PILL_BG[chapter.accent]}`}
-                    >
-                      {chapter.label}
-                    </span>
-                    <span className="h-px flex-1 bg-black-text/15" />
-                  </div>
-                </div>
 
-                <div className="max-w-2xl space-y-6 text-[46px] leading-[1.15] tracking-tight text-black-text">
-                  {chapter.paragraphs.map((paragraph, i) => (
-                    <p key={i}>
-                      <ScrollFillText text={paragraph} accent />
-                    </p>
-                  ))}
+                  <div className="flex max-w-2xl flex-col gap-6 text-lg leading-snug tracking-tight font-normal text-white/80 sm:text-xl">
+                    {chapter.paragraphs.slice(1).map((paragraph, i) => (
+                      <p key={i}>
+                        <RevealUpText text={paragraph} />
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Closing CTA — sits after the last chapter, as the final
+          element of the section. Same placement/usage as the one at
+          the bottom of AboutFieldsAccordion.tsx, reusing its
+          purple-tagged default rather than passing a redundant
+          accent here. */}
+      <Cta
+        title="Take your brand to the next level"
+        description="Our team of experts will help you connect with the right audience and grow your business."
+        cta={{ label: "Free Strategy", href: SITE_PHONE_HREF }}
+      />
     </section>
   );
 }

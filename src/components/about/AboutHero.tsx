@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion, ScrollTrigger } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import Button from "@/components/ui/Button";
 import SlidingText from "@/components/motion/SlidingText";
 import { SITE_PHONE_HREF } from "@/lib/constants";
@@ -22,6 +22,13 @@ import { SITE_PHONE_HREF } from "@/lib/constants";
    Only the copy (headline, subhead, card text) and button variant
    change; layout, classes, and animation are the same as
    ServicesHero.tsx so the two pages read as the same design system.
+
+   SCROLL SYNC: parallax uses `scrub: true` (not a numeric scrub)
+   so the circle's vertical offset is driven 1:1 by scroll position
+   with no smoothing/catch-up lag — it should visually move together
+   with the page as you scroll, not trail behind it. The idle float
+   still runs independently on its own nested ref so it keeps
+   breathing even while the parallax tween is scroll-locked.
 
    ASSETS (expected in /public, already used elsewhere in the site):
      /technico-digital-solutions-inc-bg.webp     (home/Hero.tsx)
@@ -52,29 +59,38 @@ export default function AboutHero() {
 
     if (!section || !parallaxEl || !floatEl || prefersReducedMotion) return;
 
-    const float = gsap.to(floatEl, {
-      y: -16,
-      rotation: 2,
-      duration: 3.2,
-      ease: "sine.inOut",
-      yoyo: true,
-      repeat: -1,
-    });
+    const float = gsap.fromTo(
+      floatEl,
+      { y: -24, rotation: -2 },
+      {
+        y: 24,
+        rotation: 2,
+        duration: 2.4,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      },
+    );
 
     // Parallax: as the hero scrolls fully through the viewport the
-    // circle drifts from slightly below its resting spot to well
-    // above it, layered on top of (not replacing) the idle float.
+    // circle drifts from above its resting spot to well below it,
+    // layered on top of (not replacing) the idle float.
+    //
+    // `scrub: true` locks the tween's progress directly to the
+    // scrollbar — no lag, no easing catch-up — so the circle's
+    // descent stays perfectly in sync with the user scrolling down
+    // (and reverses immediately if they scroll back up).
     const parallax = gsap.fromTo(
       parallaxEl,
-      { y: 40 },
+      { y: -160 },
       {
-        y: -140,
+        y: 280,
         ease: "none",
         scrollTrigger: {
           trigger: section,
           start: "top bottom",
-          end: "bottom top",
-          scrub: 0.6,
+          end: "bottom+=600 top",
+          scrub: true,
         },
       },
     );
@@ -97,7 +113,7 @@ export default function AboutHero() {
             headline stays high-contrast — same pattern as
             ServicesHero's left column. */}
         <div className="flex flex-col justify-center gap-6 px-5 pt-24 pb-14 sm:px-5 sm:pt-32 sm:pb-16 md:justify-start md:px-5 md:pt-32 lg:px-5 lg:pt-36 xl:pt-40">
-          <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[104px]">
+          <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[72px]">
             Your Trusted Digital Marketers For Business Transformation
           </h1>
 

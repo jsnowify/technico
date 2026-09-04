@@ -2,7 +2,7 @@ import { buildMetadata } from "@/lib/seo";
 import { SITE_NAME } from "@/lib/constants";
 import AboutHero from "@/components/about/AboutHero";
 import AboutStory from "@/components/about/AboutStory";
-import AboutFieldsAccordion from "@/components/about/AboutFieldsAccordion";
+import AboutBusinessMarketing from "@/components/about/AboutBusinessMarketing";
 
 export const metadata = buildMetadata({
   title: "About",
@@ -15,7 +15,7 @@ export default function AboutPage() {
     <>
       <AboutHero />
       <AboutStory />
-      <AboutFieldsAccordion />
+      <AboutBusinessMarketing />
     </>
   );
 }
