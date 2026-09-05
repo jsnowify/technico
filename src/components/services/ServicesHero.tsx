@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion, ScrollTrigger } from "@/lib/gsap";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import Button from "@/components/ui/Button";
 import SlidingText from "@/components/motion/SlidingText";
 import { SITE_PHONE_HREF } from "@/lib/constants";
@@ -11,10 +11,12 @@ import { SITE_PHONE_HREF } from "@/lib/constants";
 /* ================================================================
    SERVICES HERO
    ================================================================
-   Rebuilt on the same pattern as home/Hero.tsx's backdrop, minus the
-   stats bar (that's homepage-specific). Used to run a vanilla-three.js
-   fragment-shader background (FractalGlass); that's been removed
-   project-wide, so this is now a plain static `next/image` backdrop.
+   Same design system as home/Hero.tsx and about/AboutHero.tsx — left
+   text column on plain bg-black-bg, right image panel (backdrop +
+   floating circle + overlapping white card). Layout, font sizes,
+   spacing units, and the float/parallax animation values are now
+   identical across all three heroes; only the copy (headline,
+   subhead, card label) and the circle vs square asset differ.
 
    ASSET: reuses the same backdrop as home/Hero.tsx (rather than a
    separate services-only image) so the two heroes are visibly the
@@ -22,10 +24,9 @@ import { SITE_PHONE_HREF } from "@/lib/constants";
      /technico-digital-solutions-inc-bg.webp
 
    FLOATING ASSET: same idle-float + scroll-parallax treatment as
-   home/Hero.tsx's square (two nested refs, one per tween, same
-   reasoning as there — a shared element would fight over transform),
-   but using the circle asset instead of the square, so this page
-   reads as the same family without being a literal duplicate.
+   home/Hero.tsx's square / about/AboutHero.tsx's circle (two nested
+   refs, one per tween, same reasoning — a shared element would fight
+   over transform), using the circle asset here.
      /technico-digital-solutions-inc-circle.png
    ================================================================ */
 
@@ -53,29 +54,39 @@ export default function ServicesHero() {
 
     if (!section || !parallaxEl || !floatEl || prefersReducedMotion) return;
 
-    const float = gsap.to(floatEl, {
-      y: -16,
-      rotation: 2,
-      duration: 3.2,
-      ease: "sine.inOut",
-      yoyo: true,
-      repeat: -1,
-    });
+    const float = gsap.fromTo(
+      floatEl,
+      { y: -24, rotation: -2 },
+      {
+        y: 24,
+        rotation: 2,
+        duration: 2.4,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      },
+    );
 
     // Parallax: as the hero scrolls fully through the viewport the
-    // circle drifts from slightly below its resting spot to well
-    // above it, layered on top of (not replacing) the idle float.
+    // circle drifts from above its resting spot to well below it,
+    // layered on top of (not replacing) the idle float.
+    //
+    // `scrub: true` locks the tween's progress directly to the
+    // scrollbar — no lag, no easing catch-up — so the circle's
+    // descent stays perfectly in sync with the user scrolling down
+    // (and reverses immediately if they scroll back up). Same
+    // treatment as home/Hero.tsx and about/AboutHero.tsx.
     const parallax = gsap.fromTo(
       parallaxEl,
-      { y: 40 },
+      { y: -160 },
       {
-        y: -140,
+        y: 280,
         ease: "none",
         scrollTrigger: {
           trigger: section,
           start: "top bottom",
-          end: "bottom top",
-          scrub: 0.6,
+          end: "bottom+=600 top",
+          scrub: true,
         },
       },
     );
@@ -95,17 +106,18 @@ export default function ServicesHero() {
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 md:items-stretch">
         {/* LEFT — text column. Plain bg-black-bg, no backdrop image
             here (that's reserved for the right panel now), so the
-            headline stays high-contrast the way the reference's
-            plain-cream left column does. */}
+            headline stays high-contrast — same pattern as
+            home/Hero.tsx and about/AboutHero.tsx's left column. */}
         <div className="flex flex-col justify-center gap-6 px-5 pt-24 pb-14 sm:px-5 sm:pt-32 sm:pb-16 md:justify-start md:px-5 md:pt-32 lg:px-5 lg:pt-36 xl:pt-40">
-          <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[104px]">
+          <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[72px]">
             Digital Marketing Services That
             <br />
             Deliver Real Business Growth
           </h1>
 
-          {/* Divider — same beat as the reference's thin rule between
-              the headline and the supporting line underneath it. */}
+          {/* Divider — same beat as home/Hero.tsx and
+              about/AboutHero.tsx's thin rule between the headline and
+              the supporting line underneath it. */}
           <div className="h-px w-full max-w-md bg-white/15" />
 
           <p className="max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
@@ -121,11 +133,10 @@ export default function ServicesHero() {
         </div>
 
         {/* RIGHT — image panel. Backdrop lives here now instead of
-            spanning the whole section, mirroring the reference's
-            photo column. Circle asset + floating card sit on top of
-            it, same idea as the reference's "Start Selling Product"
-            card overlapping the photo. */}
-        <div className="relative isolate min-h-[320px] overflow-hidden sm:min-h-[420px] md:min-h-[640px] lg:min-h-[820px] xl:min-h-[880px]">
+            spanning the whole section, mirroring home/Hero.tsx and
+            about/AboutHero.tsx's photo column. Circle asset +
+            floating card sit on top of it. */}
+        <div className="relative isolate min-h-80 overflow-hidden sm:min-h-105 md:min-h-160 lg:min-h-205 xl:min-h-220">
           <div className="absolute inset-0 -z-20 scale-125">
             <Image
               src={HERO_IMAGE}
@@ -144,7 +155,7 @@ export default function ServicesHero() {
               don't fight over `transform`. */}
           <div
             ref={parallaxRef}
-            className="absolute top-1/2 left-1/2 w-[220px] -translate-x-1/2 -translate-y-1/2 sm:w-[280px] lg:w-[340px]"
+            className="absolute top-1/2 left-1/2 w-55 -translate-x-1/2 -translate-y-1/2 sm:w-70 lg:w-85"
           >
             <div ref={floatRef}>
               <Image
@@ -157,11 +168,10 @@ export default function ServicesHero() {
             </div>
           </div>
 
-          {/* Floating accent card — reference's overlapping white
-              card, kept white (rather than dark) so it still pops
-              against the image the way it does on the light version;
-              a dark card here would nearly disappear into the photo. */}
-          <div className="absolute bottom-6 left-6 max-w-[220px] rounded-[5px] bg-white-primary px-5 py-4 shadow-xl sm:bottom-8 sm:left-8">
+          {/* Floating accent card — same overlapping white card as
+              home/Hero.tsx and about/AboutHero.tsx, copy adjusted for
+              the Services page. */}
+          <div className="absolute bottom-6 left-6 max-w-55 rounded-[5px] bg-white-primary px-5 py-4 shadow-xl sm:bottom-8 sm:left-8">
             <p className="font-mono text-[11px] tracking-wide text-black-primary/50">
               S . 000
             </p>

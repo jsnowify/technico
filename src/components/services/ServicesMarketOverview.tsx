@@ -1,7 +1,7 @@
-import TextRevealBlock from "@/components/motion/TextRevealBlock";
 import ScrollFillText from "@/components/motion/ScrollFillText";
 import RevealUpText from "@/components/motion/RevealUpText";
 import HoverImageSwap from "@/components/services/HoverImageSwap";
+import ChannelsJigsawCard from "@/components/services/ChannelsJigsawCard";
 
 /* ================================================================
    SERVICES MARKET OVERVIEW
@@ -187,7 +187,7 @@ export default function ServicesMarketOverview() {
               first-line indent), tighter leading to match the
               reference's denser stack, and a plain black underline
               in place of the purple link treatment. */}
-          <h2 className="w-full text-[42px] leading-[1.05] font-medium tracking-[-1px] text-black-text capitalize sm:text-[56px] sm:tracking-[-1.5px] md:text-[72px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[104px]">
+          <h2 className="w-full text-[42px] leading-[1.05] font-medium tracking-[-1px] text-black-text capitalize sm:text-[56px] sm:tracking-[-1.5px] md:text-[72px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[72px]">
             {/* Rise-up-on-scroll (see /components/motion/RevealUpText.tsx)
                 — same word-by-word "y:80, stagger, circ.out" shape as
                 the GSAP "Animate text on Scroll" demo, restart/reverse
@@ -216,7 +216,7 @@ export default function ServicesMarketOverview() {
               caption={
                 <p
                   key="improve-caption"
-                  className="mt-8 max-w-md text-[46px] leading-[1.15] tracking-tight text-black-text"
+                  className="mt-8 max-w-md text-[36px] leading-[1.15] tracking-tight text-black-text"
                 >
                   <ScrollFillText
                     text="and convert more online interactions into customers."
@@ -233,7 +233,7 @@ export default function ServicesMarketOverview() {
           <RevealUpText
             as="h2"
             text="Our digital experts support businesses across"
-            className="ml-auto max-w-4xl text-right text-[42px] leading-[0.95] font-normal tracking-[-1px] text-black-text capitalize sm:text-[56px] sm:tracking-[-1.5px] md:text-[72px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[104px]"
+            className="ml-auto max-w-4xl text-right text-[42px] leading-[0.95] font-medium tracking-[-1px] text-black-text capitalize sm:text-[56px] sm:tracking-[-1.5px] md:text-[72px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[72px]"
           />
 
           {/* Sentence 2, list + image (list left, image right) */}
@@ -244,7 +244,7 @@ export default function ServicesMarketOverview() {
               caption={
                 <p
                   key="industry-caption"
-                  className="mt-8 max-w-xl text-[46px] leading-[1.15] tracking-tight text-black-text"
+                  className="mt-8 max-w-xl text-[36px] leading-[1.15] tracking-tight text-black-text"
                 >
                   <ScrollFillText
                     text="and other local service industries through SEO, paid advertising, web design and development, content, and digital campaigns built around measurable business goals."
@@ -256,24 +256,14 @@ export default function ServicesMarketOverview() {
           </div>
         </div>
 
-        {/* Sentence 3+4, heading fragment — full section width, not
-            capped down to a narrow centered column like the closing
-            statements below. */}
+        {/* Sentence 3+4 — the "you don't have to rely on just one
+            channel..." / "we look at where your customers are
+            searching..." pairing now lives inside the two-panel
+            jigsaw card (see ChannelsJigsawCard.tsx / CARD_SVG.svg)
+            instead of a plain stacked heading. Position in the
+            section, and everything below it, is unchanged. */}
         <div className="w-full mt-28 px-5 sm:mt-36 md:mt-44">
-          <h2 className="w-full text-[42px] leading-[0.95] font-normal tracking-[-1px] text-black-text capitalize sm:text-[56px] sm:tracking-[-1.5px] md:text-[72px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[104px]">
-            <RevealUpText
-              as="div"
-              text="You don't have to rely on just one marketing channel to grow your business."
-              className="inline-block align-baseline text-black-text"
-            />
-            <br />
-            <br />
-            <ScrollFillText
-              text="We look at where your customers are searching, what they see when they land on your website, and how"
-              className="normal-case"
-              accent
-            />
-          </h2>
+          <ChannelsJigsawCard />
 
           {/* Sentence 3+4, list + image (image left, list right) */}
           <div className="mt-14 sm:mt-16 md:mt-20">
@@ -283,7 +273,7 @@ export default function ServicesMarketOverview() {
               caption={
                 <p
                   key="channel-caption"
-                  className="mt-8 max-w-md text-[46px] leading-[1.15] tracking-tight text-black-text"
+                  className="mt-8 max-w-md text-[36px] leading-[1.15] tracking-tight text-black-text"
                 >
                   <ScrollFillText
                     text="can work together to bring in leads and turn more of those leads into customers."

@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
+import { Flip } from "gsap/Flip";
 
 /**
  * Header.tsx (and anything else animated) imports gsap/ScrollTrigger
@@ -12,13 +13,16 @@ import { InertiaPlugin } from "gsap/InertiaPlugin";
  * Draggable + InertiaPlugin were added for TrustedBy.tsx's
  * click-and-drag logo strip (the momentum "throw" after you release
  * a drag is InertiaPlugin's job; Draggable just handles the pointer
- * tracking). Both used to be "Club GreenSock" paid plugins but have
- * shipped free in the plain `gsap` package since GSAP went fully free
- * in 2025 — this needs a reasonably current `gsap` version installed
- * (`npm install gsap@latest` if these imports fail to resolve).
+ * tracking). Flip was added for ServicesTailoredStrategy.tsx's
+ * scroll-scrubbed pinwheel (one persistent icon that FLIPs from card
+ * to card as you scroll). All three used to be "Club GreenSock" paid
+ * plugins but have shipped free in the plain `gsap` package since GSAP
+ * went fully free in 2025 — this needs a reasonably current `gsap`
+ * version installed (`npm install gsap@latest` if these imports fail
+ * to resolve).
  */
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, Draggable, InertiaPlugin);
+  gsap.registerPlugin(ScrollTrigger, Draggable, InertiaPlugin, Flip);
 }
 
 /**
@@ -78,4 +82,4 @@ export function useSupportsFinePointer(): boolean {
   return value;
 }
 
-export { gsap, ScrollTrigger, Draggable, InertiaPlugin };
+export { gsap, ScrollTrigger, Draggable, InertiaPlugin, Flip };

@@ -1,7 +1,7 @@
 import { buildMetadata } from "@/lib/seo";
 import { getAllServices } from "@/lib/content/services";
 import ServicesHero from "@/components/services/ServicesHero";
-import ServicesAccordion from "@/components/services/ServicesAccordion";
+import Services from "@/components/services/Services";
 import ServicesMarketOverview from "@/components/services/ServicesMarketOverview";
 import ServicesMarketStats from "@/components/services/ServicesMarketStats";
 import ServicesTailoredStrategy from "@/components/services/ServicesTailoredStrategy";
@@ -24,7 +24,7 @@ export default async function ServicesPage() {
       <ServicesHero />
       <ServicesMarketOverview />
       <ServicesMarketStats />
-      <ServicesAccordion services={services} />
+      <Services services={services} />
       <ServicesTailoredStrategy />
       <ServicesChapterReel />
       <ServicesAgencyIntro />

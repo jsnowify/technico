@@ -7,14 +7,14 @@ import SlidingText from "@/components/motion/SlidingText";
 import { gsap, prefersReducedMotion, ScrollTrigger } from "@/lib/gsap";
 
 /* ================================================================
-   HOVER IMAGE SWAP
+   SCROLL IMAGE SWAP
    ================================================================
    The rollover list used in ServicesMarketOverview: a column of
-   labels next to an image well. Hovering (or focusing, for
-   keyboard users) a label swaps the image well to that item's
-   image and marks the label active; the rest sit dimmed. Client
-   component so the hover state doesn't force the whole overview
-   section into the client bundle.
+   labels next to an image well. No longer hover/focus-driven — the
+   active label (and which image shows) is set purely by scroll
+   position, so touch users and mouse users see the exact same
+   behavior. Client component so the scroll-driven state doesn't
+   force the whole overview section into the client bundle.
 
    IMAGE TRANSITION — center-out clip-path reveal + crossfade.
      Each image sits in its own layer, stacked via next/image
@@ -22,7 +22,8 @@ import { gsap, prefersReducedMotion, ScrollTrigger } from "@/lib/gsap";
      once on mount. Every subsequent swap only ever tweens TOWARD
      a target with plain gsap.to() + overwrite:"auto" — it never
      hard-resets a layer's current value mid-flight. That's what
-     makes rapid/reversed hovering look natural instead of
+     makes a fast scroll (which can jump the active index more than
+     once before a tween finishes) look natural instead of
      "rewinding": an interrupted fade just continues from wherever
      it actually is instead of snapping back first. A layer's
      clip-path is only reset back to the hidden inset (ready for
@@ -31,27 +32,27 @@ import { gsap, prefersReducedMotion, ScrollTrigger } from "@/lib/gsap";
      gets interrupted first, overwrite:"auto" kills the tween
      before onComplete can fire.
 
-   HOVER MOTION — two states, kept separate on purpose:
-     - `active` persists (it's "which image is showing"), same as
-       before — doesn't reset when the pointer leaves the list.
-     - `hovered` is momentary (it's "is the pointer over THIS row
-       right now") and drives the motion: no dot, no bar, no
-       position shift — just the label itself reusing the same
-       SlidingText vertical-swap reveal the nav links use, so every
-       single hover reads as motion without moving any layout.
+   ACTIVE/HIGHLIGHT MOTION — two states, kept separate on purpose:
+     - `active` persists (it's "which image is showing").
+     - `highlighted` is momentary (it's "which row does scroll
+       currently have positioned as active") and drives the label
+       motion: no dot, no bar, no position shift — just the label
+       itself reusing the same SlidingText vertical-swap reveal the
+       nav links use, so every transition reads as motion without
+       moving any layout. Released on a short debounce rather than
+       immediately, so a fast scrub doesn't flicker it on/off
+       between every index.
 
-   SCROLL SCRUB — for anyone who never touches the list with the
-     mouse, `active` also gets driven directly off scroll progress.
-     A single ScrollTrigger sits on the <ul>, scrubbing between
-     "top center" and "bottom center" (i.e. the zone where the list
-     crosses the viewport's midpoint, ~50%). Its progress (0–1) is
-     mapped to an item index, and every time that index changes it
-     calls the exact same setActive/setHovered a real hover would —
-     so the reveal animation in the useGSAP above never has to know
-     or care whether it was triggered by a pointer or a scrollbar.
-     `hovered` is released on a short debounce rather than
-     immediately, so a fast scrub doesn't flicker it on/off between
-     every index. Skipped entirely when prefersReducedMotion is set.
+   SCROLL SCRUB — the only driver of `active`/`highlighted` now.
+     Which element drives the scrub differs by breakpoint (see the
+     ScrollTrigger.matchMedia note above the effect below): the row
+     on md+ (where the image is sticky), the `<ul>` itself below md
+     (stacked layout, no sticky). Either way it scrubs between
+     "top center" and "bottom center" of that element (i.e. the zone
+     where it crosses the viewport's midpoint, ~50%), maps progress
+     (0–1) to an item index, and updates active/highlighted whenever
+     that index changes. Skipped entirely when prefersReducedMotion
+     is set (the first item just stays shown).
    ================================================================ */
 
 export type HoverImageSwapItem = {
@@ -74,7 +75,7 @@ export default function HoverImageSwap({
   caption?: ReactNode;
 }) {
   const [active, setActive] = useState(0);
-  const [hovered, setHovered] = useState<number | null>(null);
+  const [highlighted, setHighlighted] = useState<number | null>(null);
 
   const prevActiveRef = useRef(0);
   const mountedRef = useRef(false);
@@ -143,46 +144,76 @@ export default function HoverImageSwap({
     { dependencies: [active] },
   );
 
-  // Scroll scrub: map scroll progress through the list to `active`,
-  // same as if the pointer were moving down the rows on its own.
+  // Scroll scrub: the only driver of `active`/`highlighted` now.
+  // The right trigger element is DIFFERENT per layout, so this uses
+  // ScrollTrigger.matchMedia to pick between them and re-pick
+  // automatically on breakpoint changes:
+  //   - md+ (sticky image column): trigger = the row (rootRef).
+  //     The row is much taller than the list here (that's the point
+  //     of the sticky image), so progress needs to span the row's
+  //     full height to match how long the image stays pinned.
+  //   - below md (stacked, no sticky): trigger = the list (listRef).
+  //     Image and list are stacked in document order here, so the
+  //     row's top is the image's top, not the list's. Scrubbing off
+  //     the whole row meant progress was already partway through by
+  //     the time the list itself scrolled into view — activating
+  //     items while the list was still off-screen. Keying it back to
+  //     the list's own bounds starts the scrub only once the list is
+  //     actually the thing entering the viewport.
   const lastScrubIndexRef = useRef<number | null>(null);
-  const hoverReleaseRef = useRef<gsap.core.Tween | null>(null);
+  const highlightReleaseRef = useRef<gsap.core.Tween | null>(null);
 
   useGSAP(
     () => {
-      if (prefersReducedMotion) return;
-      const listEl = listRef.current;
-      if (!listEl || items.length === 0) return;
+      if (prefersReducedMotion || items.length === 0) return;
 
-      const trigger = ScrollTrigger.create({
-        trigger: listEl,
-        start: "top center", // list top hits 50% down the viewport
-        end: "bottom center", // list bottom hits 50% down the viewport
-        scrub: true,
-        onUpdate: (self) => {
-          const index = Math.min(
-            items.length - 1,
-            Math.floor(self.progress * items.length),
-          );
+      const makeTrigger = (el: Element) =>
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top center",
+          end: "bottom center",
+          scrub: true,
+          onUpdate: (self) => {
+            const index = Math.min(
+              items.length - 1,
+              Math.floor(self.progress * items.length),
+            );
 
-          if (index === lastScrubIndexRef.current) return;
-          lastScrubIndexRef.current = index;
+            if (index === lastScrubIndexRef.current) return;
+            lastScrubIndexRef.current = index;
 
-          setActive(index);
-          setHovered(index);
+            setActive(index);
+            setHighlighted(index);
 
-          // Debounce the "pointer leaving" so a fast scrub doesn't
-          // spam hovered on/off between every index change.
-          hoverReleaseRef.current?.kill();
-          hoverReleaseRef.current = gsap.delayedCall(0.35, () =>
-            setHovered(null),
-          );
-        },
+            // Debounce the "no longer the current index" so a fast
+            // scrub doesn't spam highlighted on/off between every
+            // index change.
+            highlightReleaseRef.current?.kill();
+            highlightReleaseRef.current = gsap.delayedCall(0.35, () =>
+              setHighlighted(null),
+            );
+          },
+        });
+
+      const mm = gsap.matchMedia();
+
+      mm.add("(min-width: 768px)", () => {
+        const rowEl = rootRef.current;
+        if (!rowEl) return;
+        const trigger = makeTrigger(rowEl);
+        return () => trigger.kill();
+      });
+
+      mm.add("(max-width: 767.98px)", () => {
+        const listEl = listRef.current;
+        if (!listEl) return;
+        const trigger = makeTrigger(listEl);
+        return () => trigger.kill();
       });
 
       return () => {
-        trigger.kill();
-        hoverReleaseRef.current?.kill();
+        mm.revert();
+        highlightReleaseRef.current?.kill();
       };
     },
     { scope: rootRef, dependencies: [items] },
@@ -191,11 +222,19 @@ export default function HoverImageSwap({
   return (
     <div
       ref={rootRef}
-      className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center md:gap-20"
+      className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start md:gap-20"
     >
+      {/* Sticky image well — stays pinned in the viewport (md+) while
+          the label list scrolls past it, instead of just being
+          height-matched/centered against the list column. `self-start`
+          plus `top-24` gives it room to stick without ever needing to
+          scroll further than the list column's own height allows;
+          it un-sticks naturally once the list (and caption) end,
+          since a sticky element can't scroll past its own parent's
+          bottom edge. */}
       <div
         ref={wellRef}
-        className={`relative aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2] ${
+        className={`relative aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2] md:sticky md:top-24 md:self-start ${
           imageFirst ? "md:order-1" : "md:order-2"
         }`}
       >
@@ -216,31 +255,18 @@ export default function HoverImageSwap({
         <ul ref={listRef}>
           {items.map((item, i) => {
             const isActive = i === active;
-            const isHovered = hovered === i;
+            const isHighlighted = highlighted === i;
 
             return (
               <li key={item.label} className="border-b border-black-text/10">
-                <button
-                  type="button"
+                <div
                   aria-label={item.label}
-                  onMouseEnter={() => {
-                    setActive(i);
-                    setHovered(i);
-                  }}
-                  onMouseLeave={() => setHovered(null)}
-                  onFocus={() => {
-                    setActive(i);
-                    setHovered(i);
-                  }}
-                  onBlur={() => setHovered(null)}
-                  className={`flex w-full items-center py-5 text-left text-[46px] font-normal tracking-tight transition-colors duration-300 ease-out sm:py-6 ${
-                    isActive
-                      ? "text-black-text"
-                      : "text-black-text/35 hover:text-black-text/60"
+                  className={`flex w-full items-center py-5 text-left text-[36px] font-normal tracking-tight transition-colors duration-300 ease-out sm:py-6 ${
+                    isActive ? "text-black-text" : "text-black-text/35"
                   }`}
                 >
-                  <SlidingText text={item.label} isHovered={isHovered} />
-                </button>
+                  <SlidingText text={item.label} isHovered={isHighlighted} />
+                </div>
               </li>
             );
           })}

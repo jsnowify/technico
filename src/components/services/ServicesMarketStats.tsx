@@ -1,6 +1,7 @@
 import TextRevealBlock from "@/components/motion/TextRevealBlock";
 import ScrollFillText from "@/components/motion/ScrollFillText";
-import GlossyButton from "@/components/ui/GlossyButton";
+import PopIn from "@/components/motion/PopIn";
+import Button from "@/components/ui/Button";
 import StatCounter from "./StatCounter";
 
 /* ================================================================
@@ -9,7 +10,14 @@ import StatCounter from "./StatCounter";
    Split out of ServicesMarketOverview.tsx as its own component:
    the "S.002 / Canadian Businesses / S.002" kicker, the two-line
    "Canadian Businesses Are Competing / in a Digital-First Market"
-   heading, and the 4-card stats grid underneath it.
+   heading, and the 4 stats underneath it.
+
+   Stats block restyled to match HeroStats.tsx's dark, per-row
+   layout: a "S . 00N" mono index kicker on the left of each row,
+   the stat's number large in the middle (via the shared
+   StatCounter), the label on the right, and a 0.5px hairline
+   divider between rows — same pattern as HeroStats, just with an
+   "S" prefix instead of "H" since this is the Services section.
 
    Kicker + top spacing intentionally mirror ServicesMarketOverview's
    own intro kicker ("S.001 / Overview / S.001") — same mb-10/12/14
@@ -22,112 +30,36 @@ const STATS = [
   {
     value: "1.37M",
     label: "Employer Businesses In Canada",
-    // Two office buildings — represents the employer-business count.
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-        <path
-          d="M4 21V4.5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1V21"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M14 21v-8.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V21"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M2 21h20"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M7 8h1M7 12h1M7 16h1"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
   },
   {
     value: "$21.1B",
     label: "Canadian Digital Advertising Market",
-    // Coin with a dollar sign — represents ad-spend market size.
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-        <path
-          d="M12 6.5v11M9.5 9.25c0-1.1 1.12-2 2.5-2s2.5.65 2.5 1.75-1.12 1.75-2.5 1.75-2.5.65-2.5 1.75S10.62 15 12 15s2.5-.65 2.5-1.75"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
   },
   {
     value: "+16%",
     label: "Digital Ad Market Growth In 2025",
-    // Trending-up arrow — represents year-over-year growth.
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-        <path
-          d="M3 17l6-6 4 4 8-8"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M15 7h6v6"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
   },
   {
     value: "#1",
     label: "Search Remains Canada\u2019s Largest Digital Ad Category",
-    // Magnifying glass — represents search as an ad category.
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-        <circle
-          cx="10.5"
-          cy="10.5"
-          r="6.5"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M20 20l-4.35-4.35"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
   },
 ];
 
 export default function ServicesMarketStats() {
   return (
     <section className="bg-white-bg">
-      <div className="w-full px-5 pt-12 pb-24 sm:pt-14 sm:pb-28 md:pt-16 md:pb-36">
+      <div className="w-full bg-black-bg px-5 pt-12 pb-20 sm:pt-14 sm:pb-24 md:pt-16 md:pb-28">
         {/* Kicker row — mirrors ServicesMarketOverview's S.001 / OVERVIEW
             / S.001 pattern: same index left and right, section name
             centered, same mb-10/12/14 spacing below it. */}
         <div className="mb-10 flex items-center justify-between gap-6 sm:mb-12 md:mb-14">
-          <span className="font-mono text-xs font-medium tracking-[0.14em] text-black-text/50 uppercase sm:text-sm">
+          <span className="font-mono text-xs font-medium tracking-[0.14em] text-white/50 uppercase sm:text-sm">
             S.002
           </span>
-          <span className="font-mono text-xs font-medium tracking-[0.14em] text-black-text/50 uppercase sm:text-sm">
+          <span className="font-mono text-xs font-medium tracking-[0.14em] text-white/50 uppercase sm:text-sm">
             Canadian Businesses
           </span>
-          <span className="font-mono text-xs font-medium tracking-[0.14em] text-black-text/50 uppercase sm:text-sm">
+          <span className="font-mono text-xs font-medium tracking-[0.14em] text-white/50 uppercase sm:text-sm">
             S.002
           </span>
         </div>
@@ -138,33 +70,44 @@ export default function ServicesMarketStats() {
             "Canadian Businesses Are Competing",
             "in a Digital-First Market",
           ]}
-          className="mx-auto max-w-4xl text-center text-[2.25rem] leading-[1.15] font-semibold tracking-tight text-black-text sm:text-[48px] sm:leading-[1.1] sm:tracking-[-1.5px] md:text-[58px] md:leading-[1.08] md:tracking-[-2px] lg:max-w-[68rem] lg:text-[104px] lg:leading-[1.02] lg:tracking-[-3px]"
+          className="mx-auto max-w-4xl text-center text-[72px] leading-[1.1] font-medium tracking-tight text-white"
           scrollTrigger
         />
+      </div>
 
-        <div className="mt-20 grid grid-cols-2 gap-5 sm:mt-24 md:grid-cols-4 md:gap-6">
-          {STATS.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-[#f3f4ee] px-6 py-10 text-center sm:px-8 sm:py-12"
-            >
-              <span
-                aria-hidden="true"
-                className="mx-auto mb-7 flex h-8 w-8 items-center justify-center rounded-full border border-black-text/15 text-black-text/60 sm:mb-9"
-              >
-                {stat.icon}
-              </span>
-              <StatCounter
-                value={stat.value}
-                className="text-[46px] font-semibold tracking-tight text-black-text"
-              />
-              <p className="mt-4 text-[14px] font-medium tracking-wide text-black-text/50 uppercase sm:mt-5">
-                {stat.label}
-              </p>
+      {/* Stats block is edge-to-edge (outside the section's px-5
+          padding above/below it), same as HeroStats.tsx. */}
+      <div className="bg-black-bg">
+        <div className="w-full px-5 sm:px-10 md:px-16 lg:px-24">
+          {STATS.map((stat, i) => (
+            <div key={stat.label}>
+              {i > 0 && (
+                <div
+                  aria-hidden="true"
+                  className="h-[0.5px] w-full bg-white/15"
+                />
+              )}
+
+              <div className="flex flex-col gap-4 py-10 sm:grid sm:grid-cols-[80px_1fr_auto] sm:items-center sm:gap-8 sm:py-14 md:gap-14 md:py-16 lg:gap-20">
+                <span className="font-mono text-xs tracking-[0.14em] text-white/40 uppercase">
+                  {`S . 00${i + 1}`}
+                </span>
+
+                <StatCounter
+                  value={stat.value}
+                  className="text-[72px] leading-none font-medium tracking-tight text-white"
+                />
+
+                <p className="max-w-56 text-base leading-snug font-normal tracking-tight text-white uppercase sm:text-lg md:text-xl">
+                  {stat.label}
+                </p>
+              </div>
             </div>
           ))}
         </div>
+      </div>
 
+      <div className="w-full px-5 pb-24 sm:pb-28 md:pb-36">
         {/* Closing copy — moved here from ServicesMarketOverview.tsx's
             "Closing" section. Same two-part right/left-aligned
             static-lead-in + scroll-fill-clause pattern, followed by
@@ -210,7 +153,7 @@ export default function ServicesMarketStats() {
               </div>
             </div>
 
-            <p className="text-right text-balance text-[46px] leading-[1.3] font-normal normal-case tracking-tight md:flex-1">
+            <p className="text-right text-balance text-[36px] leading-[1.3] font-normal normal-case tracking-tight md:flex-1">
               <span className="text-black-text">
                 A website and a few social media accounts can give your business
                 an online presence,
@@ -258,37 +201,49 @@ export default function ServicesMarketStats() {
               </div>
             </div>
 
-            <p className="text-left text-balance text-[46px] leading-[1.3] font-normal normal-case tracking-tight md:flex-1">
+            <p className="text-left text-balance text-[36px] leading-[1.3] font-normal normal-case tracking-tight md:flex-1">
               <span className="text-black-text">
-                That&rsquo;s where the digital marketers at Technico Digital
-                Solutions come in.
+                That&rsquo;s where the digital marketers at{" "}
+                <PopIn className="inline-block -rotate-2 rounded-md bg-purple-600 px-3 py-1 text-white">
+                  Technico
+                </PopIn>{" "}
+                Digital Solutions come in.
               </span>{" "}
               <ScrollFillText text="We look at how customers find your business, what happens when they reach your website, and where potential leads drop off." />
             </p>
           </div>
 
-          <p className="mt-14 w-full text-justify indent-8 text-[46px] leading-[1.3] font-normal normal-case tracking-tight text-black-text sm:mt-16">
-            SEO, paid ads, content, and social media are then brought together
-            to help local businesses like yours generate qualified leads,
-            ecommerce stores attract more customers, and growing brands reach a
-            wider audience across Canada.
-          </p>
+          <div className="mt-14 w-full rounded-[30px] bg-black   px-8 py-10 sm:mt-16 sm:px-12 sm:py-12">
+            <p className="text-justify indent-8 text-[36px] leading-[1.3] font-normal normal-case tracking-tight text-white">
+              SEO, paid ads, content, and social media are then brought together
+              to help local businesses like yours generate qualified leads,
+              ecommerce stores attract more customers, and growing brands reach
+              a wider audience across Canada.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Action step — moved here from ServicesMarketOverview.tsx's
-          "Closing" section. */}
-      <div className="bg-black-bg px-5 py-20 text-center sm:py-28 md:py-36">
-        <p className="mx-auto max-w-4xl text-[46px] leading-[1.3] font-normal normal-case tracking-tight text-white">
-          We go the extra mile to help you fulfill your business plans with
-          targeted digital marketing strategies.{" "}
-          <ScrollFillText
-            text="Partner with us today and see competitive results."
-            className="text-white"
-          />
-        </p>
-        <div className="mx-auto mt-10 w-full max-w-xs uppercase sm:w-auto">
-          <GlossyButton to="/contact">Book a Call</GlossyButton>
+          "Closing" section. Restyled as a purple card attached to
+          the left edge of the viewport (rounded on the right only,
+          flush against the left edge), rather than a full-width
+          dark band. */}
+      <div className="bg-white-bg py-16 sm:py-20 md:py-24">
+        <div className="mr-auto w-full max-w-3xl rounded-r-[40px] bg-purple-600 px-8 py-14 sm:px-12 sm:py-16 md:py-20">
+          <p className="max-w-lg text-[32px] leading-[1.3] font-normal normal-case tracking-tight text-white sm:text-[36px]">
+            We go the extra mile to help you fulfill your business plans with
+            targeted digital marketing strategies.{" "}
+            <ScrollFillText
+              text="Partner with us today and see competitive results."
+              className="text-white"
+            />
+          </p>
+          <div className="mt-10 w-full max-w-xs uppercase sm:w-auto">
+            <Button to="/contact" variant="white-static">
+              Book a Call
+            </Button>
+          </div>
         </div>
       </div>
     </section>
