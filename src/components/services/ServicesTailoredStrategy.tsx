@@ -177,10 +177,21 @@ export default function ServicesTailoredStrategy() {
         });
 
         states.forEach((state, i) => {
-          tl!.add(
-            Flip.fit(iconBox, state, flipConfig),
-            i === 0 ? undefined : "+=0.5",
-          );
+          // Flip.fit()'s type signature is `object | Tween | null` —
+          // wider than what it actually returns. Passing `flipConfig`
+          // (real animation vars: ease + duration) always makes it
+          // hand back a genuine Tween at runtime; the plain-`object`
+          // case in its type only applies when you call it with no
+          // vars at all (an instant, non-animated snap), which we
+          // never do here. The null check above already rules out the
+          // other non-Tween case, so this cast is safe.
+          const flipTween = Flip.fit(iconBox, state, flipConfig);
+          if (flipTween) {
+            tl!.add(
+              flipTween as gsap.core.Tween,
+              i === 0 ? undefined : "+=0.5",
+            );
+          }
         });
 
         // Continuous spin, decoupled from the Flip timeline above —
@@ -276,7 +287,7 @@ export default function ServicesTailoredStrategy() {
               next to the heading with empty space past it. */}
           <div
             ref={cardsColumnRef}
-            className="flex w-full max-w-[720px] flex-col justify-self-end gap-6 sm:gap-8"
+            className="flex w-full max-w-180 flex-col justify-self-end gap-6 sm:gap-8"
           >
             {STRATEGY_CARDS.map((card, i) => (
               <div
@@ -284,7 +295,7 @@ export default function ServicesTailoredStrategy() {
                 ref={(el) => {
                   cardRefs.current[i] = el;
                 }}
-                className={`flex min-h-[180px] flex-col justify-between rounded-[28px] bg-gradient-to-br p-6 sm:min-h-[220px] sm:p-8 ${card.gradient}`}
+                className={`flex min-h-45 flex-col justify-between rounded-[28px] bg-linear-to-br p-6 sm:min-h-55 sm:p-8 ${card.gradient}`}
               >
                 {/* Fixed-size wrapper reserves the icon's spot in
                     normal flow regardless of what Flip does to the

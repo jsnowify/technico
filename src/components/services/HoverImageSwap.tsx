@@ -234,7 +234,7 @@ export default function HoverImageSwap({
           bottom edge. */}
       <div
         ref={wellRef}
-        className={`relative aspect-[4/3] w-full overflow-hidden sm:aspect-[3/2] md:sticky md:top-24 md:self-start ${
+        className={`relative aspect-4/3 w-full overflow-hidden sm:aspect-3/2 md:sticky md:top-24 md:self-start ${
           imageFirst ? "md:order-1" : "md:order-2"
         }`}
       >

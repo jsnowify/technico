@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 
 /* ================================================================
    CHANNELS JIGSAW CARD
@@ -14,7 +15,7 @@ import type { ReactNode } from "react";
    <path>, plus a <foreignObject> that carries the real HTML text so
    it wraps normally instead of being drawn as SVG <text>. The
    wrapping div is locked to the same aspect ratio as the viewBox
-   (aspect-[657/787]) with preserveAspectRatio="none", so the shape
+   (aspect-657/787) with preserveAspectRatio="none", so the shape
    — and the notch specifically — scales uniformly at any width
    instead of stretching into an ellipse.
 
@@ -27,12 +28,12 @@ import type { ReactNode } from "react";
    overlay rect stays on top so the white caption keeps enough
    contrast over it.
 
-   Plain <img>, not next/image, on purpose: this sits inside an SVG
-   <foreignObject>. It's the same res.cloudinary.com host the rest
-   of this section already uses via next/image, so if you'd rather
-   get Next's image optimization here too, this is a fine place to
-   switch — swap this <img> for next/image with `fill` and drop the
-   inline width/height/objectFit below.
+   Uses next/image with `fill` here (same res.cloudinary.com host the
+   rest of this section already uses via next/image) rather than a
+   plain <img>, even though this sits inside an SVG <foreignObject>:
+   `fill` just needs a sized, `position: relative` ancestor to fill,
+   which the wrapping <div> below already provides, so it works fine
+   here too and gets Next's image optimization for free.
    ================================================================ */
 
 const VIEW_W = 657;
@@ -91,7 +92,7 @@ export default function ChannelsJigsawCard() {
           scale-x relative to the shape's own bounding box, not the
           full SVG viewport) so the reveal always matches the card's
           rounded/notched outline exactly, at any size. */}
-      <div className="group relative aspect-[657/787] w-full cursor-pointer">
+      <div className="group relative aspect-657/787 w-full cursor-pointer">
         <svg
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           preserveAspectRatio="none"
@@ -114,7 +115,7 @@ export default function ChannelsJigsawCard() {
       </div>
 
       {/* Right panel — placeholder photo + dark overlay, text anchored to the bottom */}
-      <div className="relative aspect-[657/787] w-full overflow-hidden">
+      <div className="relative aspect-657/787 w-full overflow-hidden">
         <svg
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           preserveAspectRatio="none"
@@ -132,15 +133,12 @@ export default function ChannelsJigsawCard() {
                 xmlns="http://www.w3.org/1999/xhtml"
                 style={{ width: "100%", height: "100%", position: "relative" }}
               >
-                <img
+                <Image
                   src={CHANNELS_PHOTO}
                   alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
+                  fill
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40" />
               </div>

@@ -116,7 +116,7 @@ export default function ServicesMarketStats() {
         <div className="mt-20 sm:mt-24 md:mt-28">
           {/* Row 1 — placeholder image left, statement right */}
           <div className="flex flex-col items-center gap-10 md:flex-row md:items-center md:gap-14">
-            <div className="aspect-[4/3] w-full shrink-0 bg-[#f3f4ee] md:w-2/5">
+            <div className="aspect-4/3 w-full shrink-0 bg-[#f3f4ee] md:w-2/5">
               <div className="flex h-full w-full items-center justify-center gap-3 text-black-text/30">
                 <svg
                   viewBox="0 0 24 24"
@@ -164,7 +164,7 @@ export default function ServicesMarketStats() {
 
           {/* Row 2 — statement left, placeholder image right (mirrored) */}
           <div className="mt-16 flex flex-col items-center gap-10 sm:mt-20 md:flex-row-reverse md:items-center md:gap-14">
-            <div className="aspect-[4/3] w-full shrink-0 bg-[#f3f4ee] md:w-2/5">
+            <div className="aspect-4/3 w-full shrink-0 bg-[#f3f4ee] md:w-2/5">
               <div className="flex h-full w-full items-center justify-center gap-3 text-black-text/30">
                 <svg
                   viewBox="0 0 24 24"

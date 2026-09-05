@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Draggable } from "gsap/Draggable";
@@ -49,37 +49,58 @@ export const supportsFinePointer: boolean =
  * value feeds directly into RENDER OUTPUT (a className, some text)
  * rather than just gating a useGSAP effect or an event handler.
  *
- * The module-level constants are evaluated the instant the client JS
- * bundle loads — before React hydrates — so they already hold the
- * real browser value by the time hydration runs, while the server
- * always rendered `false`. Reading them straight in JSX makes React
- * see a live mismatch between server and client markup.
+ * Built on `useSyncExternalStore` rather than a `useEffect` that
+ * calls `setState` once on mount: matchMedia is genuinely external
+ * state (the browser owns it, not React), which is exactly what
+ * `useSyncExternalStore` exists for. It also solves the SSR/hydration
+ * problem the old effect-based version was working around by hand —
+ * `getServerSnapshot` returns `false` during the server render (and
+ * during hydration, before the client has committed), so there's no
+ * server/client markup mismatch, and React swaps in the real
+ * `getSnapshot` value right after. No effect body, so nothing here
+ * calls setState synchronously inside one.
  *
- * These hooks avoid that by starting at `false` (matching the server)
- * on every render up through hydration, then flipping to the real
- * value in a `useEffect`, which only ever runs after hydration is
- * done. Effects and event handlers can keep using the plain constants
- * above; they never run during SSR, so there's nothing for them to
- * mismatch.
+ * `subscribe` is a no-op (never invokes its callback) rather than
+ * wiring up matchMedia's own `change` event, on purpose: same as
+ * before, if the user flips their OS-level setting mid-session, the
+ * app won't reactively pick it up. Effects and event handlers can
+ * keep using the plain constants above; they never run during SSR,
+ * so there's nothing for them to mismatch.
  */
+function subscribeNoop() {
+  return () => {};
+}
+
+function getReducedMotionSnapshot(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function getReducedMotionServerSnapshot(): boolean {
+  return false;
+}
+
 export function usePrefersReducedMotion(): boolean {
-  const [value, setValue] = useState(false);
+  return useSyncExternalStore(
+    subscribeNoop,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot,
+  );
+}
 
-  useEffect(() => {
-    setValue(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
+function getSupportsFinePointerSnapshot(): boolean {
+  return window.matchMedia("(pointer: fine)").matches;
+}
 
-  return value;
+function getSupportsFinePointerServerSnapshot(): boolean {
+  return false;
 }
 
 export function useSupportsFinePointer(): boolean {
-  const [value, setValue] = useState(false);
-
-  useEffect(() => {
-    setValue(window.matchMedia("(pointer: fine)").matches);
-  }, []);
-
-  return value;
+  return useSyncExternalStore(
+    subscribeNoop,
+    getSupportsFinePointerSnapshot,
+    getSupportsFinePointerServerSnapshot,
+  );
 }
 
 export { gsap, ScrollTrigger, Draggable, InertiaPlugin, Flip };

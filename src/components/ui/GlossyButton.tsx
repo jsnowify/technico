@@ -27,7 +27,7 @@ export default function GlossyButton({ to, children }: GlossyButtonProps) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="
-          flex w-full min-w-[200px] items-center justify-center
+          flex w-full min-w-50 items-center justify-center
           rounded-[5px] bg-purple-secondary
           px-10 py-5
           font-mono text-sm uppercase tracking-[0.14em] text-white

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { JSX } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion, supportsFinePointer } from "@/lib/gsap";
@@ -195,16 +196,29 @@ function ServiceCard({
   // not something that needs to stay visible).
   const [showTags, setShowTags] = useState(false);
 
-  useEffect(() => {
+  // Render-time state adjustment (not an effect) for the two cases
+  // that need to happen synchronously with the `isActive` change
+  // itself: hiding immediately when the card goes inactive, and
+  // showing immediately under prefersReducedMotion (no rise-in delay
+  // to wait for). Tracking `prevIsActive` lets us detect the change
+  // during render, per React's "adjusting state when a prop changes"
+  // pattern — this avoids calling setState directly in a useEffect
+  // body, which triggers an extra render pass for no benefit here.
+  const [prevIsActive, setPrevIsActive] = useState(isActive);
+  if (isActive !== prevIsActive) {
+    setPrevIsActive(isActive);
     if (!isActive) {
       setShowTags(false);
-      return;
-    }
-
-    if (prefersReducedMotion) {
+    } else if (prefersReducedMotion) {
       setShowTags(true);
-      return;
     }
+  }
+
+  // Only the delayed (non-reduced-motion, becoming-active) case is
+  // left here, since it's driven by a real external timer callback
+  // rather than a synchronous state adjustment.
+  useEffect(() => {
+    if (!isActive || prefersReducedMotion) return;
 
     const id = setTimeout(() => setShowTags(true), 250);
     return () => clearTimeout(id);
@@ -387,7 +401,7 @@ function ServiceCard({
       onPointerLeave={handlePointerLeave}
       aria-pressed={isActive}
       aria-label={`Show details for ${service.title}`}
-      className={`group relative flex min-h-96 flex-col rounded-[30px] border p-6 text-left transition-colors duration-500 sm:min-h-[28rem] sm:p-8 ${
+      className={`group relative flex min-h-96 flex-col rounded-[30px] border p-6 text-left transition-colors duration-500 sm:min-h-112 sm:p-8 ${
         isActive
           ? `${accentBorder} text-white`
           : "border-black-text/10 bg-white hover:border-black-text/25"

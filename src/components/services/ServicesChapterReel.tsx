@@ -322,10 +322,10 @@ export default function ServicesChapterReel() {
     >
       <div className="mx-auto max-w-7xl px-5 pt-24 pb-24 sm:pt-28 sm:pb-28 md:pt-32 md:pb-32">
         {/* Tabs — each fully bordered with a small gap between them
-            (gap-[2px]), matching the mock exactly rather than the
+            (gap-0.5), matching the mock exactly rather than the
             merged-border look. Big N°0X label, active tab marked
             with an accent dot. */}
-        <div className="flex gap-[2px]">
+        <div className="flex gap-0.5">
           {CHAPTERS.map((c, i) => (
             <button
               key={c.id}
@@ -340,7 +340,7 @@ export default function ServicesChapterReel() {
               aria-current={i === activeIndex}
               aria-label={`Go to ${c.label}`}
               className={`flex flex-1 items-center gap-2 border border-black-text/15 px-5 py-4 text-xl font-medium text-black-text sm:text-2xl ${
-                i === activeIndex ? "bg-white-bg" : "bg-black-text/[0.03]"
+                i === activeIndex ? "bg-white-bg" : "bg-black-text/3"
               }`}
             >
               {i === activeIndex && (
@@ -368,7 +368,7 @@ export default function ServicesChapterReel() {
               reveal panel (absolute inset-0) to the same rectangle,
               leaving the footer bar below as a fixed-height sibling. */}
           <div className="relative flex-1 overflow-hidden">
-            <div className="relative z-[1] flex h-full flex-col overflow-y-auto px-10 pt-14 pb-8">
+            <div className="relative z-1 flex h-full flex-col overflow-y-auto px-10 pt-14 pb-8">
               <div className="mb-2 flex items-center gap-2">
                 <RevealUpText
                   key={`kicker-${chapter.id}`}
@@ -458,7 +458,7 @@ export default function ServicesChapterReel() {
                 while closed. */}
             <div
               ref={panelRef}
-              className={`absolute inset-0 z-[2] ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+              className={`absolute inset-0 z-2 ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}
               style={{ background: PANEL_TINT, clipPath: "inset(100% 0 0 0)" }}
             >
               <div
@@ -495,7 +495,7 @@ export default function ServicesChapterReel() {
             </div>
           </div>
 
-          {/* Footer bar — toggle + prev/next, gap-[2px] between
+          {/* Footer bar — toggle + prev/next, gap-0.5 between
               segments (a thin background-colored seam, same as the
               mock's border-left: 2px solid var(--surface-2)) rather
               than a visible divider line. Background switched to
@@ -511,7 +511,7 @@ export default function ServicesChapterReel() {
               through the new <SlidingIcon>, the same mechanic on the
               X axis: the "<" slides left on hover, the ">" slides
               right — each arrow slides the way it points. */}
-          <div className="relative z-[3] flex gap-[2px]">
+          <div className="relative z-3 flex gap-0.5">
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}

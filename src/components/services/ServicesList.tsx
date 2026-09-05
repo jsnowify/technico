@@ -41,7 +41,7 @@ function ServiceCard({ service }: { service: Service }) {
         aria-label={`Learn more about ${service.title}`}
         onMouseEnter={() => setLearnMoreHovered(true)}
         onMouseLeave={() => setLearnMoreHovered(false)}
-        className="mt-7 inline-flex w-fit items-center font-mono text-xs tracking-[0.14em] text-black-text uppercase transition-colors duration-300 hover:text-black-text/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-accent sm:text-sm"
+        className="mt-7 inline-flex w-fit items-center font-mono text-xs tracking-[0.14em] text-black-text uppercase transition-colors duration-300 hover:text-black-text/50 focus-visible:outline-2 focus-visible:outline-purple-accent sm:text-sm"
       >
         <span aria-hidden="true">[&nbsp;</span>
         <SlidingText text="Learn More" isHovered={learnMoreHovered} />
