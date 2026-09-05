@@ -10,6 +10,7 @@ import {
 } from "react";
 import { QUESTIONS_ANSWERS, type QuestionAnswer } from "@/lib/constants";
 import { ScrollTrigger } from "@/lib/gsap";
+import RevealUpText from "@/components/motion/RevealUpText";
 
 /* ================================================================
    QUESTIONS & ANSWERS (fourth section)
@@ -299,7 +300,12 @@ export default function QuestionsAnswers() {
 
   return (
     <section className="bg-white-bg">
-      <div className="mx-auto max-w-6xl px-6 pt-24 pb-24 sm:pt-28 sm:pb-28 md:pt-32 md:pb-32">
+      {/* Top padding matched to Strategy.tsx's outer container
+          (pt-16, no responsive step-up) instead of this section's
+          previous pt-24 sm:pt-28 md:pt-32. Bottom padding (pb-24
+          sm:pb-28 md:pb-32) left as-is — only the top was asked to
+          match. */}
+      <div className="mx-auto max-w-6xl px-6 pt-16 pb-24 sm:pb-28 md:pb-32">
         {/* Eyebrow */}
         <div className="flex items-center justify-center gap-3">
           <span className="h-2.5 w-2.5 shrink-0 bg-black-text" />
@@ -308,10 +314,13 @@ export default function QuestionsAnswers() {
           </span>
         </div>
 
-        {/* Headline */}
-        <h2 className="mx-auto mt-7 max-w-4xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[50px] md:leading-[1.12] md:tracking-[-2px]">
-          We drive your brand forward, automate strategies, and boost revenue.
-        </h2>
+        {/* Headline — word-by-word scroll rise-in via RevealUpText,
+            same classes it replaced. */}
+        <RevealUpText
+          as="h2"
+          text="We drive your brand forward, automate strategies, and boost revenue."
+          className="mx-auto mt-7 max-w-4xl text-balance text-center text-[32px] leading-[1.2] font-medium tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[56px] md:leading-[1.12] md:tracking-[-2px] lg:text-[64px]"
+        />
         <p className="mx-auto mt-7 max-w-xl text-center text-sm leading-loose text-black-text/60 text-pretty sm:mt-8 sm:text-base">
           If you find yourself saying yes to these questions, it&rsquo;s time to
           take action to transform your digital marketing strategy and drive

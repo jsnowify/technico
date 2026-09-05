@@ -17,6 +17,7 @@ import ContactSection from "@/components/layout/ContactSection";
 import Footer from "@/components/layout/Footer";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import BottomGlassBlur from "@/components/layout/BottomGlassBlur";
+import NoiseOverlay from "@/components/layout/NoiseOverlay";
 import { getAllServices } from "@/lib/content/services";
 import { IS_PRODUCTION } from "@/lib/env";
 
@@ -126,6 +127,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Footer />
           </SmoothScrollProvider>
           <BottomGlassBlur />
+          <NoiseOverlay />
         </div>
       </body>
     </html>

@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { SERVICES, type Service } from "@/lib/constants";
 import SlidingText from "@/components/motion/SlidingText";
+import RevealUpText from "@/components/motion/RevealUpText";
 import {
   SERVICES_FOCUS_EVENT,
   SERVICES_UNFOCUS_EVENT,
@@ -290,7 +291,10 @@ export default function Services() {
 
   return (
     <section className="bg-white-bg">
-      <div className="mx-auto max-w-6xl px-6 pt-20 sm:pt-24 md:pt-28">
+      {/* Top padding matched to Strategy.tsx's outer container
+          (pt-16, no responsive step-up) instead of this section's
+          previous pt-20 sm:pt-24 md:pt-28. */}
+      <div className="mx-auto max-w-6xl px-6 pt-16">
         {/* Eyebrow */}
         <div className="flex items-center justify-center gap-3">
           <span className="h-2.5 w-2.5 shrink-0 bg-black-text" />
@@ -299,10 +303,13 @@ export default function Services() {
           </span>
         </div>
 
-        {/* Headline */}
-        <h2 className="mx-auto mt-7 max-w-4xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[50px] md:leading-[1.12] md:tracking-[-2px]">
-          Accelerate your online growth with proven digital marketing services
-        </h2>
+        {/* Headline — word-by-word scroll rise-in via RevealUpText,
+            same classes it replaced. */}
+        <RevealUpText
+          as="h2"
+          text="Accelerate your online growth with proven digital marketing services"
+          className="mx-auto mt-7 max-w-4xl text-balance text-center text-[32px] leading-[1.2] font-medium tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[56px] md:leading-[1.12] md:tracking-[-2px] lg:text-[64px]"
+        />
         <p className="mx-auto mt-7 max-w-2xl text-center text-sm leading-loose text-black-text/60 text-pretty sm:mt-8 sm:text-base">
           Our specialty is to help businesses grow faster online through
           effective digital marketing services. If you&rsquo;re building

@@ -363,6 +363,60 @@ export const PARTNERS: Partner[] = [
 ];
 
 /**
+ * Content for the "Trusted by" logo loop (components/home/TrustedBy.tsx).
+ *
+ * These are hosted on Cloudinary rather than /public — no company names
+ * were supplied alongside the images, so `alt` is left empty (the logos
+ * are decorative here; the section's "Trusted by" heading already carries
+ * the meaning for assistive tech).
+ */
+export interface TrustedBrand {
+  logo: string;
+}
+
+export const TRUSTED_BY: TrustedBrand[] = [
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526316/trusted/technico-trusted-by-1_r1j2kq.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526316/trusted/technico-trusted-by-2_vtqyly.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-3_cxj5my.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-4_ds72ds.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526316/trusted/technico-trusted-by-5_sbmbc9.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-6_yewoz3.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-7_iupzeh.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-8_zza1hu.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-9_ceji5a.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-10_hwtenh.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-11_dadypu.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526318/trusted/technico-trusted-by-12_zzhke2.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526318/trusted/technico-trusted-by-13_wqkkvw.png",
+  },
+];
+
+/**
  * Content for the "Our Proven Approach" step tabs
  * (components/home/Approach.tsx). Copy is supplied verbatim — do not
  * rewrite, shorten, or paraphrase it here.
