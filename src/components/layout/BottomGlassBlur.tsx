@@ -50,7 +50,16 @@
 export const BOTTOM_GLASS_BLUR_HEIGHT_CLASSES = "h-20 sm:h-24 lg:h-28";
 export const BOTTOM_SAFE_PADDING_CLASSES = "pb-28 sm:pb-32 lg:pb-40";
 
-const BLUR_STEPS = [0.5, 1, 2, 4, 8, 12, 18, 26] as const;
+// Fewer, wider-spaced steps than before (was 8 layers). Each layer is
+// its own `backdrop-filter`, and backdrop-filter is one of the most
+// GPU-expensive effects a browser can run — it has to keep re-sampling
+// whatever's scrolling underneath. This strip is fixed/global (mounted
+// once in app/layout.tsx, present on every route), so every extra
+// layer here is recurring cost on every scroll frame of every page,
+// including while reading a long article. Halving the layer count
+// keeps the same visual gradient (overlapping bands still blend into
+// one continuous fade) for roughly half the compositing work.
+const BLUR_STEPS = [0.5, 2, 6, 14, 26] as const;
 
 const LAYERS = (() => {
   const n = BLUR_STEPS.length;

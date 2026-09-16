@@ -1,9 +1,38 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { buildMetadata } from "@/lib/seo";
-import { getAllServices, getServiceBySlug } from "@/lib/content/services";
+import {
+  getAllServices,
+  getServiceBySlug,
+  getServiceAccent,
+} from "@/lib/content/services";
 import JsonLd from "@/components/seo/JsonLd";
-import { SITE_NAME, SITE_URL, SERVICE_AREAS } from "@/lib/constants";
+import Cta from "@/components/ui/CTA";
+import GeometricIcon from "@/components/ui/icons";
+import ServiceHighlights from "@/components/services/ServiceHighlights";
+import ServiceComparison from "@/components/services/ServiceComparison";
+import ServiceFeatureList from "@/components/services/ServiceFeatureList";
+import ServiceFeatureCard from "@/components/services/ServiceFeatureCard";
+import ServiceImageStatement from "@/components/services/ServiceImageStatement";
+import ServicesProcess from "@/components/services/ServicesProcess";
+import ServiceMarqueeCta from "@/components/services/ServiceMarqueeCta";
+import ServiceConversion from "@/components/services/ServiceConversion";
+import ServiceInsights from "@/components/services/ServiceInsights";
+import ServiceResults from "@/components/services/ServiceResults";
+import ServiceContentPillars from "@/components/services/ServiceContentPillars";
+import ServicePillarCards from "@/components/services/ServicePillarCards";
+import ServicesGrowBusiness from "@/components/services/ServicesGrowBusiness";
+import FAQ from "@/components/ui/FAQ";
+import TrustedBy from "@/components/home/TrustedBy";
+import TechStack from "@/components/services/TechStack";
+import ServiceIntroPanel from "@/components/services/ServiceIntroPanel";
+import type { ServiceSection } from "@/lib/content/types";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SERVICE_AREAS,
+  GRAPHIC_DESIGN_WORK,
+} from "@/lib/constants";
 
 export async function generateStaticParams() {
   const services = await getAllServices();
@@ -23,6 +52,49 @@ export async function generateMetadata({
     path: `/services/${slug}`,
   });
 }
+
+/**
+ * Renders a hero paragraph, turning `link.label` into an underlined
+ * link if present — same substring-match technique as
+ * ServiceIntroPanel's paragraph `link` field.
+ */
+function renderHeroParagraph({
+  text,
+  link,
+}: Extract<ServiceSection, { type: "hero" }>["paragraphs"][number]) {
+  if (!link) return text;
+
+  const idx = text.indexOf(link.label);
+  if (idx === -1) return text;
+
+  return (
+    <>
+      {text.slice(0, idx)}
+      <Link
+        href={link.href}
+        className="text-white underline decoration-1 underline-offset-4 hover:text-white/80"
+      >
+        {link.label}
+      </Link>
+      {text.slice(idx + link.label.length)}
+    </>
+  );
+}
+
+/**
+ * Vertical padding for a "cta" block. Kept as a lookup rather than
+ * inline in the switch below so the three known combinations stay
+ * documented in one place. See ServiceSection["cta"]["spacing"] in
+ * lib/content/types.ts for what each option means.
+ */
+const CTA_SPACING_CLASS: Record<
+  NonNullable<Extract<ServiceSection, { type: "cta" }>["spacing"]>,
+  string
+> = {
+  standalone: "bg-black-bg !pt-[80px] !pb-[80px]",
+  compact: "bg-black-bg !pt-0 !pb-0",
+  "tight-bottom": "bg-black-bg !pt-0 !pb-[80px]",
+};
 
 export default async function ServiceDetailPage({
   params,
@@ -67,86 +139,313 @@ export default async function ServiceDetailPage({
     ],
   };
 
+  const accent = getServiceAccent(service.slug);
+  const sections = service.sections ?? [];
+  const hasHero = sections.some((section) => section.type === "hero");
+
   return (
-    <div className="mx-auto max-w-3xl px-6 py-24">
+    <>
       <JsonLd data={serviceJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
-      {/* Breadcrumb nav — visible counterpart to the BreadcrumbList
-          schema above; structured data should mirror what's on the
-          page, not stand in for it. */}
-      <nav aria-label="Breadcrumb" className="mb-8">
-        <ol className="flex flex-wrap items-center gap-1.5 font-mono text-xs tracking-wide text-black-text/50 uppercase">
-          <li>
-            <Link href="/" className="hover:text-black-text">
-              Home
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li>
-            <Link href="/services" className="hover:text-black-text">
-              Services
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" className="text-black-text">
-            {service.title}
-          </li>
-        </ol>
-      </nav>
+      <div className="bg-black-bg">
+        {/* Plain fallback header for services that don't have a
+            `hero` block in their sections yet — keeps the page from
+            rendering blank instead of inventing hero copy for them. */}
+        {!hasHero && (
+          <section className="bg-black-bg px-10 pt-20 pb-10 sm:pt-24 md:pt-28">
+            <h1 className="max-w-xl text-[32px] leading-[1.05] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
+              {service.title}
+            </h1>
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed font-light text-white/60">
+              {service.shortDescription}
+            </p>
+          </section>
+        )}
 
-      <h1 className="text-4xl font-semibold tracking-tight text-black-text">
-        {service.title}
-      </h1>
+        {sections.map((section, index) => {
+          switch (section.type) {
+            case "hero":
+              return (
+                <section
+                  key={index}
+                  className="relative overflow-hidden bg-black-bg"
+                >
+                  <div className="px-10 pt-20 pb-0 sm:pt-24 md:pt-28">
+                    <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-sm font-light text-white ${
+                              accent === "pink"
+                                ? "bg-pink-accent"
+                                : "bg-purple-accent"
+                            }`}
+                          >
+                            <GeometricIcon index={10} className="h-3 w-3" />
+                          </span>
+                          <p className="text-base leading-none font-light tracking-wide text-white">
+                            {section.eyebrow}
+                          </p>
+                        </div>
+                        <h1 className="mt-6 max-w-xl text-[32px] leading-[1.05] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
+                          {section.headline}
+                        </h1>
+                      </div>
+                      <div className="space-y-6 text-lg leading-relaxed font-light text-white/60 md:pt-1">
+                        {section.paragraphs.map((paragraph, i) => (
+                          <p key={i}>{renderHeroParagraph(paragraph)}</p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              );
 
-      {service.subtitle && (
-        <p className="mt-3 text-lg text-black-text/60">{service.subtitle}</p>
-      )}
+            case "cta":
+              return (
+                <Cta
+                  key={index}
+                  title={section.title}
+                  description={section.description}
+                  cta={section.cta}
+                  wide={section.wide}
+                  className={CTA_SPACING_CLASS[section.spacing ?? "standalone"]}
+                />
+              );
 
-      {service.quote && (
-        <p className="mt-6 border-l-2 border-purple-secondary pl-4 text-xl font-medium text-black-text">
-          {service.quote}
-        </p>
-      )}
+            case "highlights": {
+              // Drop this block's own top padding when it's stacked
+              // directly after another `highlights` block — that
+              // first block's bottom padding already supplies the
+              // gap, so stacking both blocks' padding would leave a
+              // much bigger gap here than between any other pair of
+              // sections on the page. See ServiceHighlights.tsx's
+              // doc comment for the full explanation.
+              const previousSection = sections[index - 1];
+              const spacing =
+                previousSection?.type === "highlights"
+                  ? "tight-top"
+                  : "default";
 
-      <div className="mt-8 space-y-4 text-lg leading-8 text-black-text/70">
-        {service.description.map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
-        ))}
+              return (
+                <ServiceHighlights
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  paragraph={section.paragraph}
+                  items={section.items}
+                  accent={accent}
+                  cta={section.cta}
+                  subheading={section.subheading}
+                  spacing={spacing}
+                />
+              );
+            }
+
+            case "conversion":
+              return (
+                <ServiceConversion
+                  key={index}
+                  headline={section.headline}
+                  description={section.description}
+                  image={section.image}
+                  features={section.features}
+                  accent={accent}
+                />
+              );
+
+            case "insights":
+              return (
+                <ServiceInsights
+                  key={index}
+                  image={section.image}
+                  headline={section.headline}
+                  intro={section.intro}
+                  introLink={section.introLink}
+                  items={section.items}
+                  closingParagraph={section.closingParagraph}
+                />
+              );
+
+            case "results":
+              return (
+                <ServiceResults
+                  key={index}
+                  headline={section.headline}
+                  description={section.description}
+                  descriptionLink={section.descriptionLink}
+                  items={section.items}
+                />
+              );
+
+            case "contentPillars":
+              return (
+                <ServiceContentPillars
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  paragraph={section.paragraph}
+                  quote={section.quote}
+                  quoteAttribution={section.quoteAttribution}
+                  image={section.image}
+                  items={section.items}
+                />
+              );
+
+            case "pillarCards":
+              return (
+                <ServicePillarCards
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  intro={section.intro}
+                  items={section.items}
+                  closingParagraph={section.closingParagraph}
+                />
+              );
+
+            case "growBusiness":
+              return (
+                <ServicesGrowBusiness
+                  key={index}
+                  headline={section.headline}
+                  intro={section.intro}
+                  items={section.items}
+                  closing={section.closing}
+                />
+              );
+
+            case "comparison":
+              return (
+                <ServiceComparison
+                  key={index}
+                  headline={section.headline}
+                  intro={section.intro}
+                  cta={section.cta}
+                  columns={section.columns}
+                  closing={section.closing}
+                  accent={accent}
+                />
+              );
+
+            case "marqueeCta":
+              return (
+                <ServiceMarqueeCta
+                  key={index}
+                  text={section.text}
+                  cta={section.cta}
+                  accent={accent}
+                />
+              );
+
+            case "featuresSplit":
+              return (
+                <ServiceFeatureList
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  paragraphs={section.paragraphs}
+                  listHeading={section.listHeading}
+                  items={section.items}
+                  accent={accent}
+                  image={section.image}
+                />
+              );
+
+            case "featureCard":
+              return (
+                <ServiceFeatureCard
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  paragraph={section.paragraph}
+                  image={section.image}
+                  cta={section.cta}
+                  checklist={section.checklist}
+                />
+              );
+
+            case "imageStatement":
+              return (
+                <ServiceImageStatement
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  cta={section.cta}
+                  image={section.image}
+                  shape={section.shape}
+                  paragraph={section.paragraph}
+                  bullets={section.bullets}
+                  closingParagraph={section.closingParagraph}
+                />
+              );
+
+            case "process":
+              return (
+                <ServicesProcess
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  paragraph={section.paragraph}
+                  steps={section.steps}
+                  descriptionLayout={section.descriptionLayout}
+                />
+              );
+
+            case "trustedBy":
+              return <TrustedBy key={index} />;
+
+            case "techStack":
+              return section.variant === "graphicDesignWork" ? (
+                <TechStack
+                  key={index}
+                  items={GRAPHIC_DESIGN_WORK}
+                  heading={
+                    <>
+                      Our Recent
+                      <br />
+                      Graphic Design Work
+                    </>
+                  }
+                />
+              ) : (
+                <TechStack key={index} />
+              );
+
+            case "introPanel":
+              return (
+                <ServiceIntroPanel
+                  key={index}
+                  eyebrow={section.eyebrow}
+                  headline={section.headline}
+                  paragraphs={section.paragraphs}
+                  image={section.image}
+                />
+              );
+
+            case "faq":
+              return (
+                <FAQ
+                  key={index}
+                  heading={
+                    <>
+                      {section.headline[0]}
+                      <br />
+                      {section.headline[1]}
+                    </>
+                  }
+                  cta={section.cta}
+                  items={section.items}
+                  includeJsonLd={false}
+                />
+              );
+
+            default:
+              return null;
+          }
+        })}
       </div>
-
-      {service.tags && service.tags.length > 0 && (
-        <ul className="mt-10 flex flex-wrap gap-2">
-          {service.tags.map((tag) => (
-            <li
-              key={tag}
-              className="rounded-full border border-black-text/15 px-4 py-1.5 text-sm text-black-text/70"
-            >
-              {tag}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="mt-14 border-t border-black-text/10 pt-8">
-        <p className="text-sm text-black-text/60">
-          Explore our other{" "}
-          <Link
-            href="/services"
-            className="text-purple-secondary underline decoration-1 underline-offset-4 hover:text-purple-accent"
-          >
-            digital marketing services
-          </Link>{" "}
-          or{" "}
-          <Link
-            href="/contact"
-            className="text-purple-secondary underline decoration-1 underline-offset-4 hover:text-purple-accent"
-          >
-            get in touch
-          </Link>{" "}
-          to talk about your project.
-        </p>
-      </div>
-    </div>
+    </>
   );
 }

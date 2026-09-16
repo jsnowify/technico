@@ -1,214 +1,314 @@
 "use client";
 
+import { useId, useRef, useState } from "react";
 import Image from "next/image";
-import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import {
+  gsap,
+  prefersReducedMotion,
+  usePrefersReducedMotion,
+} from "@/lib/gsap";
 import Button from "@/components/ui/Button";
-import SlidingText from "@/components/motion/SlidingText";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 
-/* ================================================================
-   HOME HERO
-   ================================================================
-   Copied from about/AboutHero.tsx (itself copied from
-   services/ServicesHero.tsx) so all three heroes share one design
-   system: left text column on plain bg-black-bg, right image panel
-   (backdrop + floating asset + overlapping white card), instead of
-   the previous centered single-column layout with the big radial
-   vignette behind the headline. That vignette treatment and the
-   centered layout are gone along with the old structure.
+const HERO_BG =
+  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1788870336/hero-bg-shapes/technico-bg_z3fyss.avif";
+const HERO_CIRCLE =
+  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1788870624/hero-bg-shapes/hero-home-circle.avif";
 
-   ASSETS (both expected in /public):
-     /technico-digital-solutions-inc-bg.webp     — right panel backdrop
-     /technico-digital-solutions-inc-square.webp — floating 3D square
-       (kept as the home page's own asset — ServicesHero/AboutHero
-       use the circle instead — so this page still reads as its own
-       hero within the shared layout, not a literal duplicate.)
-
-   The square's motion now matches AboutHero.tsx's circle exactly
-   (same float range/rotation/duration, same scroll-scrubbed
-   parallax distance and `scrollTrigger` bounds), rather than the
-   square's own previous tuning — skipped outright under
-   prefersReducedMotion, same as SmoothScrollProvider / NavItem /
-   SlidingText:
-
-     1. IDLE FLOAT — fromTo -24→24 y / -2→2deg rotation, 2.4s yoyo,
-        purely decorative.
-     2. SCROLL PARALLAX — fromTo -160→280 y, `scrub: true` (locked
-        1:1 to scroll position, no lag), over "top bottom" to
-        "bottom+=600 top".
-
-   Two nested refs on the square for the same reason ServicesHero/
-   AboutHero document: the scroll-parallax offset and the idle float
-   both animate `y`/transform, and GSAP tweens a property by writing
-   the element's whole transform each tick — two tweens sharing one
-   element would silently overwrite each other.
-
-   The "2.5k+ Project Completed / 100+ Happy Client / 5+ Years Of
-   Experience" stats live in their own component, HeroStats.tsx
-   (rendered as a separate section right after this one in
-   app/page.tsx) — unaffected by this layout change.
-   ================================================================ */
-
-const HERO_BG = "/technico-digital-solutions-inc-bg.webp";
-const HERO_SQUARE = "/technico-digital-solutions-inc-square.webp";
+/*
+ * Portrait frame path, supplied at 667x896. Normalized to
+ * objectBoundingBox (0-1) fractions so the clip-path scales cleanly
+ * with the responsive container instead of being pinned to one
+ * pixel size. The notch carved out of the top-right corner is what
+ * the floating arrow badge sits into.
+ */
+const PORTRAIT_CLIP_PATH =
+  "M0.655172,0 C0.671733,0 0.685157,0.009994 0.685157,0.022321 V0.212054 C0.685157,0.224381 0.698582,0.234375 0.715142,0.234375 H0.970015 C0.986575,0.234375 1,0.244369 1,0.256696 V0.977679 C1,0.990006 0.986575,1 0.970015,1 H0.029985 C0.013425,1 0,0.990006 0,0.977679 V0.022321 C0,0.009994 0.013425,0 0.029985,0 H0.655172 Z";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
-  // Hover state for the "Free Strategy" link's SlidingText — same
-  // mechanic as ui/Button.tsx, and the same pattern ServicesHero.tsx
-  // / AboutHero.tsx use for their floating card's link.
-  const [linkHovered, setLinkHovered] = useState(false);
-  // Two nested refs on purpose: the scroll-parallax offset and the
-  // idle float both animate `y`/transform, and GSAP tweens a
-  // property by writing the element's whole transform each tick —
-  // two tweens sharing one element would silently overwrite each
-  // other. Same reasoning useMagneticHover documents for why
-  // targetRef/boundsRef must be different elements.
   const parallaxRef = useRef<HTMLDivElement>(null);
   const floatRef = useRef<HTMLDivElement>(null);
+  const [strategyHovered, setStrategyHovered] = useState(false);
+  const clipId = useId();
+  const reduceMotion = usePrefersReducedMotion();
 
   useGSAP(() => {
     const section = sectionRef.current;
     const parallaxEl = parallaxRef.current;
     const floatEl = floatRef.current;
-
     if (!section || !parallaxEl || !floatEl || prefersReducedMotion) return;
 
-    const float = gsap.fromTo(
-      floatEl,
-      { y: -24, rotation: -2 },
-      {
-        y: 24,
-        rotation: 2,
-        duration: 2.4,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1,
-      },
-    );
+    const mm = gsap.matchMedia();
 
-    // Parallax: as the hero scrolls fully through the viewport the
-    // square drifts from above its resting spot to well below it,
-    // layered on top of (not replacing) the idle float.
-    //
-    // `scrub: true` locks the tween's progress directly to the
-    // scrollbar — no lag, no easing catch-up — so the square's
-    // descent stays perfectly in sync with the user scrolling down
-    // (and reverses immediately if they scroll back up). Same
-    // treatment as AboutHero.tsx's circle.
-    const parallax = gsap.fromTo(
-      parallaxEl,
-      { y: -160 },
-      {
-        y: 280,
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top bottom",
-          end: "bottom+=600 top",
-          scrub: true,
+    // Fine-pointer (mouse/trackpad) devices get the full effect.
+    mm.add("(pointer: fine)", () => {
+      const float = gsap.fromTo(
+        floatEl,
+        { y: -15, rotation: -2 },
+        {
+          y: 45,
+          rotation: 2,
+          duration: 2.8,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
         },
-      },
-    );
+      );
 
-    return () => {
-      float.kill();
-      parallax.scrollTrigger?.kill();
-      parallax.kill();
-    };
+      const parallax = gsap.fromTo(
+        parallaxEl,
+        { y: -60 },
+        {
+          y: 180,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.3,
+          },
+        },
+      );
+
+      return () => {
+        float.kill();
+        parallax.scrollTrigger?.kill();
+        parallax.kill();
+      };
+    });
+
+    // Touch/coarse-pointer devices: lighter bob, shorter scroll range, and
+    // fastScrollEnd so a quick flick doesn't leave the scrub animation
+    // visibly "catching up" after the finger lifts.
+    mm.add("(pointer: coarse)", () => {
+      const float = gsap.fromTo(
+        floatEl,
+        { y: -8, rotation: -1 },
+        {
+          y: 20,
+          rotation: 1,
+          duration: 3.4,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        },
+      );
+
+      const parallax = gsap.fromTo(
+        parallaxEl,
+        { y: -25 },
+        {
+          y: 70,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.5,
+            fastScrollEnd: true,
+          },
+        },
+      );
+
+      return () => {
+        float.kill();
+        parallax.scrollTrigger?.kill();
+        parallax.kill();
+      };
+    });
+
+    return () => mm.revert();
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative isolate overflow-hidden bg-black-bg"
+      className="relative isolate overflow-hidden bg-black-bg text-white"
     >
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 md:items-stretch">
-        {/* LEFT — text column. Plain bg-black-bg, no backdrop image
-            here (that's reserved for the right panel now), so the
-            headline stays high-contrast — same pattern as
-            ServicesHero/AboutHero's left column. */}
-        <div className="flex flex-col justify-center gap-6 px-5 pt-24 pb-14 sm:px-5 sm:pt-32 sm:pb-16 md:justify-start md:px-5 md:pt-32 lg:px-5 lg:pt-36 xl:pt-40">
-          <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[72px]">
-            Digital Marketing Agency That Prioritizes Your Profit, Not Just
-            Traffic.
-          </h1>
-
-          {/* Divider — same beat as ServicesHero/AboutHero's thin
-              rule between the headline and the supporting line
-              underneath it. */}
-          <div className="h-px w-full max-w-md bg-white/15" />
-
-          <p className="max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-            Achieve Business Success Through Effective Brand Development.
-            Explore new digital marketing opportunities with Technico Digital
-            Solutions.
+      <div className="container-x mx-auto grid min-h-svh w-full max-w-360 grid-cols-1 pt-20 pb-10 lg:grid-cols-[minmax(0,1fr)_667px] lg:pt-18.25 lg:pb-13.75">
+        {/* LEFT */}
+        <div className="relative z-20 flex flex-col justify-center lg:justify-start lg:pt-29.5">
+          <p className="mb-7 font-mono text-[14px] tracking-[-0.02em] text-white/85 uppercase">
+            [ ] YOOHOOOO HELLOOOO{" "}
+            <span
+              className={
+                reduceMotion ? "inline-block" : "eyebrow-wave inline-block"
+              }
+            >
+              👋
+            </span>
           </p>
 
-          <div className="w-full max-w-xs sm:w-auto">
-            <Button to={SITE_PHONE_HREF} variant="white-static" size="lg">
-              Book a Call
+          {/* Font-size now lives in globals.css (`.h1-hero`) as a
+              fluid clamp() instead of stepped Tailwind breakpoints —
+              see that class for the full reasoning. Letter-spacing
+              switched from a fixed -2.5px to an em-based -0.04em so
+              it scales together with the now-continuously-changing
+              font-size instead of staying a flat px value. */}
+          <h1 className="h1-hero max-w-132.5 leading-[0.98] font-medium tracking-[-0.04em] text-white">
+            <span className="underline decoration-[#8B5CF6] underline-offset-4 text-[#8B5CF6]">
+              Digital Marketing Agency
+            </span>{" "}
+            that prioritize your profit, not just traffic.
+          </h1>
+
+          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 lg:mt-16">
+            <Button to={SITE_PHONE_HREF} variant="purple-fill">
+              BOOK A CALL
             </Button>
+            <Button to={SITE_PHONE_HREF} variant="underline">
+              Free Strategy
+            </Button>
+          </div>
+
+          {/* Desktop overlapping statement card — fixed 617px width (matches
+              the source design) so the overlap into the portrait stays
+              consistent no matter how wide the left column gets. */}
+          <div
+            className="mt-14 hidden lg:mt-16 lg:block"
+            style={{ width: "617px" }}
+          >
+            <div className="relative min-h-36.5 overflow-hidden rounded-[20px] border border-white/10 backdrop-blur-xl">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 617 146"
+                preserveAspectRatio="none"
+                className="absolute inset-0 h-full w-full"
+              >
+                <rect
+                  width="617"
+                  height="146"
+                  rx="20"
+                  fill="#000000"
+                  fillOpacity="0.25"
+                />
+              </svg>
+              <div className="relative flex min-h-36.5 items-center gap-6 px-7 py-5">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 102 102"
+                  className="h-21.5 w-21.5 shrink-0"
+                  fill="none"
+                >
+                  <path
+                    d="M0 0C0 13.5263 5.37171 26.4985 14.9365 36.0621C24.5013 45.6271 37.4734 51.0002 50.9995 51.0002V0H0ZM50.9995 51.0002H102V0C88.4739 0 75.5008 5.3731 65.936 14.9367C56.3712 24.5017 50.9995 37.4726 50.9995 51.0002ZM50.9995 51.0002V102H102C102 88.4741 96.6282 75.5018 87.0634 65.9369C77.4986 56.3733 64.5252 51.0002 50.9995 51.0002ZM50.9995 51.0002H0V102C13.5261 102 26.4994 96.6269 36.0642 87.0633C45.6291 77.4983 50.9995 64.5261 50.9995 51.0002Z"
+                    fill="white"
+                  />
+                </svg>
+                <p className="max-w-102.5 text-[15px] leading-[1.35] text-white/95 xl:text-[17px]">
+                  Achieve Business Success Through Effective Brand Development.
+                  Explore new digital marketing opportunities with Technico
+                  Digital Solutions.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT — image panel. Backdrop lives here now instead of
-            spanning the whole section, mirroring ServicesHero/
-            AboutHero's photo column. Square asset + floating card sit
-            on top of it. */}
-        <div className="relative isolate min-h-80 overflow-hidden sm:min-h-105 md:min-h-160 lg:min-h-205 xl:min-h-220">
-          <div className="absolute inset-0 -z-20 scale-125">
+        {/* RIGHT VISUAL */}
+        <div
+          className="relative z-10 mt-10 h-[72svh] min-h-155 w-full self-start overflow-visible lg:mt-0 lg:h-auto lg:min-h-0"
+          style={{ aspectRatio: "667 / 896" }}
+        >
+          {/* Portrait frame — clipped to the supplied notch shape so the
+              floating arrow badge sits flush into the cut top-right corner
+              instead of merely overlapping a plain rounded rect. */}
+          <svg aria-hidden="true" className="absolute h-0 w-0">
+            <defs>
+              <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+                <path d={PORTRAIT_CLIP_PATH} />
+              </clipPath>
+            </defs>
+          </svg>
+
+          <div
+            className="absolute inset-0 overflow-hidden bg-[#eceaf0]"
+            style={{ clipPath: `url(#${clipId})` }}
+          >
             <Image
               src={HERO_BG}
-              loading="eager"
               alt=""
               fill
-              unoptimized
-              sizes="50vw"
+              priority
+              sizes="(min-width: 1024px) 667px, 100vw"
               className="object-cover object-center"
             />
           </div>
 
-          {/* Square asset — outer div carries the scroll-scrubbed
-              parallax offset; inner div carries the continuous idle
-              float — kept on separate elements so the two tweens
-              don't fight over `transform`. */}
           <div
             ref={parallaxRef}
-            className="absolute top-1/2 left-1/2 w-55 -translate-x-1/2 -translate-y-1/2 sm:w-70 lg:w-85"
+            className="absolute top-[45%] left-1/2 w-[54%] max-w-102.5 -translate-x-1/2 -translate-y-1/2 will-change-transform"
           >
-            <div ref={floatRef}>
+            <div ref={floatRef} className="relative aspect-square w-full">
               <Image
-                src={HERO_SQUARE}
+                src={HERO_CIRCLE}
                 alt=""
-                width={800}
-                height={800}
-                className="h-auto w-full drop-shadow-2xl"
+                fill
+                draggable={false}
+                sizes="(min-width: 1024px) 360px, 54vw"
+                className="object-contain drop-shadow-[0_24px_35px_rgba(0,0,0,0.18)]"
               />
             </div>
           </div>
 
-          {/* Floating accent card — same overlapping white card as
-              ServicesHero/AboutHero, copy adjusted for the home page. */}
-          <div className="absolute bottom-6 left-6 max-w-55 rounded-[5px] bg-white-primary px-5 py-4 shadow-xl sm:bottom-8 sm:left-8">
-            <p className="font-mono text-[11px] tracking-wide text-black-primary/50">
-              H . 000
-            </p>
-            <p className="mt-1 text-sm leading-snug font-medium text-black-primary">
-              Free strategy call, no commitment
-            </p>
+          {/* Floating arrow badge — sits inside the notch cut from the portrait */}
+          <div className="absolute top-0 right-0 z-30 aspect-square w-[28%] overflow-hidden rounded-[20px] bg-[#8B5CF6]">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 187 187"
+              className="absolute inset-0 h-full w-full"
+            >
+              <rect width="187" height="187" rx="20" fill="#8B5CF6" />
+            </svg>
             <a
               href={SITE_PHONE_HREF}
-              aria-label="FREE STRATEGY"
+              aria-label="Book a free strategy call"
               data-cursor="highlight"
-              onMouseEnter={() => setLinkHovered(true)}
-              onMouseLeave={() => setLinkHovered(false)}
-              className="mt-3 inline-flex items-center font-mono text-sm tracking-wide text-black-primary/70 hover:text-black-primary"
+              onMouseEnter={() => setStrategyHovered(true)}
+              onMouseLeave={() => setStrategyHovered(false)}
+              className="relative flex h-full w-full items-center justify-center"
             >
-              <SlidingText text="FREE STRATEGY" isHovered={linkHovered} />
+              <svg
+                viewBox="0 0 80 80"
+                fill="none"
+                className={`aspect-square w-[44%] text-black transition-transform duration-500 ease-out ${strategyHovered ? "rotate-45" : "rotate-0"}`}
+                aria-hidden="true"
+              >
+                <path
+                  d="M15 65L65 15M65 15H28M65 15V52"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </a>
+          </div>
+
+          {/* Mobile statement card */}
+          <div className="absolute right-4 bottom-4 left-4 z-30 lg:hidden">
+            <div className="relative min-h-36.5 overflow-hidden rounded-[20px] border border-white/10 bg-black/25 backdrop-blur-md">
+              <div className="relative flex min-h-36.5 items-center gap-5 px-6 py-5">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 102 102"
+                  className="h-16 w-16 shrink-0"
+                  fill="none"
+                >
+                  <path
+                    d="M0 0C0 13.5263 5.37171 26.4985 14.9365 36.0621C24.5013 45.6271 37.4734 51.0002 50.9995 51.0002V0H0ZM50.9995 51.0002H102V0C88.4739 0 75.5008 5.3731 65.936 14.9367C56.3712 24.5017 50.9995 37.4726 50.9995 51.0002ZM50.9995 51.0002V102H102C102 88.4741 96.6282 75.5018 87.0634 65.9369C77.4986 56.3733 64.5252 51.0002 50.9995 51.0002ZM50.9995 51.0002H0V102C13.5261 102 26.4994 96.6269 36.0642 87.0633C45.6291 77.4983 50.9995 64.5261 50.9995 51.0002Z"
+                    fill="white"
+                  />
+                </svg>
+                <p className="text-sm leading-snug text-white">
+                  Achieve Business Success Through Effective Brand Development.
+                  Explore new digital marketing opportunities with Technico
+                  Digital Solutions.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

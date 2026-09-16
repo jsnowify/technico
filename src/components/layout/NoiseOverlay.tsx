@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/gsap";
 
 /**
@@ -37,11 +37,34 @@ import { prefersReducedMotion } from "@/lib/gsap";
  *
  * TV-STATIC BEHAVIOR: the grain sits still while the page is
  * scrolling and only flickers/crawls (real TV-static style, via
- * `steps()` jumping between background positions rather than a
- * smooth pan) once scrolling has stopped for a beat. Static-while-
- * moving would just be visual noise competing with the scroll
- * itself; saving the flicker for when the page is at rest makes it
- * read as an idle/ambient detail instead.
+ * `steps()` jumping between positions rather than a smooth pan) once
+ * scrolling has stopped for a beat. Static-while-moving would just be
+ * visual noise competing with the scroll itself; saving the flicker
+ * for when the page is at rest makes it read as an idle/ambient
+ * detail instead.
+ *
+ * PERFORMANCE — TRANSFORM, NOT BACKGROUND-POSITION: the actual
+ * @keyframes (globals.css, "noise-static-flicker") step a `transform`
+ * rather than `background-position`. background-position is a paint
+ * property — animating it would force a full-viewport repaint on the
+ * main thread on every step, indefinitely, any time the page sits
+ * idle. transform is compositor-only, so once this element has its
+ * own layer (`will-change: transform` below) the flicker costs the
+ * GPU a matrix update and nothing on the main thread. The grain layer
+ * (`-inset-20`, see below) is rendered larger than the viewport and
+ * clipped by the `overflow-hidden` wrapper so translating it never
+ * reveals a bare edge — the keyframes top out at a 63px offset,
+ * comfortably inside that 80px margin.
+ *
+ * PERFORMANCE — NO REACT RE-RENDERS FOR SCROLL: the idle/flickering
+ * toggle is applied straight to the grain element's own
+ * `style.animationPlayState` via a ref inside the scroll handler,
+ * not via `useState`. Native `scroll` events can fire dozens of times
+ * a second (more with Lenis's eased glide still dispatching them
+ * throughout) — routing that through component state would mean a
+ * React re-render on that same cadence for a value nothing else in
+ * the tree reads. Going straight to the DOM avoids that entirely;
+ * this component now only ever renders once.
  *
  * SCROLL DETECTION: a native `scroll` listener on window, not a
  * Lenis-specific hook. SmoothScrollProvider's Lenis instance smooths
@@ -54,29 +77,33 @@ import { prefersReducedMotion } from "@/lib/gsap";
  * as a false "stopped" the moment the wheel tick ends.
  *
  * REDUCED MOTION: when the user prefers reduced motion, the overlay
- * renders as static grain only — the flicker animation is skipped
- * entirely rather than just paused, matching how
- * SmoothScrollProvider treats the same setting for scrolling itself.
+ * renders as static grain only — no scroll listener is attached and
+ * no `animation` is set at all — matching how SmoothScrollProvider
+ * treats the same setting for scrolling itself.
  */
 
 const NOISE_SVG_DATA_URI =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 4 -1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 // How long (ms) after the last scroll event before we call the page
-// "stopped" and let the static flicker start.
+// "stopped" and let the static flicker resume.
 const IDLE_DELAY_MS = 150;
 
 export default function NoiseOverlay() {
-  const [isIdle, setIsIdle] = useState(true);
+  const grainRef = useRef<HTMLDivElement>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
+    const grain = grainRef.current;
+    if (!grain) return;
 
     const handleScroll = () => {
-      setIsIdle(false);
+      grain.style.animationPlayState = "paused";
       if (idleTimer.current) clearTimeout(idleTimer.current);
-      idleTimer.current = setTimeout(() => setIsIdle(true), IDLE_DELAY_MS);
+      idleTimer.current = setTimeout(() => {
+        grain.style.animationPlayState = "running";
+      }, IDLE_DELAY_MS);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -87,36 +114,20 @@ export default function NoiseOverlay() {
   }, []);
 
   return (
-    <>
-      {/* Scoped keyframes rather than a globals.css addition — this
-          animation belongs to this one component and nothing else
-          on the site needs to share or override it. */}
-      <style>{`
-        @keyframes noise-static-flicker {
-          0%   { background-position: 0 0; }
-          10%  { background-position: -37px 12px; }
-          20%  { background-position: 22px -48px; }
-          30%  { background-position: -63px -19px; }
-          40%  { background-position: 41px 33px; }
-          50%  { background-position: -18px 57px; }
-          60%  { background-position: 54px -27px; }
-          70%  { background-position: -44px -52px; }
-          80%  { background-position: 16px 40px; }
-          90%  { background-position: -29px -8px; }
-          100% { background-position: 0 0; }
-        }
-      `}</style>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-[80] overflow-hidden opacity-[0.07]"
+    >
       <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[80] opacity-[0.15]"
+        ref={grainRef}
+        className="absolute -inset-20 will-change-transform"
         style={{
           backgroundImage: NOISE_SVG_DATA_URI,
           animation: prefersReducedMotion
             ? undefined
             : "noise-static-flicker 0.5s steps(1) infinite",
-          animationPlayState: isIdle ? "running" : "paused",
         }}
       />
-    </>
+    </div>
   );
 }

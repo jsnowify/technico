@@ -43,7 +43,7 @@ export default function ContactSection() {
     <section className="border-t border-white/10 bg-black-bg">
       <div className="mx-auto max-w-6xl px-6 py-24 sm:py-28 md:py-32">
         {/* Headline */}
-        <h2 className="mx-auto max-w-3xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-white sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[50px] md:leading-[1.12] md:tracking-[-2px]">
+        <h2 className="mx-auto max-w-3xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-white sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[44px] md:leading-[1.12] md:tracking-[-2px]">
           Let&rsquo;s Discuss Your Project
         </h2>
         <p className="mx-auto mt-7 max-w-2xl text-center text-sm leading-loose text-white/50 text-pretty sm:mt-8 sm:text-base">

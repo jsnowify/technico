@@ -67,12 +67,18 @@ export default function HoverImageSwap({
   items,
   imageFirst = true,
   caption,
+  variant = "light",
 }: {
   items: readonly HoverImageSwapItem[];
   /** Whether the image well sits left of the list on desktop (md+). */
   imageFirst?: boolean;
   /** Optional caption rendered under the list, in the list's own column. */
   caption?: ReactNode;
+  /** "light" (default, black text on a light section) or "dark"
+   *  (white text on a black section) — every other usage of this
+   *  component is on a light bg, so this only changes anything where
+   *  it's explicitly passed. */
+  variant?: "light" | "dark";
 }) {
   const [active, setActive] = useState(0);
   const [highlighted, setHighlighted] = useState<number | null>(null);
@@ -234,7 +240,7 @@ export default function HoverImageSwap({
           bottom edge. */}
       <div
         ref={wellRef}
-        className={`relative aspect-4/3 w-full overflow-hidden sm:aspect-3/2 md:sticky md:top-24 md:self-start ${
+        className={`relative aspect-4/3 w-full overflow-hidden rounded-[30px] sm:aspect-3/2 md:sticky md:top-24 md:self-start ${
           imageFirst ? "md:order-1" : "md:order-2"
         }`}
       >
@@ -258,11 +264,20 @@ export default function HoverImageSwap({
             const isHighlighted = highlighted === i;
 
             return (
-              <li key={item.label} className="border-b border-black-text/10">
+              <li
+                key={item.label}
+                className={`border-b ${variant === "dark" ? "border-white/10" : "border-black-text/10"}`}
+              >
                 <div
                   aria-label={item.label}
                   className={`flex w-full items-center py-5 text-left text-[36px] font-normal tracking-tight transition-colors duration-300 ease-out sm:py-6 ${
-                    isActive ? "text-black-text" : "text-black-text/35"
+                    variant === "dark"
+                      ? isActive
+                        ? "text-white"
+                        : "text-white/35"
+                      : isActive
+                        ? "text-black-text"
+                        : "text-black-text/35"
                   }`}
                 >
                   <SlidingText text={item.label} isHovered={isHighlighted} />

@@ -138,7 +138,7 @@ function BusinessMarketingPanel({ panel }: { panel: Panel }) {
         </span>
       </div>
 
-      <h2 className="mt-6 text-[40px] leading-[0.95] font-medium tracking-tight text-white sm:text-[52px]">
+      <h2 className="mt-6 text-[40px] leading-[0.95] font-medium tracking-tight text-white sm:text-[44px]">
         {panel.label}
       </h2>
 

@@ -2,8 +2,22 @@
 
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+
+/**
+ * Lenis eases every wheel tick out over ~1 second instead of moving
+ * the page 1:1 with the input — great for the marketing pages' feel,
+ * but on a long article it reads as the page "lagging" behind your
+ * scrolling, because that's literally what it's doing on purpose.
+ * Blog post pages are skipped so reading scrolls natively (instant,
+ * no residual glide) while the rest of the site keeps the smoothed
+ * feel.
+ */
+function isLongFormReadingRoute(pathname: string): boolean {
+  return pathname.startsWith("/blog/") && pathname !== "/blog";
+}
 
 /**
  * Wires up Lenis smooth scrolling for the whole site and keeps it in
@@ -28,26 +42,27 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
  * then smooths like any other scroll — it doesn't hijack or replace
  * that input path.
  *
- * TUNING: duration/wheelMultiplier bumped from the defaults to get a
- * heavier, more "glassy" glide (longer settle instead of snapping to
- * a stop) matching the reference site's feel. Each wheel tick eases
- * out over ~1.8s using a quintic tail, so after the user stops
- * scrolling there's a clearly visible bit of leftover glide before
- * it settles — not just an instant stop. Touch is intentionally left
- * at its native multiplier (see above) since touch isn't smoothed at
- * all here.
+ * TUNING: eased for a smooth "glassy" glide without an exaggerated
+ * trailing tail — a shorter duration + cubic ease (vs. the earlier
+ * 1.8s quintic) so a quick reversal (scroll up right after scrolling
+ * down) doesn't visibly fight the previous glide's residual motion,
+ * which read as a "bounce back." Touch is intentionally left at its
+ * native multiplier (see above) since touch isn't smoothed at all
+ * here.
  */
 export default function SmoothScrollProvider({
   children,
 }: {
   children: ReactNode;
 }) {
+  const pathname = usePathname();
+
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || isLongFormReadingRoute(pathname)) return;
 
     const lenis = new Lenis({
-      duration: 1.8,
-      easing: (t: number) => 1 - Math.pow(1 - t, 5),
+      duration: 1.15,
+      easing: (t: number) => 1 - Math.pow(1 - t, 3),
       smoothWheel: true,
       wheelMultiplier: 1,
     });
@@ -76,7 +91,12 @@ export default function SmoothScrollProvider({
       gsap.ticker.remove(update);
       lenis.destroy();
     };
-  }, []);
+    // Re-run on route change: this is a persistent layout-level
+    // provider (mounted once in app/layout.tsx), so navigating
+    // between a blog post and any other page needs to tear down or
+    // (re)create the Lenis instance rather than being decided once
+    // on first mount.
+  }, [pathname]);
 
   return <>{children}</>;
 }

@@ -39,6 +39,7 @@ function ServiceCard({ service }: { service: Service }) {
       <Link
         href={`/services/${service.slug}`}
         aria-label={`Learn more about ${service.title}`}
+        data-cursor="circle"
         onMouseEnter={() => setLearnMoreHovered(true)}
         onMouseLeave={() => setLearnMoreHovered(false)}
         className="mt-7 inline-flex w-fit items-center font-mono text-xs tracking-[0.14em] text-black-text uppercase transition-colors duration-300 hover:text-black-text/50 focus-visible:outline-2 focus-visible:outline-purple-accent sm:text-sm"
@@ -63,7 +64,7 @@ export default function ServicesList({ services }: { services: Service[] }) {
           </span>
         </div>
 
-        <h2 className="mx-auto mt-7 max-w-4xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[50px] md:leading-[1.12] md:tracking-[-2px]">
+        <h2 className="mx-auto mt-7 max-w-4xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[44px] md:leading-[1.12] md:tracking-[-2px]">
           Every service, one place
         </h2>
         <p className="mx-auto mt-7 max-w-2xl text-center text-sm leading-loose text-black-text/60 text-pretty sm:mt-8 sm:text-base">

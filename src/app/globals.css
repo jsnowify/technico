@@ -1,11 +1,31 @@
 @import "tailwindcss";
 
+/* Kills the browser/OS native rubber-band "bounce" at scroll
+   boundaries (most visible on touchscreens and trackpads). Lenis
+   (see SmoothScrollProvider) already owns the eased-scroll feel, so
+   the native overscroll bounce on top of that reads as a jarring
+   double-motion rather than a nice touch.
+
+   `background-color` here is NOT decorative — most sections paint
+   their own bg (bg-black-bg, bg-white-bg, etc.), but wherever a
+   section/page has no explicit bg, the browser falls back to its
+   own default canvas color, which on a dark-mode OS/browser can
+   render as black even where `viewport.colorScheme = "light"` is
+   set. This site's prevailing theme is dark (Hero, ContactSection,
+   BlogHero, StickyConnectCTA all paint bg-black-bg), so the fallback
+   here matches that. */
+html,
+body {
+  overscroll-behavior-y: none;
+  background-color: var(--color-black-bg);
+}
+
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
   /* color tokens */
-  --color-black-bg: #010104;
+  --color-black-bg: #080808;
   --color-black-text: #040316;
   --color-black-primary: #000000;
 
@@ -19,4 +39,332 @@
   /* Second alternating panel color for ServicesIndustriesStack — sampled
      directly from the mock (#EC4899 / Tailwind's pink-500). */
   --color-pink-accent: #ec4899;
+}
+
+/* ================================================================
+   GLOBAL SECTION INSET
+   ================================================================
+   Single source of truth for how far page content sits from the
+   left/right edges of the viewport. Every section should wrap its
+   content in `.container-x` instead of hand-rolling its own padding
+   or margin scale — that per-component habit is how the site ended
+   up with a different gutter on nearly every section (px-5, px-6,
+   mx-4 sm:mx-[70px], lg:px-24, lg:px-[90px], lg:pr-[9.3vw]...all in
+   the same page).
+
+   The scale (24px -> 32px -> 48px -> 90px) matches the pattern most
+   sections already used before this existed (QuestionsAnswers,
+   Services, Approach, Feedback, Qualify, FAQ all landed on roughly
+   this progression independently) — so this mostly just codifies
+   what was already the de facto "correct" spacing and brings the
+   outliers in line with it, rather than inventing a new scale from
+   scratch.
+
+   Update the values here once and every section using this class
+   moves together — that's the whole point of it being global.
+   ================================================================ */
+.container-x {
+  padding-inline: 1.5rem; /* 24px, mobile */
+}
+
+@media (min-width: 640px) {
+  .container-x {
+    padding-inline: 2rem; /* 32px, sm */
+  }
+}
+
+@media (min-width: 768px) {
+  .container-x {
+    padding-inline: 3rem; /* 48px, md */
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-x {
+    padding-inline: 90px; /* lg and up — the "global 90px" ask */
+  }
+}
+
+/* ================================================================
+   LIGHT BODY TEXT — letter-spacing correction
+   ================================================================
+   font-light (300) renders with thin strokes, which at the default
+   0/"normal" tracking reads as slightly loose between letters —
+   most noticeable on 18px body paragraphs. A small negative tracking
+   tightens that up, same principle already used on the heading
+   tracking-tight classes, just for body copy.
+
+   Pair with the site's standard 18px/font-light/leading-relaxed
+   paragraph combo instead of a one-off `tracking-[-0.01em]` per
+   element, so the value lives in one place and can be tuned once.
+   ================================================================ */
+.tracking-body {
+  letter-spacing: -0.01em;
+}
+
+/* ================================================================
+   MEDIUM-WEIGHT HEADINGS — letter-spacing correction
+   ================================================================
+   Same idea as .tracking-body, but for font-medium (500) headings:
+   the 44px section headings and 24px sub-headings both settled on
+   -0.02em independently across different files, with a couple of
+   stragglers using Tailwind's built-in `tracking-tight` (-0.025em,
+   a different value) or no tracking at all. One class, one value,
+   applied everywhere a font-medium heading needs tightening.
+   ================================================================ */
+.tracking-heading {
+  letter-spacing: -0.02em;
+}
+
+/* ================================================================
+   HERO HEADLINE — fluid font-size
+   ================================================================
+   Replaces the old stepped scale (46px -> 58 -> 66 -> 58 -> 62,
+   jumping at each Tailwind breakpoint) with a smoothly-interpolated
+   clamp(), split into the two ranges that actually match this
+   section's layout:
+
+   Phase 1 (< 1024px) — single-column, stacked layout. The heading
+   has the FULL container width to itself, so it grows steadily from
+   46px on a small phone up to 58px right at the edge of the
+   two-column layout kicking in — capped at 58px specifically so it
+   hands off to Phase 2 below with zero jump, not 66px like a naive
+   "let it keep growing" version would.
+
+   Phase 2 (>= 1024px) — two-column grid (see Hero.tsx). The image
+   column is a fixed 667px, so the text column doesn't get the full
+   viewport's growth — it only widens from ~177px (at exactly 1024px)
+   up to ~593px (at 1440px, where the max-w-360 container caps out).
+   The font follows that narrower, slower-growing column: 58px -> 62px
+   across that same range, then holds flat past 1440px since the
+   container itself stops growing too.
+
+   62px is the true/intended desktop size (per client) — everything
+   below xl is this class fluidly approaching that value, not a
+   separate fixed size of its own.
+   ================================================================ */
+.h1-hero {
+  /* 46px -> 58px across a 375px-1024px viewport range. Caps at 58px
+     here (not 66px) specifically so it lands on the EXACT same
+     value Phase 2 starts at below — continuous handoff at the 1024px
+     boundary, zero visual jump. (First draft of this capped at 66px
+     here, which snapped down to 58px right at the boundary — same
+     shrink-then-grow bug this class exists to remove, just moved
+     into CSS. Caught and fixed before shipping.) */
+  font-size: clamp(2.875rem, 2.44rem + 1.85vw, 3.625rem);
+}
+
+@media (min-width: 1024px) {
+  .h1-hero {
+    /* 58px -> 62px across the 1024px-1440px range, then flat */
+    font-size: clamp(3.625rem, 3.01rem + 0.96vw, 3.875rem);
+  }
+}
+
+/* ================================================================
+   SECTION TYPE SCALE — fluid font-sizes
+   ================================================================
+   Single source of truth for the four text sizes that repeat across
+   every "eyebrow / heading / CTA / cards" section on the home page
+   (Overview.tsx, Strategy.tsx, QuestionsAnswers.tsx). Before this,
+   each file hand-rolled its own text-[Xpx] + sm:/md: stepped
+   breakpoints, which is how QuestionsAnswers quietly drifted a size
+   up (18px/24px) from Overview/Strategy's 16px/22px on the same
+   role of text. One class per role, defined once, used everywhere —
+   so the three sections stay in sync automatically instead of by
+   convention, and a future size tweak only happens in one place.
+
+   FLUID, NOT STEPPED — same reasoning as .h1-hero above: a stepped
+   scale (32px -> 40px -> 44px at fixed breakpoints) snaps visibly at
+   each jump and looks identical for the entire range in between,
+   including awkward widths like 700-1023px where nothing changes
+   until the next breakpoint hits. clamp() interpolates continuously
+   across the phone-to-desktop range instead, so every screen size in
+   between gets a size that's actually proportional to it, then holds
+   flat once it reaches the intended min/max (small phones never get
+   smaller than the min; large desktops never grow past the max).
+   ================================================================ */
+
+/* Eyebrow — "[ ] Label" tag above each section heading. 12px at a
+   narrow phone (320px) up to 14px by 640px, matching the old
+   text-xs/sm:text-sm step but without the snap. */
+.eyebrow-text {
+  font-size: clamp(0.75rem, 0.625rem + 0.625vw, 0.875rem);
+}
+
+/* Section heading — the big h2 each section opens with. 32px at
+   375px up to 44px by 1024px, then flat — same range/values the old
+   text-[32px] sm:text-[40px] md:text-[44px] step landed on, just
+   continuous instead of jumping twice on the way there. */
+.h2-section {
+  font-size: clamp(2rem, 1.5666rem + 1.849vw, 2.75rem);
+}
+
+/* Card / question title — the h3 inside each Overview/Strategy card
+   and each QuestionsAnswers accordion item. 20px at 320px up to 22px
+   by 640px. */
+.card-title {
+  font-size: clamp(1.25rem, 1.125rem + 0.625vw, 1.375rem);
+}
+
+/* Body copy — every paragraph at this level: section intro text,
+   card/panel descriptions, accordion answers. 15px at 320px up to
+   16px by 640px, so small phones don't get body text ever so
+   slightly wider than the space really wants. */
+.body-copy {
+  font-size: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
+}
+
+/* ================================================================
+   SECTION VERTICAL RHYTHM
+   ================================================================
+   Single source of truth for the gap a top-level page section
+   keeps against the section before and after it — the vertical
+   counterpart to .container-x above. Apply `.section-y` to a
+   section's outer wrapper instead of hand-rolling its own
+   py-16/20/24/28/32/36/44 stack, which is how the gap between
+   sections ended up a different size depending on which file wrote
+   it last (some sections landed on 24/28/32/32, others on
+   20/24/28/32, others on a bare 20/24/28 with no lg step at all).
+
+   This only governs the BOUNDARY against neighboring sections.
+   Spacing *inside* a section — e.g. the gap between its own
+   eyebrow+heading row and the content below it — should stay a
+   local `mt-*`/`pt-*` value driven by that section's own content,
+   not this class. That way one section's content can grow or
+   shrink without ever nudging where the next section starts.
+   ================================================================ */
+.section-y {
+  padding-block: 2.5rem; /* 40px, mobile */
+}
+
+@media (min-width: 640px) {
+  .section-y {
+    padding-block: 3rem; /* 48px, sm */
+  }
+}
+
+@media (min-width: 768px) {
+  .section-y {
+    padding-block: 3.5rem; /* 56px, md */
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-y {
+    padding-block: 4rem; /* 64px, lg and up */
+  }
+}
+
+/* ================================================================
+   NOISE OVERLAY — TV-static flicker
+   ================================================================
+   Used by components/layout/NoiseOverlay.tsx. Lives here (a real
+   stylesheet rule) instead of a component-local `<style>` tag so it
+   compiles once and never re-injects/re-diffs on that component's
+   re-renders.
+
+   TRANSFORM, NOT BACKGROUND-POSITION — an earlier version stepped
+   `background-position` instead. That animates a paint property: the
+   browser has to repaint the affected region on the main thread on
+   every step, and here "the affected region" is the entire viewport
+   (the overlay is `fixed inset-0`), on every one of these 10 steps,
+   in a loop, for as long as the page sits idle. `transform` is a
+   compositor property — once the element has its own layer (see
+   `will-change: transform` on the element itself), animating this
+   costs the GPU compositor a matrix update per step and nothing on
+   the main thread at all. Same visual jump-cut (still `steps(1)`,
+   still literal pixel jumps, not a smooth pan), effectively free to
+   run continuously instead of a repeated full-screen repaint.
+
+   The element this animates is intentionally larger than the
+   viewport (see NoiseOverlay.tsx's `-inset-20`) so translating it
+   never reveals an edge — the max offset below is 63px, comfortably
+   inside that 80px margin.
+   ================================================================ */
+@keyframes noise-static-flicker {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  10% {
+    transform: translate3d(-37px, 12px, 0);
+  }
+  20% {
+    transform: translate3d(22px, -48px, 0);
+  }
+  30% {
+    transform: translate3d(-63px, -19px, 0);
+  }
+  40% {
+    transform: translate3d(41px, 33px, 0);
+  }
+  50% {
+    transform: translate3d(-18px, 57px, 0);
+  }
+  60% {
+    transform: translate3d(54px, -27px, 0);
+  }
+  70% {
+    transform: translate3d(-44px, -52px, 0);
+  }
+  80% {
+    transform: translate3d(16px, 40px, 0);
+  }
+  90% {
+    transform: translate3d(-29px, -8px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ================================================================
+   HERO EYEBROW — waving hand
+   ================================================================
+   Used by components/home/Hero.tsx's "[ ] YOOHOOOO HELLOOOO 👋"
+   eyebrow. Rotates the hand back and forth like an actual wave for
+   the first ~60% of the cycle, then holds still for the remaining
+   40% before repeating — a continuous non-stop wiggle reads as
+   nervous/broken rather than a friendly wave, so the pause matters.
+
+   `transform-origin: 70% 70%` pivots from roughly the wrist/heel of
+   the emoji's glyph (bottom-right of its bounding box) rather than
+   dead center, so the rotation actually looks like a wave instead of
+   the whole glyph spinning on its own middle.
+
+   Component applies this class conditionally based on
+   `usePrefersReducedMotion()` (the hook, not the plain
+   `prefersReducedMotion` flag — see lib/gsap.ts's doc comment on
+   why: this feeds a className directly into render output, which is
+   exactly the case that flag can hydration-mismatch on).
+   ================================================================ */
+@keyframes eyebrow-wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.eyebrow-wave {
+  transform-origin: 70% 70%;
+  animation: eyebrow-wave 2.4s ease-in-out infinite;
 }

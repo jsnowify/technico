@@ -1,193 +1,169 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import Button from "@/components/ui/Button";
-import SlidingText from "@/components/motion/SlidingText";
 import { SITE_PHONE_HREF } from "@/lib/constants";
+import ServiceTagsPhysics from "@/components/services/ServiceTagsPhysics";
 
 /* ================================================================
    SERVICES HERO
    ================================================================
-   Same design system as home/Hero.tsx and about/AboutHero.tsx — left
-   text column on plain bg-black-bg, right image panel (backdrop +
-   floating circle + overlapping white card). Layout, font sizes,
-   spacing units, and the float/parallax animation values are now
-   identical across all three heroes; only the copy (headline,
-   subhead, card label) and the circle vs square asset differ.
+   v3 layout, driven by the client's SVG (1243x385 viewBox).
 
-   ASSET: reuses the same backdrop as home/Hero.tsx (rather than a
-   separate services-only image) so the two heroes are visibly the
-   same design system, not just similarly styled.
-     /technico-digital-solutions-inc-bg.webp
+   The heading text is completely separate from the image — it sits
+   as plain text on the black section background ABOVE the image
+   panel (no mask, no overlap).
 
-   FLOATING ASSET: same idle-float + scroll-parallax treatment as
-   home/Hero.tsx's square / about/AboutHero.tsx's circle (two nested
-   refs, one per tween, same reasoning — a shared element would fight
-   over transform), using the circle asset here.
-     /technico-digital-solutions-inc-circle.png
+   The image panel below it is its own rounded block, with a small
+   notch cut out of its TOP-RIGHT corner only (bounding box from the
+   path: x 949-1243, y 0-72 → 23.7% width, 18.7% height of the
+   1243x385 panel). That notch is where "Book a Call" sits — the
+   button is backed by black (via the cutout) instead of the image,
+   so it reads as a separate pill floating at the image's corner,
+   per the client's reference screenshot.
+
+   NOTE: the GSAP scroll parallax on the image has been removed —
+   it was sharing a transformed ancestor with the button and causing
+   the button's hover (goo/circle-detach) effect to glitch. This
+   section is now fully static/plain, per client request.
    ================================================================ */
 
-const HERO_IMAGE = "/technico-digital-solutions-inc-bg.webp";
-const HERO_CIRCLE = "/technico-digital-solutions-inc-circle.png";
+const HERO_IMAGE =
+  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1789032026/temporary-placeholder/Gemini_Generated_Image_3f5bts3f5bts3f5b_qjxyw0.avif";
+
+// Client's v3 notch path (viewBox 0 0 1243 385) — notch cut at top-right,
+// all corners rounded to 20px to match the site's global 20px radius
+// (was 30px in the original client SVG).
+const NOTCH_PATH =
+  "M959 0C970.0457 0 979 8.9543 979 20V52C979 63.0457 987.9543 72 999 72H1223C1234.0457 72 1243 80.9543 1243 92V365C1243 376.0457 1234.0457 385 1223 385H20C8.9543 385 0 376.0457 0 365V20C0 8.9543 8.9543 0 20 0H959Z";
+
+const NOTCH_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1243 385'><path d='${NOTCH_PATH}' fill='white'/></svg>`;
+
+const NOTCH_MASK = `url("data:image/svg+xml,${encodeURIComponent(NOTCH_SVG)}")`;
 
 export default function ServicesHero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  // Hover state for the "Free Strategy" link's SlidingText — same
-  // mechanic as ui/Button.tsx (local state driving the slide-up/out,
-  // slide-in/up tween).
-  const [linkHovered, setLinkHovered] = useState(false);
-  // Two nested refs on purpose: the scroll-parallax offset and the
-  // idle float both animate `y`/transform, and GSAP tweens a
-  // property by writing the element's whole transform each tick —
-  // two tweens sharing one element would silently overwrite each
-  // other. Same reasoning home/Hero.tsx documents for its square.
-  const parallaxRef = useRef<HTMLDivElement>(null);
-  const floatRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const section = sectionRef.current;
-    const parallaxEl = parallaxRef.current;
-    const floatEl = floatRef.current;
-
-    if (!section || !parallaxEl || !floatEl || prefersReducedMotion) return;
-
-    const float = gsap.fromTo(
-      floatEl,
-      { y: -24, rotation: -2 },
-      {
-        y: 24,
-        rotation: 2,
-        duration: 2.4,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1,
-      },
-    );
-
-    // Parallax: as the hero scrolls fully through the viewport the
-    // circle drifts from above its resting spot to well below it,
-    // layered on top of (not replacing) the idle float.
-    //
-    // `scrub: true` locks the tween's progress directly to the
-    // scrollbar — no lag, no easing catch-up — so the circle's
-    // descent stays perfectly in sync with the user scrolling down
-    // (and reverses immediately if they scroll back up). Same
-    // treatment as home/Hero.tsx and about/AboutHero.tsx.
-    const parallax = gsap.fromTo(
-      parallaxEl,
-      { y: -160 },
-      {
-        y: 280,
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top bottom",
-          end: "bottom+=600 top",
-          scrub: true,
-        },
-      },
-    );
-
-    return () => {
-      float.kill();
-      parallax.scrollTrigger?.kill();
-      parallax.kill();
-    };
-  }, []);
-
   return (
-    <section
-      ref={sectionRef}
-      className="relative isolate overflow-hidden bg-black-bg"
-    >
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 md:items-stretch">
-        {/* LEFT — text column. Plain bg-black-bg, no backdrop image
-            here (that's reserved for the right panel now), so the
-            headline stays high-contrast — same pattern as
-            home/Hero.tsx and about/AboutHero.tsx's left column. */}
-        <div className="flex flex-col justify-center gap-6 px-5 pt-24 pb-14 sm:px-5 sm:pt-32 sm:pb-16 md:justify-start md:px-5 md:pt-32 lg:px-5 lg:pt-36 xl:pt-40">
-          <h1 className="max-w-2xl text-[42px] leading-[0.9] font-medium tracking-[-1px] text-white sm:text-[56px] sm:tracking-[-1.5px] md:text-[64px] md:tracking-[-2px] lg:text-[88px] lg:tracking-[-3px] xl:text-[72px]">
-            Digital Marketing Services That
-            <br />
-            Deliver Real Business Growth
-          </h1>
-
-          {/* Divider — same beat as home/Hero.tsx and
-              about/AboutHero.tsx's thin rule between the headline and
-              the supporting line underneath it. */}
-          <div className="h-px w-full max-w-md bg-white/15" />
-
-          <p className="max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-            Join the growing number of clients who trust Technico Digital
-            Solutions.
-          </p>
-
-          <div className="w-full max-w-xs sm:w-auto">
-            <Button to={SITE_PHONE_HREF} variant="white-static" size="lg">
-              Book a Call
-            </Button>
-          </div>
-        </div>
-
-        {/* RIGHT — image panel. Backdrop lives here now instead of
-            spanning the whole section, mirroring home/Hero.tsx and
-            about/AboutHero.tsx's photo column. Circle asset +
-            floating card sit on top of it. */}
-        <div className="relative isolate min-h-80 overflow-hidden sm:min-h-105 md:min-h-160 lg:min-h-205 xl:min-h-220">
-          <div className="absolute inset-0 -z-20 scale-125">
-            <Image
-              src={HERO_IMAGE}
-              loading="eager"
-              alt=""
-              fill
-              unoptimized
-              sizes="50vw"
-              className="object-cover object-center"
-            />
-          </div>
-
-          {/* Circle asset — outer div carries the scroll-scrubbed
-              parallax offset; inner div carries the continuous idle
-              float — kept on separate elements so the two tweens
-              don't fight over `transform`. */}
-          <div
-            ref={parallaxRef}
-            className="absolute top-1/2 left-1/2 w-55 -translate-x-1/2 -translate-y-1/2 sm:w-70 lg:w-85"
-          >
-            <div ref={floatRef}>
-              <Image
-                src={HERO_CIRCLE}
-                alt=""
-                width={800}
-                height={800}
-                className="h-auto w-full drop-shadow-2xl"
-              />
+    <section className="relative isolate overflow-hidden bg-[#0A0A0C]">
+      {/* Waving hand animation for the "[ ] SERVICES 👋" eyebrow label */}
+      <style jsx global>{`
+        @keyframes wave {
+          0%,
+          60%,
+          100% {
+            transform: rotate(0deg);
+          }
+          10% {
+            transform: rotate(14deg);
+          }
+          20% {
+            transform: rotate(-8deg);
+          }
+          30% {
+            transform: rotate(14deg);
+          }
+          40% {
+            transform: rotate(-4deg);
+          }
+          50% {
+            transform: rotate(10deg);
+          }
+        }
+        .wave-emoji {
+          transform-origin: 70% 70%;
+          animation: wave 2.4s ease-in-out infinite;
+        }
+      `}</style>
+      <div className="container-x mx-auto max-w-[1440px] pt-24 pb-10 sm:pt-28 sm:pb-12 md:pb-14 lg:pt-24 lg:pb-16 xl:pt-28">
+        {/* MOBILE / TABLET (< lg) — unchanged, simple stacked layout */}
+        <div className="flex flex-col gap-8 lg:hidden">
+          <div className="flex flex-col gap-5">
+            <p className="font-mono text-sm font-light tracking-[-0.02em] text-white/70 uppercase">
+              [ ] SERVICES <span className="wave-emoji inline-block">👋</span>
+            </p>
+            <h1 className="max-w-xl text-[36px] leading-[1.05] font-medium tracking-[-1px] text-white sm:text-[48px] sm:tracking-[-1.5px]">
+              <span className="underline decoration-[#EC4899] underline-offset-4 text-[#EC4899]">
+                Digital Marketing Services
+              </span>{" "}
+              that deliver real business growth.
+            </h1>
+            <div className="w-full max-w-xs sm:w-auto">
+              <Button to={SITE_PHONE_HREF} variant="pink-fill">
+                Book a Call
+              </Button>
             </div>
           </div>
 
-          {/* Floating accent card — same overlapping white card as
-              home/Hero.tsx and about/AboutHero.tsx, copy adjusted for
-              the Services page. */}
-          <div className="absolute bottom-6 left-6 max-w-55 rounded-[5px] bg-white-primary px-5 py-4 shadow-xl sm:bottom-8 sm:left-8">
-            <p className="font-mono text-[11px] tracking-wide text-black-primary/50">
-              S . 000
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] bg-[#1A1A1A] sm:aspect-[16/10]">
+            <Image
+              src={HERO_IMAGE}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+            <ServiceTagsPhysics />
+          </div>
+        </div>
+
+        {/* DESKTOP (lg+) — v3 layout: plain heading block on top,
+            image panel (with top-right notch for the button) below.
+            Fully static now — no parallax/ref/GSAP anywhere here. */}
+        <div className="hidden w-full flex-col gap-8 lg:flex">
+          {/* Heading block — plain text on the black section bg,
+              no mask, no overlap with the image below it */}
+          <div className="max-w-4xl">
+            <p className="mb-3 font-mono text-[14px] font-light tracking-[-0.02em] text-white/70 uppercase">
+              [ ] SERVICES <span className="wave-emoji inline-block">👋</span>
             </p>
-            <p className="mt-1 text-sm leading-snug font-medium text-black-primary">
-              Free strategy call, no commitment
-            </p>
-            <a
-              href={SITE_PHONE_HREF}
-              aria-label="FREE STRATEGY"
-              data-cursor="highlight"
-              onMouseEnter={() => setLinkHovered(true)}
-              onMouseLeave={() => setLinkHovered(false)}
-              className="mt-3 inline-flex items-center font-mono text-sm tracking-wide text-black-primary/70 hover:text-black-primary"
+            <h1 className="text-[62px] leading-[1.08] font-medium tracking-[-0.5px] text-white">
+              <span className="underline decoration-[#EC4899] underline-offset-4 text-[#EC4899]">
+                Digital Marketing Services
+              </span>{" "}
+              that deliver real business growth.
+            </h1>
+          </div>
+
+          {/* Image panel — masked to the notch at its top-right corner */}
+          <div
+            className="relative w-full"
+            style={{ aspectRatio: "1243 / 385" }}
+          >
+            <div
+              className="absolute inset-0 overflow-hidden rounded-[20px] bg-[#0E0F11]"
+              style={{
+                WebkitMaskImage: NOTCH_MASK,
+                maskImage: NOTCH_MASK,
+                WebkitMaskSize: "100% 100%",
+                maskSize: "100% 100%",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskPosition: "center",
+              }}
             >
-              <SlidingText text="FREE STRATEGY" isHovered={linkHovered} />
-            </a>
+              <Image
+                src={HERO_IMAGE}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1024px) 1243px, 100vw"
+                className="object-cover object-center"
+              />
+
+              <ServiceTagsPhysics />
+            </div>
+
+            {/* "Book a Call" sits in the top-right notch, backed by
+                black (the cutout) instead of the image. Plain
+                top/right offset, no constrained box, so its hover
+                effect (circle detaching from the label) behaves
+                normally. */}
+            <div className="absolute top-2 right-6">
+              <Button to={SITE_PHONE_HREF} variant="pink-fill">
+                Book a Call
+              </Button>
+            </div>
           </div>
         </div>
       </div>

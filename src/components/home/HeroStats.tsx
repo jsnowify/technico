@@ -41,7 +41,7 @@ const STATS = [
 export default function HeroStats() {
   return (
     <section className="bg-black-bg">
-      <div className="w-full px-5 sm:px-10 md:px-16 lg:px-24">
+      <div className="container-x w-full">
         {STATS.map((stat, i) => (
           <div key={stat.label}>
             {i > 0 && (

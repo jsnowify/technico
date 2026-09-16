@@ -2,16 +2,14 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import Button from "@/components/ui/Button";
-import TextRevealBlock from "@/components/motion/TextRevealBlock";
-import RevealUp from "@/components/motion/RevealUp";
+import Cta from "@/components/ui/CTA";
 import { gsap, Flip, prefersReducedMotion } from "@/lib/gsap";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 
 /* Pinwheel mark — one real instance of this shared across all three
-   gradient cards below (see the FLIP setup further down), instead of
-   one per card. Same shape as the SEO service icon elsewhere on the
-   site (four curved blades), recolored via `currentColor`. */
+   row placeholders below (see the FLIP setup further down), instead
+   of one per row. Same shape as the SEO service icon elsewhere on
+   the site (four curved blades), recolored via `currentColor`. */
 function PinwheelIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -28,109 +26,86 @@ function PinwheelIcon({ className }: { className?: string }) {
   );
 }
 
-/* Copy for each gradient card, plus which corner its pinwheel slot
-   sits in and its gradient direction — driven off an array instead
-   of three near-identical hand-written blocks below. */
-const STRATEGY_CARDS: {
+/* Copy for each row, numbered top to bottom, plus which corner of its
+   image placeholder the pinwheel slot sits in.
+   UNCHANGED: this is the section's actual content/data and is not
+   touched by the redesign — same text, same order as before. */
+const STRATEGY_ROWS: {
+  number: string;
   text: string;
   iconAlign: "left" | "right";
-  gradient: string;
+  image: string;
 }[] = [
   {
+    number: "01",
     text: "A Law Firm May Need Qualified Local Leads From High-Intent Searches, While A Solar Company May Need To Educate Homeowners Before Turning Interest Into Quote Requests.",
     iconAlign: "right",
-    gradient: "from-[#4a1740] via-[#9c2f74] to-pink-accent",
+    image:
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788935799/temporary-placeholder/Gemini_Generated_Image_3nu4uo3nu4uo3nu4_o2cn3b.jpg",
   },
   {
+    number: "02",
     text: "Our Digital Team Works With Businesses Across Industries, Locations, And Stages Of Growth, Building Strategies That Focus On How Your Customers Search, Compare, And Take Action.",
     iconAlign: "left",
-    gradient: "from-[#160830] via-[#3c1470] to-purple-accent",
+    image:
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788935799/temporary-placeholder/Gemini_Generated_Image_3nu4uo3nu4uo3nu4_o2cn3b.jpg",
   },
   {
+    number: "03",
     text: "The Goal Is To Turn Your Digital Presence Into More Local Leads, Ecommerce Sales, Appointment Bookings, And Opportunities To Grow Into New Markets.",
     iconAlign: "right",
-    gradient: "from-[#4a1740] via-[#9c2f74] to-pink-accent",
+    image:
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788935799/temporary-placeholder/Gemini_Generated_Image_3nu4uo3nu4uo3nu4_o2cn3b.jpg",
   },
 ];
 
 /* ================================================================
    SERVICES TAILORED STRATEGY
    ================================================================
-   First piece of the services page's 4th section (see
-   services_4th_section.png), broken out as its own component per
-   your request to build this section piece by piece. Covers just
-   the top of that mock: the white intro CTA banner ("Deliver the
-   right message...") through the "built around your business"
-   block, ending at "The goal is to turn your digital presence...".
-   Everything below that (Industries We Know, the Canada map, the
-   engagement/deliverables block, the closing CTA) is intentionally
-   NOT here yet — separate components, next.
+   Layout: eyebrow/heading/description header, then three numbered,
+   divider-separated rows each pairing a paragraph with an image
+   placeholder on the right (unchanged from the last pass).
 
-   The "built around your business" block is a sticky-sidebar
-   layout: the heading + subtext sit in the left column and pin in
-   place (`lg:sticky lg:top-28 lg:self-start`) while the three
-   gradient cards in the right column scroll past underneath. Plain
-   CSS position:sticky, same pattern already used for the image in
-   HoverImageSwap.
+   PINWHEEL'S BACK — STRAIGHT FLOW THIS TIME
+   ------------------------------------------
+   Same technique as the old gradient-card version: only row 1 renders
+   a real, visible pinwheel (`iconBoxRef`) in the corner of its image
+   placeholder; rows 2 and 3 each render an invisible same-size
+   placeholder (`markerRefs`) that exists purely to reserve a target
+   rect for GSAP Flip to read. A single `gsap.timeline` — its
+   `scrollTrigger` spanning from row 1's top to row 3's bottom,
+   `scrub: 1` — calls `Flip.fit(iconBox, state)` for each marker in
+   turn so the one real icon visually flies between corners in
+   lockstep with scroll position.
 
-   The cards themselves render plain/static (no mount or scroll
-   entrance animation on the card boxes) — only the pinwheel icon
-   inside them moves.
+   The flow itself is intentionally plain this time — no dwell holds,
+   no eased wind-up/settle, no landing-bounce overshoot. Just one
+   continuous, linear (`ease: "none"`) hop per marker tied directly to
+   scroll position, so the icon's position always matches how far
+   you've scrolled through the section, straight and predictable.
+   A slow, constant spin plays the whole time via a second, entirely
+   separate ScrollTrigger — not synced to the hops — so the icon never
+   looks frozen without adding extra rhythm to the straight flow.
 
-   ONE PINWHEEL, SCROLL-SCRUBBED FLIP
-   -----------------------------------
-   Only card 1 renders a real, visible pinwheel (`iconBoxRef`). Cards
-   2 and 3 each render an invisible same-size placeholder
-   (`markerRefs`) that exists purely to reserve a target rect for
-   GSAP Flip to read — this is exactly GSAP's own "Even tie your FLIP
-   animations to scroll" pattern (codepen: cards ↔ container/box/
-   marker), translated into React refs instead of hardcoded class
-   selectors:
-     1. `Flip.getState(marker)` captures each marker's on-page
-        position/size before anything moves.
-     2. A single `gsap.timeline` — its `scrollTrigger` spanning from
-        card 1's top to card 3's bottom, `scrub: 1` — calls
-        `Flip.fit(iconBox, state)` for card 2's marker, then card
-        3's marker, so the one real icon visually "flies" from slot
-        to slot in lockstep with scroll position instead of on a
-        fixed timer.
    `build()` re-reads every marker's rect and rebuilds the timeline
-   from scratch on mount and on window resize (same as the codepen's
-   own resize listener), since a breakpoint change moves every
-   card/marker to a new spot. `iconBoxRef`'s parent stays a normal
-   fixed-size flow element the whole time — only the icon itself
-   gets positioned by Flip — so card 1's layout never jumps when the
-   icon leaves for card 2.
+   from scratch on mount and on window resize, since a breakpoint
+   change moves every row (and therefore every marker) to a new spot.
+   Entirely skipped under `prefersReducedMotion`: the icon just stays
+   put in row 1's corner, no scroll-tied motion.
 
-   Z-INDEX FIX: Flip.fit moves the icon purely with a transform — it
-   never changes where the element actually sits in the DOM, so the
-   icon is still a child of card 1 and still paints in card 1's spot
-   in the stacking order. Cards 2 and 3 come *after* card 1 in the
-   DOM, so by default they paint on top of it, which hid the "flying"
-   icon the instant it crossed into their space even though it was
-   geometrically sitting right on top of their marker. Giving the
-   icon's wrapper (and the markers, so layout matches) a `relative
-   z-20` — higher than the cards' own implicit stacking order — keeps
-   it visible above every card, not just its home card.
-   Skipped entirely under prefersReducedMotion: the icon just stays
-   put in card 1's slot, no scroll-tied motion.
-
-   Reuses the same building blocks as ServicesMarketOverview rather
-   than introducing new patterns:
-   - TextRevealBlock for the intro banner heading (curtain-wipe
-     reveal, scrollTrigger since it sits below the fold)
-   - RevealUp for the "built around your business" heading (mount-
-     time-agnostic; wraps naturally at any width, see comment below)
-   - Button (not GlossyButton) for "Book a Call", matching the plain
-     black pill in the mock rather than the purple glossy CTA used
-     at the very bottom of the market-overview section
+   Z-INDEX: Flip.fit moves the icon purely with a transform, so it
+   stays a DOM child of row 1 and paints in row 1's stacking position
+   by default. Rows 2 and 3 come after row 1 in the DOM and would
+   otherwise paint over it mid-flight. Giving the icon's wrapper (and
+   the markers, so layout matches) a `relative z-20` keeps it visible
+   above every row, not just its home row.
    ================================================================ */
 
 export default function ServicesTailoredStrategy() {
-  const cardsColumnRef = useRef<HTMLDivElement>(null);
+  const rowsColumnRef = useRef<HTMLDivElement>(null);
   const iconBoxRef = useRef<HTMLDivElement>(null);
   const iconSpinRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const markerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useGSAP(
@@ -139,9 +114,9 @@ export default function ServicesTailoredStrategy() {
 
       const iconBox = iconBoxRef.current;
       const iconSpin = iconSpinRef.current;
-      const firstCard = cardRefs.current[0];
-      const lastCard = cardRefs.current[STRATEGY_CARDS.length - 1];
-      if (!iconBox || !firstCard || !lastCard) return;
+      const firstRow = rowRefs.current[0];
+      const lastRow = rowRefs.current[STRATEGY_ROWS.length - 1];
+      if (!iconBox || !firstRow || !lastRow) return;
 
       let tl: gsap.core.Timeline | undefined;
       let spinTween: gsap.core.Tween | undefined;
@@ -149,9 +124,7 @@ export default function ServicesTailoredStrategy() {
       // Rebuilds the Flip states + scrubbed timeline from the
       // markers' current on-page rects. Called once up front and
       // again on every resize, since a breakpoint change moves every
-      // card (and therefore every marker) to a new position — same
-      // as the reference codepen's own `window.addEventListener(
-      // "resize", createTimeline)`.
+      // row (and therefore every marker) to a new position.
       const build = () => {
         tl?.scrollTrigger?.kill();
         tl?.kill();
@@ -164,51 +137,37 @@ export default function ServicesTailoredStrategy() {
         if (markers.length === 0) return;
 
         const states = markers.map((marker) => Flip.getState(marker));
-        const flipConfig = { ease: "none", duration: 1 };
 
         tl = gsap.timeline({
           scrollTrigger: {
-            trigger: firstCard,
+            trigger: firstRow,
             start: "clamp(top center)",
-            endTrigger: lastCard,
+            endTrigger: lastRow,
             end: "clamp(bottom center)",
             scrub: 1,
           },
         });
 
-        states.forEach((state, i) => {
-          // Flip.fit()'s type signature is `object | Tween | null` —
-          // wider than what it actually returns. Passing `flipConfig`
-          // (real animation vars: ease + duration) always makes it
-          // hand back a genuine Tween at runtime; the plain-`object`
-          // case in its type only applies when you call it with no
-          // vars at all (an instant, non-animated snap), which we
-          // never do here. The null check above already rules out the
-          // other non-Tween case, so this cast is safe.
-          const flipTween = Flip.fit(iconBox, state, flipConfig);
-          if (flipTween) {
-            tl!.add(
-              flipTween as gsap.core.Tween,
-              i === 0 ? undefined : "+=0.5",
-            );
-          }
+        // One straight, linear hop per marker — no dwell, no easing,
+        // no settle bounce. Position tracks scroll directly.
+        states.forEach((state) => {
+          const flipTween = Flip.fit(iconBox, state, {
+            ease: "none",
+            duration: 1,
+          }) as gsap.core.Tween | null;
+          if (flipTween) tl!.add(flipTween);
         });
 
-        // Continuous spin, decoupled from the Flip timeline above —
-        // it targets the inner wrapper (`iconSpin`), not `iconBox`
-        // itself, so the rotation transform never fights with the
-        // translate/scale Flip.fit applies to move the icon between
-        // slots. Its own scrub'd ScrollTrigger spans the same range
-        // as the Flip timeline, so the icon keeps spinning the whole
-        // time it's flying from card to card.
+        // Constant slow spin for the whole section, independent of
+        // the hops, so the icon never looks frozen mid-flight.
         if (iconSpin) {
           spinTween = gsap.to(iconSpin, {
-            rotate: 720,
+            rotate: "+=360",
             ease: "none",
             scrollTrigger: {
-              trigger: firstCard,
+              trigger: firstRow,
               start: "clamp(top center)",
-              endTrigger: lastCard,
+              endTrigger: lastRow,
               end: "clamp(bottom center)",
               scrub: 1,
             },
@@ -227,107 +186,130 @@ export default function ServicesTailoredStrategy() {
         spinTween?.kill();
       };
     },
-    { scope: cardsColumnRef, dependencies: [] },
+    { scope: rowsColumnRef, dependencies: [] },
   );
 
   return (
     <>
       {/* Intro CTA banner */}
-      <section className="w-full bg-white-bg px-5 py-20 sm:py-24 md:py-28">
-        <div className="flex flex-col items-center text-center">
-          <TextRevealBlock
-            as="h2"
-            lines={[
-              "Deliver The Right Message To Your Ideal Audience",
-              "With Customized Digital Marketing Solutions. Let\u2019s",
-              "Create A Strategy That Works For Your Business.",
-            ]}
-            className="max-w-6xl text-3xl leading-[1.2] font-semibold tracking-tight text-black-text capitalize sm:text-4xl md:text-5xl md:leading-[1.15] lg:text-[45px]"
-            revealColorDark="#000000"
-            scrollTrigger
-          />
+      <Cta
+        className="bg-black-bg"
+        title="Deliver The Right Message To Your Ideal Audience"
+        description="With customized digital marketing solutions. Let's create a strategy that works for your business."
+        cta={{ label: "Book A Call", href: SITE_PHONE_HREF }}
+      />
 
-          <div className="mt-10 w-full max-w-xs sm:w-auto">
-            <Button to={SITE_PHONE_HREF} variant="primary" size="lg">
-              Book a Call
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* Tailored strategy — eyebrow/heading/description header,
+          then three numbered, divider-separated rows each pairing a
+          paragraph with an image placeholder on the right. */}
+      <section className="bg-black-bg text-white">
+        <div className="container-x pt-24 pb-10 sm:pt-28 sm:pb-12 md:pt-32 md:pb-14">
+          {/* ==========================================================
+              HEADER
+             ========================================================== */}
 
-      {/* Tailored strategy — sticky heading beside scrolling cards */}
-      <section className="w-full bg-white-bg px-5 py-20 sm:py-24 md:py-28">
-        <div className="grid gap-12 lg:grid-cols-[420px_1fr] lg:items-start lg:gap-16">
-          <div className="lg:sticky lg:top-28 lg:self-start">
-            {/* Plain heading + RevealUp (whole-block mask wipe) instead of
-                TextRevealBlock here: TextRevealBlock needs each visual
-                line passed in explicitly so its per-line mask can match
-                that line's exact width, which only works if you already
-                know where it wraps. At this size (scaling up to 72px)
-                that break point keeps moving across breakpoints, so a
-                plain heading that wraps naturally — masked as one block
-                via RevealUp — holds up better than fixed manual lines. */}
-            <RevealUp as="h2">
-              <span className="block text-3xl leading-[1.1] font-semibold tracking-tight text-black-text sm:text-4xl md:text-5xl lg:text-6xl xl:text-[72px]">
+          <div className="flex flex-col gap-6 border-b border-white/10 pb-10 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+            {/* Eyebrow */}
+            <div className="flex items-center gap-2 lg:w-48 lg:shrink-0">
+              <span className="font-mono text-xs tracking-[0.16em] whitespace-nowrap text-white/85 uppercase sm:text-sm">
+                [ ] Tailored Strategy
+              </span>
+            </div>
+
+            {/* Heading — plain heading, no reveal/mask animation. */}
+            <h2 className="lg:max-w-2xl lg:flex-1">
+              <span className="block text-[32px] leading-[1.1] font-medium tracking-heading text-white sm:text-[40px] md:text-[44px]">
                 Digital Marketing Built Around Your Business, Market & Customers
               </span>
-            </RevealUp>
-            <p className="mt-5 max-w-xs text-sm text-black-text/60 sm:text-base">
+            </h2>
+
+            {/* Description */}
+            <p className="max-w-70 text-[18px] leading-relaxed font-light tracking-body text-white/60 text-pretty lg:w-64 lg:shrink-0">
               Your Business Doesn&rsquo;t Need The Same Marketing Strategy As
               Everyone Else.
             </p>
           </div>
 
-          {/* max-w here (not on the section) is the actual fix for
-              ultrawide monitors: the section itself stays edge-to-edge
-              like Services.tsx, but without a cap on this column
-              specifically it just stretches to fill the entire `1fr`
-              track. `justify-self-end` pins the capped column to the
-              right edge of the section instead of leaving it stranded
-              next to the heading with empty space past it. */}
-          <div
-            ref={cardsColumnRef}
-            className="flex w-full max-w-180 flex-col justify-self-end gap-6 sm:gap-8"
-          >
-            {STRATEGY_CARDS.map((card, i) => (
+          {/* ==========================================================
+              ROWS
+             ========================================================== */}
+
+          <div ref={rowsColumnRef}>
+            {STRATEGY_ROWS.map((row, i) => (
               <div
-                key={i}
+                key={row.number}
                 ref={(el) => {
-                  cardRefs.current[i] = el;
+                  rowRefs.current[i] = el;
                 }}
-                className={`flex min-h-45 flex-col justify-between rounded-[28px] bg-linear-to-br p-6 sm:min-h-55 sm:p-8 ${card.gradient}`}
+                className={`grid grid-cols-1 gap-6 py-10 sm:py-12 lg:grid-cols-[100px_1fr_420px] lg:items-center lg:gap-10 ${
+                  i !== STRATEGY_ROWS.length - 1
+                    ? "border-b border-white/10"
+                    : ""
+                }`}
               >
-                {/* Fixed-size wrapper reserves the icon's spot in
-                    normal flow regardless of what Flip does to the
-                    real icon inside it, so card 1's layout never
-                    jumps once the icon flies off toward card 2.
-                    `z-20` keeps whichever slot is currently hosting
-                    the real icon painting above every card, not just
-                    its home card — see Z-INDEX FIX above. */}
-                <div
-                  className={`relative z-20 h-12 w-12 sm:h-14 sm:w-14 ${
-                    card.iconAlign === "right" ? "ml-auto" : ""
-                  }`}
-                >
-                  {i === 0 ? (
-                    <div ref={iconBoxRef} className="absolute inset-0">
-                      <div ref={iconSpinRef} className="h-full w-full">
-                        <PinwheelIcon className="h-full w-full text-white" />
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      ref={(el) => {
-                        markerRefs.current[i] = el;
-                      }}
-                      aria-hidden="true"
-                      className="absolute inset-0"
-                    />
-                  )}
-                </div>
-                <p className="max-w-md text-lg leading-[1.4] font-normal text-white sm:text-xl md:text-2xl">
-                  {card.text}
+                {/* Numbered tag */}
+                <span className="font-mono text-xs tracking-[0.16em] whitespace-nowrap text-white/85 uppercase sm:text-sm">
+                  [ ]{row.number}
+                </span>
+
+                {/* Paragraph */}
+                <p className="max-w-md text-[16px] leading-[1.5] font-light tracking-body text-white/80 sm:text-[17px]">
+                  {row.text}
                 </p>
+
+                {/* Image placeholder — plain <img> for now, since this
+                    Cloudinary temp-placeholder host isn't whitelisted
+                    in next.config.js's images.remotePatterns yet.
+                    Swap to next/image once the real photo is hosted
+                    somewhere already in remotePatterns.
+
+                    Split into two layers on purpose: the rounded,
+                    `overflow-hidden` layer holds ONLY the photo, and
+                    the pinwheel's corner slot sits in a separate,
+                    non-clipping sibling on top of it. The icon needs
+                    to visually fly out past this row's own box toward
+                    the next row's — if it lived inside the clipped
+                    photo layer, `overflow-hidden` would chop it off
+                    the instant it crossed this row's edge mid-flight. */}
+                <div className="relative aspect-[16/10] w-full lg:aspect-auto lg:h-[220px]">
+                  <div className="absolute inset-0 overflow-hidden rounded-[20px] bg-white/[0.06] ring-1 ring-white/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={row.image}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  </div>
+
+                  {/* Fixed-size wrapper reserves the icon's spot in
+                      normal flow regardless of what Flip does to the
+                      real icon inside it. `z-20` keeps whichever slot
+                      is currently hosting the real icon painting above
+                      every row, not just its home row. Sits outside
+                      the overflow-hidden photo layer above — see note
+                      on the wrapper. */}
+                  <div
+                    className={`absolute top-4 z-20 h-10 w-10 ${
+                      row.iconAlign === "right" ? "right-4" : "left-4"
+                    }`}
+                  >
+                    {i === 0 ? (
+                      <div ref={iconBoxRef} className="absolute inset-0">
+                        <div ref={iconSpinRef} className="h-full w-full">
+                          <PinwheelIcon className="h-full w-full text-white" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        ref={(el) => {
+                          markerRefs.current[i] = el;
+                        }}
+                        aria-hidden="true"
+                        className="absolute inset-0"
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

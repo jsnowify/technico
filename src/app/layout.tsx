@@ -18,8 +18,10 @@ import Footer from "@/components/layout/Footer";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import BottomGlassBlur from "@/components/layout/BottomGlassBlur";
 import NoiseOverlay from "@/components/layout/NoiseOverlay";
+import GlobalCursor from "@/components/layout/GlobalCursor";
 import { getAllServices } from "@/lib/content/services";
 import { IS_PRODUCTION } from "@/lib/env";
+import StickyConnectCTA from "@/components/layout/StickyConnectCTA";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,7 +78,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#010104",
+  themeColor: "#0a0a0c",
   colorScheme: "light",
 };
 
@@ -127,7 +129,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Footer />
           </SmoothScrollProvider>
           <BottomGlassBlur />
+          <StickyConnectCTA />
           <NoiseOverlay />
+          <GlobalCursor />
         </div>
       </body>
     </html>

@@ -14,7 +14,6 @@ import ServicesDropdownPanel from "./ServicesDropdownPanel";
 import ServicesInlineExpansion from "./ServicesInlineExpansion";
 import MobileNav from "./MobileNav";
 import {
-  FOCUS_STATE,
   GLASS_FADE_DELAY,
   GLASS_FADE_DURATION,
   MORPH_DURATION,
@@ -23,8 +22,6 @@ import {
   PILL_STATE,
   SCROLL_ENTER_THRESHOLD,
   SCROLL_LEAVE_THRESHOLD,
-  SERVICES_FOCUS_EVENT,
-  SERVICES_UNFOCUS_EVENT,
   TOP_STATE,
 } from "./header.config";
 
@@ -42,7 +39,6 @@ export default function Header({ services }: HeaderProps) {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const [servicesFocused, setServicesFocused] = useState(false);
 
   const serviceColumns = useMemo(
     () => chunkIntoColumns(services, 3),
@@ -58,13 +54,14 @@ export default function Header({ services }: HeaderProps) {
    */
   const navExpanded = servicesOpen && scrolled && !mobileOpen;
 
-  // Third header state — true while the user is inside Services.tsx's
-  // pinned horizontal-scroll section. Mobile menu always wins if both
-  // are somehow true at once (shouldn't happen: opening the mobile
-  // menu body-locks scroll, so the user can't be mid-pin at the same
-  // time, but this keeps the two states from fighting regardless).
-  const focusActive = servicesFocused && !mobileOpen;
+  // Drives the whole header sliding out of view on scroll-down and
+  // back in on scroll-up (see the "HIDE ON SCROLL" effect below).
+  // Kept separate from `scrolled` (which only tracks the pill morph)
+  // so the two behaviors can't fight each other.
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
+  const headerRef = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const glassRef = useRef<HTMLDivElement>(null);
   const topRowRef = useRef<HTMLDivElement>(null);
@@ -79,11 +76,6 @@ export default function Header({ services }: HeaderProps) {
   const servicesCloseTimerRef = useRef<number | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileInnerRef = useRef<HTMLDivElement>(null);
-  // Tracks focusActive across renders so the morph effect below can
-  // tell "just entered/left focus mode" apart from "re-ran for an
-  // unrelated reason (e.g. scrolled toggled) while focus was already
-  // settled" — see the display:none handling in HEADER MORPH.
-  const wasFocusActiveRef = useRef(false);
 
   /* ================================================================
       SERVICES TIMER
@@ -192,30 +184,80 @@ export default function Header({ services }: HeaderProps) {
   }, []);
 
   /* ================================================================
-      SERVICES FOCUS MODE (3rd header state)
+      HIDE ON SCROLL
       ================================================================
-      Header has no ref to Services.tsx's pinned section — they're
-      siblings composed in app/page.tsx — so rather than prop-drill or
-      add a context just for this, Services.tsx dispatches plain
-      window CustomEvents from the same ScrollTrigger that already
-      drives its horizontal scroll (onEnter/onLeave/onEnterBack/
-      onLeaveBack), and Header just listens. This keeps the two
-      components decoupled: Header doesn't need to know Services.tsx
-      exists, only that this event contract does.
+      Scrolling down slides the whole header out of view; scrolling
+      up brings it right back — direction is all that matters, not
+      distance, so even a small scroll-up reveals it immediately.
+      Suppressed near the very top (nothing to hide against yet, and
+      it would otherwise flicker while the pill is still morphing)
+      and whenever the mobile menu or the services dropdown is open,
+      so the header can never disappear out from under an open
+      interaction.
       ============================================================== */
 
   useEffect(() => {
-    const handleFocus = () => setServicesFocused(true);
-    const handleUnfocus = () => setServicesFocused(false);
+    lastScrollYRef.current = window.scrollY;
 
-    window.addEventListener(SERVICES_FOCUS_EVENT, handleFocus);
-    window.addEventListener(SERVICES_UNFOCUS_EVENT, handleUnfocus);
+    // Rate-limited to one check per animation frame (same pattern as
+    // BlogContents' scroll handler) instead of running on every raw
+    // "scroll" event. The native event can fire far more often than
+    // the screen actually repaints — especially with Lenis smoothing
+    // active — and each firing was previously calling setState
+    // synchronously, forcing a Header re-render per event instead of
+    // per frame. On a long page (e.g. a blog post) that adds up to a
+    // lot of avoidable re-renders while the user is simply scrolling
+    // to read, which is a big part of why scrolling felt laggy.
+    let rafId = 0;
+
+    const evaluate = () => {
+      rafId = 0;
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+
+      if (mobileOpen || servicesOpen || currentY < SCROLL_ENTER_THRESHOLD) {
+        setHeaderVisible(true);
+      } else if (delta > 4) {
+        setHeaderVisible(false);
+      } else if (delta < -4) {
+        setHeaderVisible(true);
+      }
+
+      lastScrollYRef.current = currentY;
+    };
+
+    const handleScroll = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(evaluate);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener(SERVICES_FOCUS_EVENT, handleFocus);
-      window.removeEventListener(SERVICES_UNFOCUS_EVENT, handleUnfocus);
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [mobileOpen, servicesOpen]);
+
+  useGSAP(
+    () => {
+      const header = headerRef.current;
+      if (!header) return;
+
+      if (prefersReducedMotion) {
+        gsap.set(header, { y: headerVisible ? 0 : "-100%" });
+        return;
+      }
+
+      gsap.to(header, {
+        y: headerVisible ? 0 : "-100%",
+        duration: 0.45,
+        ease: "power3.out",
+        overwrite: true,
+      });
+    },
+    { dependencies: [headerVisible] },
+  );
 
   /* ================================================================
       HEADER MORPH
@@ -237,13 +279,11 @@ export default function Header({ services }: HeaderProps) {
 
       const baseTarget = mobileOpen
         ? TOP_STATE
-        : focusActive
-          ? FOCUS_STATE
-          : scrolled
-            ? PILL_STATE
-            : TOP_STATE;
-      const glassVisible = !mobileOpen && (scrolled || focusActive);
-      const showCategories = !mobileOpen && navExpanded && !focusActive;
+        : scrolled
+          ? PILL_STATE
+          : TOP_STATE;
+      const glassVisible = !mobileOpen && scrolled;
+      const showCategories = !mobileOpen && navExpanded;
 
       const categoriesHeight =
         showCategories && categoriesContent
@@ -261,47 +301,19 @@ export default function Header({ services }: HeaderProps) {
         height: baseTarget.height + categoriesHeight,
       };
 
-      // Shared by both the reduced-motion snap below and the animated
-      // tween further down: how far the logo needs to move (as a
-      // transform, not a layout change) to sit centered inside the
-      // FOCUS_STATE pill. Measuring via gsap.getProperty + the
-      // bounding rect (rather than assuming it starts at x:0) means
-      // this stays correct even if focus mode is re-triggered mid
-      // transition.
-      const computeFocusLogoX = () => {
-        if (!logoWrap || !topRow) return 0;
-        const currentX = Number(gsap.getProperty(logoWrap, "x")) || 0;
-        const currentLeft =
-          logoWrap.getBoundingClientRect().left -
-          topRow.getBoundingClientRect().left;
-        const baseLeft = currentLeft - currentX;
-        const logoWidth = logoWrap.getBoundingClientRect().width;
-        const focusInnerWidth =
-          FOCUS_STATE.maxWidth -
-          FOCUS_STATE.paddingLeft -
-          FOCUS_STATE.paddingRight;
-        const targetLeft = (focusInnerWidth - logoWidth) / 2;
-        return targetLeft - baseLeft;
-      };
-
       if (prefersReducedMotion) {
         gsap.set(wrapper, wrapperTarget);
         gsap.set(topRow, { height: baseTarget.height });
         gsap.set(glass, { opacity: glassVisible ? 1 : 0 });
 
         if (logoWrap) {
-          gsap.set(logoWrap, { x: focusActive ? computeFocusLogoX() : 0 });
+          gsap.set(logoWrap, { x: 0 });
         }
 
         [nav, cta, burger].forEach((el) => {
           if (!el) return;
-          gsap.set(el, {
-            autoAlpha: focusActive ? 0 : 1,
-            display: focusActive ? "none" : "",
-          });
+          gsap.set(el, { autoAlpha: 1, display: "" });
         });
-
-        wasFocusActiveRef.current = focusActive;
 
         if (categoriesWrap) {
           gsap.set(categoriesWrap, {
@@ -312,33 +324,6 @@ export default function Header({ services }: HeaderProps) {
 
         return;
       }
-
-      // While focused, the logo needs to visually end up centered in
-      // the shrunk pill. Flipping topRow's justify-content to
-      // "center" — even done carefully, even done at exactly the
-      // right instant — is a DISCRETE layout change: the logo would
-      // sit pinned at flex-start for the entire width-shrink tween
-      // and then teleport to center in a single frame at the end.
-      // That's not a race condition to fix, it's just not an
-      // animation. Instead, topRow's layout is left alone (still
-      // "space-between" throughout) and the logo itself is moved with
-      // a plain transform tween, computed once and run with the SAME
-      // duration + ease as the wrapper's width/padding tween below.
-      // Because maxWidth/padding are being interpolated linearly by
-      // that identical curve, the logo's target offset — itself a
-      // linear function of the pill's shrinking inner width — tracks
-      // exactly in proportion at every instant, not just at the two
-      // endpoints. The result is one continuous glide to center,
-      // synced with the pill shrinking, with nothing to jump.
-      //
-      // nav/CTA/burger still get pulled out of the flex flow with
-      // display:none once they've faded — mainly so they're out of
-      // tab order and don't influence topRow's content width — but
-      // that no longer has anything to do with centering the logo, so
-      // there's no timing dependency between the two anymore.
-      const justEnteredFocus = focusActive && !wasFocusActiveRef.current;
-      const justLeftFocus = !focusActive && wasFocusActiveRef.current;
-      wasFocusActiveRef.current = focusActive;
 
       const tl = gsap.timeline({ defaults: { ease: MORPH_EASE } });
 
@@ -366,53 +351,6 @@ export default function Header({ services }: HeaderProps) {
         GLASS_FADE_DELAY,
       );
 
-      if (logoWrap) {
-        tl.to(
-          logoWrap,
-          {
-            x: focusActive ? computeFocusLogoX() : 0,
-            duration: MORPH_DURATION,
-            overwrite: true,
-          },
-          0,
-        );
-      }
-
-      // Nav / CTA / burger fade together with the wrapper's width tween
-      // above, over the SAME duration, so the whole thing lands as one
-      // motion instead of the fade finishing early. autoAlpha also
-      // sets visibility:hidden at 0, so none of these stay clickable
-      // while faded. display:none is applied/cleared right at the
-      // transition boundary — purely a tab-order/layout-hygiene
-      // cleanup now, not something the logo's position depends on.
-      [nav, cta, burger].forEach((el) => {
-        if (!el) return;
-
-        if (focusActive) {
-          tl.to(
-            el,
-            {
-              autoAlpha: 0,
-              duration: MORPH_DURATION,
-              overwrite: true,
-              onComplete: justEnteredFocus
-                ? () => {
-                    el.style.display = "none";
-                  }
-                : undefined,
-            },
-            0,
-          );
-        } else {
-          if (justLeftFocus) el.style.display = "";
-          tl.to(
-            el,
-            { autoAlpha: 1, duration: MORPH_DURATION, overwrite: true },
-            0,
-          );
-        }
-      });
-
       if (categoriesWrap) {
         tl.to(
           categoriesWrap,
@@ -431,7 +369,7 @@ export default function Header({ services }: HeaderProps) {
         tl.kill();
       };
     },
-    { dependencies: [scrolled, mobileOpen, navExpanded, focusActive] },
+    { dependencies: [scrolled, mobileOpen, navExpanded] },
   );
 
   /* ================================================================
@@ -629,7 +567,10 @@ export default function Header({ services }: HeaderProps) {
       {/* ============================================================
             DESKTOP / BASE HEADER
             ============================================================ */}
-      <header className="fixed inset-x-0 top-0 z-[110] flex h-24 items-start justify-center">
+      <header
+        ref={headerRef}
+        className="fixed inset-x-0 top-0 z-[110] flex h-24 items-start justify-center"
+      >
         <div
           ref={wrapperRef}
           className={`
@@ -701,7 +642,7 @@ export default function Header({ services }: HeaderProps) {
             style={{ height: TOP_STATE.height }}
           >
             <div ref={logoWrapRef} className="flex items-center">
-              <Logo scrolled={scrolled || focusActive} siteName={SITE_NAME} />
+              <Logo scrolled={scrolled} siteName={SITE_NAME} />
             </div>
 
             {/* DESKTOP NAV */}
@@ -768,8 +709,11 @@ export default function Header({ services }: HeaderProps) {
             </nav>
 
             {/* DESKTOP CTA */}
-            <div ref={ctaRef} className="relative z-10 hidden lg:block">
-              <Button to="/contact" variant="primary" size="md">
+            <div
+              ref={ctaRef}
+              className="relative z-10 hidden lg:flex lg:w-[185px] lg:justify-end"
+            >
+              <Button to="/contact" variant="purple-fill">
                 Let&apos;s Talk
               </Button>
             </div>
@@ -778,9 +722,7 @@ export default function Header({ services }: HeaderProps) {
             <div
               ref={burgerRef}
               className={`relative z-[120] lg:hidden ${
-                mobileOpen || scrolled || focusActive
-                  ? "text-black"
-                  : "text-white"
+                mobileOpen || scrolled ? "text-black" : "text-white"
               }`}
             >
               <MobileMenuButton

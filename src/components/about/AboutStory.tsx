@@ -196,7 +196,7 @@ export default function AboutStory() {
                   {chapter.label}
                 </span>
 
-                <h2 className="text-[56px] leading-[0.95] font-medium tracking-tight text-white sm:text-[80px] md:text-[96px]">
+                <h2 className="text-[32px] leading-[1.1] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
                   {chapter.label}
                 </h2>
 

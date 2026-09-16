@@ -11,6 +11,8 @@
  * everything else derives from this file so it can't drift again.
  */
 
+import type { FaqItem } from "@/components/ui/FAQ";
+
 export const SITE_NAME = "Technico Digital Solutions Inc.";
 export const SITE_URL = "https://technicosolutions.com";
 export const SITE_DESCRIPTION =
@@ -120,16 +122,19 @@ export const QUESTIONS_ANSWERS: QuestionAnswer[] = [
 ];
 
 /**
- * Content for the FAQ section (components/home/FAQ.tsx). This is a
+ * Content for the homepage FAQ section, rendered via the shared
+ * components/ui/FAQ.tsx directly in app/page.tsx. This is a
  * separate section from QUESTIONS_ANSWERS above — that block is the
  * "Question & Answer" section higher up the page, while this is the
  * dedicated FAQ section (11th section on the homepage). Copy is
  * supplied verbatim — do not rewrite, shorten, or paraphrase it here.
+ *
+ * `FaqItem` itself lives in components/ui/FAQ.tsx — the shared FAQ
+ * component used by home, services, and blog posts — and is just
+ * re-exported here so existing imports of `FaqItem` from this file
+ * keep working.
  */
-export interface FaqItem {
-  question: string;
-  answer: string;
-}
+export type { FaqItem };
 
 export const FAQS: FaqItem[] = [
   {
@@ -146,7 +151,7 @@ export const FAQS: FaqItem[] = [
   {
     question: "Which is better, SEO or PPC?",
     answer:
-      "SEO is better for long-term, sustainable growth, while PPC is better when you need fast, targeted traffic. But the strongest results come from running both together. SEO (including search campaigns) builds compounding organic visibility over time, meaning your rankings keep working without ongoing ad spend. PPC or paid ads put you in front of the right audience immediately, but stop the moment your budget does. At Technico Digital Solutions, we combine both methods so clients aren\u2019t dependent on one channel to drive results.",
+      "SEO is better for long-term, sustainable growth, while PPC is better when you need fast, targeted traffic. But the strongest results come from running both together. SEO (including search campaigns) builds compounding organic visibility over time, meaning your rankings keep working without ongoing ad spend. PPC or paid ads put you in front of the right audience immediately, but stop the moment your budget does. At Technico Digital Solutions, we combine both methods so clients aren’t dependent on one channel to drive results.",
   },
   {
     question: "How do digital marketing companies help start-up businesses?",
@@ -161,12 +166,13 @@ export const FAQS: FaqItem[] = [
 ];
 
 /**
- * Content for the Services page FAQ section
- * (components/services/ServicesFAQ.tsx). Separate from FAQS above,
- * which is the homepage FAQ — this is the FAQ block scoped to
- * /services. Uses the same FaqItem shape (plain string answer) as
- * FAQS above, for consistency with the rest of this file. Copy is
- * supplied verbatim — do not rewrite, shorten, or paraphrase it here.
+ * Content for the /services page FAQ section, rendered via the
+ * shared components/ui/FAQ.tsx directly in app/services/page.tsx.
+ * Separate from FAQS above, which is the homepage FAQ — this is the
+ * FAQ block scoped to /services. Uses the same FaqItem shape (plain
+ * string answer) as FAQS above, for consistency with the rest of
+ * this file. Copy is supplied verbatim — do not rewrite, shorten,
+ * or paraphrase it here.
  */
 export const SERVICES_FAQS: FaqItem[] = [
   {
@@ -192,9 +198,15 @@ export const SERVICES_FAQS: FaqItem[] = [
 ];
 
 /**
- * Content for the horizontal-scroll services strip
- * (components/home/Services.tsx). Copy is supplied verbatim — do not
- * rewrite, shorten, or paraphrase it here.
+ * Content for the homepage services list (components/home/Services.tsx).
+ * Copy is supplied verbatim — do not rewrite, shorten, or paraphrase it
+ * here.
+ *
+ * `shortTitle` is a display-only abbreviation for contexts with limited
+ * width (the large list labels and the "READ ..." card in
+ * components/home/Services.tsx) — `title` stays the full name used
+ * everywhere else (ContactForm.tsx's service dropdown, /services page
+ * headers).
  *
  * `icon` paths are the existing files already in /public — nothing
  * to upload, just referenced by path:
@@ -221,6 +233,7 @@ export const SERVICES_FAQS: FaqItem[] = [
  */
 export interface Service {
   title: string;
+  shortTitle: string;
   description: string;
   bullets: string[];
   icon: string;
@@ -230,6 +243,7 @@ export interface Service {
 export const SERVICES: Service[] = [
   {
     title: "SEO (Search Engine Optimization)",
+    shortTitle: "SEO",
     description:
       "Let’s get your business found online. Our SEO work improves your search visibility through data, structure, and creative content. Every strategy we build aims to drive organic traffic, attract qualified leads, and improve long-term rankings. Our SEO process includes:",
     bullets: [
@@ -239,10 +253,11 @@ export const SERVICES: Service[] = [
       "Content planning based on user intent",
     ],
     icon: "/technico-digital-solutions-inc-seo.png",
-    href: "/services",
+    href: "/services/search-engine-optimization",
   },
   {
     title: "Website Development & Design",
+    shortTitle: "Web Development",
     description:
       "Make your website fast, functional, and easy to use. Every project starts with a plan that matches your brand and supports your digital goals. Each page loads quickly, guides users naturally, and helps convert visitors into customers. With our web services, expect:",
     bullets: [
@@ -252,10 +267,11 @@ export const SERVICES: Service[] = [
       "Security setup and performance testing",
     ],
     icon: "/technico-digital-solutions-inc-website-development.png",
-    href: "/services",
+    href: "/services/website-design-and-development",
   },
   {
     title: "Creative Design & Content Services",
+    shortTitle: "Creative Design",
     description:
       "We combine visual creativity with strategic content planning. Every piece we create solidifies your brand and connects with your target market. From ad visuals to website copy, we keep your tone consistent and your message clear. Our creative digital marketing services cover:",
     bullets: [
@@ -265,10 +281,11 @@ export const SERVICES: Service[] = [
       "Integrated campaign visuals & promotional assets",
     ],
     icon: "/technico-digital-solutions-inc-creative-design.png",
-    href: "/services",
+    href: "/services/creative-design-and-content",
   },
   {
     title: "Media Buying & Digital Advertising",
+    shortTitle: "Advertising",
     description:
       "We plan, manage, and optimize campaigns that bring impressive results. Our team uses data-backed strategies to make every ad dollar count. From keyword targeting to audience segmentation, each decision is made with performance in mind. Our focus areas include:",
     bullets: [
@@ -277,10 +294,11 @@ export const SERVICES: Service[] = [
       "Social Media Marketing",
     ],
     icon: "/technico-digital-solutions-inc-media-buying.png",
-    href: "/services",
+    href: "/services/advertising",
   },
   {
     title: "Social Media Management",
+    shortTitle: "Social Media",
     description:
       "We create, manage, and maintain a consistent brand identity across all your social platforms. Each post, story, and caption is based on a clear content plan that supports your business goals. Every piece of content adds value and strengthens your social media presence. Our approach covers:",
     bullets: [
@@ -290,10 +308,11 @@ export const SERVICES: Service[] = [
       "Performance tracking with monthly insights",
     ],
     icon: "/technico-digital-solutions-inc-social-media-management.png",
-    href: "/services",
+    href: "/services/social-media-management",
   },
   {
     title: "Email Marketing",
+    shortTitle: "Email Marketing",
     description:
       "Connect directly with your target audience through our strategic email campaigns. From welcome emails to follow-up messages, our team creates every campaign to get responses. We keep messages concise, relevant, and consistent so your brand stays top of mind. For consistent results, our digital marketing services include:",
     bullets: [
@@ -303,7 +322,7 @@ export const SERVICES: Service[] = [
       "Reporting that shows campaign outcomes",
     ],
     icon: "/technico-digital-solutions-inc-email-marketing.png",
-    href: "/services",
+    href: "/services/email-marketing",
   },
 ];
 
@@ -372,6 +391,11 @@ export const PARTNERS: Partner[] = [
  */
 export interface TrustedBrand {
   logo: string;
+  /** Optional — used as the `<img>` alt text. Left unset for the
+   * decorative, forced-white brand marks (tool/trusted-by logos),
+   * but set for real client project photos so they get meaningful
+   * alt text instead of "". */
+  name?: string;
 }
 
 export const TRUSTED_BY: TrustedBrand[] = [
@@ -413,6 +437,85 @@ export const TRUSTED_BY: TrustedBrand[] = [
   },
   {
     logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526318/trusted/technico-trusted-by-13_wqkkvw.png",
+  },
+];
+
+/**
+ * Content for the "Technologies We Use To Build Your Website" logo loop
+ * (components/services/TechStack.tsx) — same marquee mechanics as
+ * TrustedBy above, reused for the services page's tech-stack section.
+ *
+ * These logos come in as full-color brand marks, so each URL carries a
+ * Cloudinary transformation (`e_colorize:100,co_white`, plus `w_240` +
+ * `q_auto,f_auto` for size) that bakes the white recolor in server-side
+ * — once, ahead of time — instead of a live CSS `filter` the browser
+ * would otherwise have to composite every animation frame across all
+ * 72 on-screen clones. That's also why these render identically to
+ * TRUSTED_BY's already-white sources: no runtime filter on either.
+ */
+export const TECH_STACK: TrustedBrand[] = [
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781032/technico-technology/technico-technology-7_ls1ld3.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781031/technico-technology/technico-technology-8_woger0.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781030/technico-technology/technico-technology-6_ssmpdx.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781030/technico-technology/technico-technology-5_tgbeed.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781029/technico-technology/technico-technology-3_ga5zxi.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781029/technico-technology/technico-technology-4_vjj9kl.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781028/technico-technology/technico-technology-2_ldwpxt.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781028/technico-technology/technico-technology-1_rx9uaj.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781028/technico-technology/technico-technology-12_rfk815.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781027/technico-technology/technico-technology-9_tczy0k.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781027/technico-technology/technico-technology-10_onq83n.png",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/w_240,q_auto,f_auto,e_colorize:100,co_white/v1788781026/technico-technology/technico-technology-11_kcdzw2.png",
+  },
+];
+
+/**
+ * Content for the Graphic Design service's "recent work" logo loop
+ * — same marquee component (components/services/TechStack.tsx) as
+ * TECH_STACK above, but rendered as its own separate strip via that
+ * component's `items`/`heading` props, not mixed into TECH_STACK.
+ * No `e_colorize` transform on these URLs, so they render in their
+ * real color rather than the forced white treatment above.
+ */
+export const GRAPHIC_DESIGN_WORK: TrustedBrand[] = [
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788842782/temporary-placeholder/mr-fence_fku9lz.jpg",
+    name: "Mr. Fence",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788842783/temporary-placeholder/up-islang-roofing_w6k2rn.jpg",
+    name: "Up Island Roofing",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788842784/temporary-placeholder/up-island-junk_yv8wi4.jpg",
+    name: "Up Island Junk",
+  },
+  {
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788842786/temporary-placeholder/essence-of-detail_hsg4kw.jpg",
+    name: "Essence of Detail",
   },
 ];
 
@@ -499,13 +602,13 @@ export const FEEDBACK: FeedbackItem[] = [
     name: "Westgate Dental Centre",
     image: "/feedback/technico-feedback-4.jpg",
     quote:
-      "SEO-optimized content and search visibility elevated Westgate Dental Centre\u2019s patient reach. The clinic recorded consistent growth in appointment requests and online reputation improvements in Maple Ridge and beyond.",
+      "SEO-optimized content and search visibility elevated Westgate Dental Centre’s patient reach. The clinic recorded consistent growth in appointment requests and online reputation improvements in Maple Ridge and beyond.",
   },
   {
     name: "Sidhu Personal Injury Lawyers",
     image: "/feedback/technico-feedback-5.jpg",
     quote:
-      "Strategic content optimization expanded Sidhu Personal Injury Lawyers\u2019 client base in Alberta. The firm noted measurable growth in case consultations and stronger regional recognition in personal injury law.",
+      "Strategic content optimization expanded Sidhu Personal Injury Lawyers’ client base in Alberta. The firm noted measurable growth in case consultations and stronger regional recognition in personal injury law.",
   },
 ];
 

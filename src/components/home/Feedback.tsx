@@ -587,33 +587,39 @@ export default function Feedback() {
   };
 
   return (
-    <section className="bg-white-bg">
-      <div className="mx-auto max-w-6xl px-6 pt-20 sm:pt-24 md:pt-28">
-        {/* Eyebrow */}
-        <div className="flex items-center justify-center gap-2.5">
-          <span className="h-2.5 w-2.5 shrink-0 bg-black-primary" />
-          <span className="font-mono text-xs tracking-[0.14em] text-black-text uppercase text-balance sm:text-sm">
-            Real Feedbacks
-          </span>
+    <section className="bg-[#0A0A0C]">
+      <div className="px-6 pt-20 sm:px-8 sm:pt-24 md:px-12 md:pt-28 lg:px-[90px]">
+        {/* Eyebrow / headline / paragraph — same row layout as
+            Approach.tsx (eyebrow left, headline in its own column,
+            paragraph right on `lg:`; stacked on mobile). */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+          {/* Eyebrow — bracket-style marker, matching Approach.tsx's
+              "[ ] Proven Approach" instead of a square dot. */}
+          <div className="flex items-center gap-2 lg:shrink-0 lg:pt-2">
+            <span className="font-mono text-xs tracking-[0.16em] whitespace-nowrap text-white/85 uppercase sm:text-sm">
+              [ ] Real Feedbacks
+            </span>
+          </div>
+
+          {/* Headline — indented + justified like the closing paragraph
+              in Approach.tsx, with a forced break so "Meets Results"
+              sits on its own second line regardless of viewport width. */}
+          <h2 className="indent-8 text-justify text-[2rem] leading-[1.2] font-normal tracking-tight text-white sm:indent-10 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:indent-12 md:text-[44px] md:leading-[1.12] md:tracking-[-2px] lg:w-[700px] lg:shrink-0">
+            Where Performance
+            <br />
+            Meets Results
+          </h2>
+
+          {/* Intro copy — merged into a single paragraph */}
+          <div className="max-w-80 lg:shrink-0 lg:pt-1">
+            <p className="text-[18px] leading-relaxed font-light tracking-body text-white/50 text-pretty">
+              How Our Solutions Deliver Success. Our marketing solutions help
+              businesses across Canada grow through targeted digital content
+              strategies to turn search visibility into measurable leads,
+              bookings, and consultations. Notable results include:
+            </p>
+          </div>
         </div>
-
-        {/* Headline */}
-        <h2 className="mx-auto mt-7 max-w-3xl text-balance text-center text-[2rem] leading-[1.2] font-normal tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[50px] md:leading-[1.12] md:tracking-[-2px]">
-          Where Performance Meets Results
-        </h2>
-
-        {/* Sub-heading */}
-        <p className="mx-auto mt-6 text-center text-base tracking-wide text-black-text/45 sm:mt-7 sm:text-lg">
-          How Our Solutions Deliver Success
-        </p>
-
-        {/* Intro paragraph */}
-        <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-loose text-black-text/50 text-pretty sm:mt-6 sm:text-base">
-          Our marketing solutions help businesses across Canada grow through
-          targeted digital content strategies to turn search visibility into
-          measurable leads, bookings, and consultations. Notable results
-          include:
-        </p>
       </div>
 
       {isMobile ? (
@@ -630,7 +636,7 @@ export default function Feedback() {
                 key={item.name}
                 className="mr-5 w-[78vw] shrink-0 snap-center last:mr-0"
               >
-                <div className="relative aspect-[3/4] overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
                   <Image
                     src={item.image}
                     alt={item.name}
@@ -641,11 +647,11 @@ export default function Feedback() {
                 </div>
 
                 <div className="pt-5">
-                  <span className="block text-lg font-medium text-black-text">
+                  <span className="block text-[24px] leading-snug font-medium tracking-heading text-white">
                     {item.name}
                   </span>
-                  <p className="mt-2 text-sm leading-relaxed text-black-text/55 text-pretty">
-                    {item.quote}
+                  <p className="mt-2 text-[18px] leading-relaxed font-light tracking-body text-white/55 text-pretty">
+                    &ldquo;{item.quote}&rdquo;
                   </p>
                 </div>
               </div>
@@ -657,7 +663,7 @@ export default function Feedback() {
               type="button"
               aria-label="Previous testimonial"
               onClick={() => scrollByCard(-1)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-black-text/15 text-black-text active:bg-black-text/5"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white active:bg-white/10"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                 <path
@@ -673,7 +679,7 @@ export default function Feedback() {
               type="button"
               aria-label="Next testimonial"
               onClick={() => scrollByCard(1)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-black-text/15 text-black-text active:bg-black-text/5"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white active:bg-white/10"
             >
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                 <path
@@ -710,7 +716,7 @@ export default function Feedback() {
                   if (event.pointerType === "mouse") scheduleSpeedUp();
                 }}
               >
-                <div className="relative aspect-[3/4] overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
                   <Image
                     src={item.image}
                     alt={item.name}
@@ -721,11 +727,11 @@ export default function Feedback() {
                 </div>
 
                 <div className="pt-5 sm:pt-6">
-                  <span className="block text-lg font-medium text-black-text sm:text-xl">
+                  <span className="block text-[24px] leading-snug font-medium tracking-heading text-white">
                     {item.name}
                   </span>
-                  <p className="mt-2 text-sm leading-relaxed text-black-text/55 text-pretty">
-                    {item.quote}
+                  <p className="mt-2 text-[18px] leading-relaxed font-light tracking-body text-white/55 text-pretty">
+                    &ldquo;{item.quote}&rdquo;
                   </p>
                 </div>
               </div>

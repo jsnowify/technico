@@ -5,10 +5,19 @@ import Image from "next/image";
    CHANNELS JIGSAW CARD
    ================================================================
    The two-panel "puzzle piece" card from your mock/CARD_SVG.svg:
-   a solid-purple text panel on the left and a photo panel on the
-   right, joined at the bottom by a small interlocking notch —
-   instead of the plain stacked-heading treatment the section used
-   before.
+   a text panel on the left and a photo panel on the right, joined
+   at the bottom by a small interlocking notch — instead of the
+   plain stacked-heading treatment the section used before.
+
+   COLOR — left panel is now black (#0A0A0C, same hex as the intro
+   section's bg above it) at rest, sliding in the site's purple
+   accent (#6B26D9, same as purple-accent everywhere else) on hover,
+   instead of the old purple-base/pink-hover combo — matches the
+   black+purple scheme the rest of this page now uses.
+
+   SIZE — the whole card is capped at max-w-4xl and centered
+   (mx-auto) instead of stretching full-bleed across the section, so
+   it reads as a contained card rather than the full section width.
 
    Both panels are built the same way: an <svg> with a fixed
    viewBox (657x787, matching CARD_SVG.svg) holding the panel-shape
@@ -85,23 +94,21 @@ function PanelText({
 
 export default function ChannelsJigsawCard() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
-      {/* Left panel — purple by default, slides in pink on hover.
-          The pink layer is the same path, scaled in from 0 width at
-          its left edge (transform-box: fill-box makes the 0-100%
-          scale-x relative to the shape's own bounding box, not the
-          full SVG viewport) so the reveal always matches the card's
-          rounded/notched outline exactly, at any size. */}
+    <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
+      {/* Left panel — black by default (matches the intro section's
+          #0A0A0C bg), slides in the site's purple accent on hover
+          instead of the old purple/pink combo. Same fill-swap
+          mechanic as before, just different colors. */}
       <div className="group relative aspect-657/787 w-full cursor-pointer">
         <svg
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           preserveAspectRatio="none"
           className="absolute inset-0 h-full w-full"
         >
-          <path d={LEFT_PATH} fill="#6D28D9" />
+          <path d={LEFT_PATH} fill="#0A0A0C" />
           <path
             d={LEFT_PATH}
-            fill="#EC4899"
+            fill="#6B26D9"
             style={{ transformBox: "fill-box", transformOrigin: "left center" }}
             className="scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
           />

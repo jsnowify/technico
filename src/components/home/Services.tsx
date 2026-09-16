@@ -7,11 +7,6 @@ import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { SERVICES, type Service } from "@/lib/constants";
 import SlidingText from "@/components/motion/SlidingText";
-import RevealUpText from "@/components/motion/RevealUpText";
-import {
-  SERVICES_FOCUS_EVENT,
-  SERVICES_UNFOCUS_EVENT,
-} from "@/components/layout/Header/header.config";
 
 /* ================================================================
    SERVICES (fifth section)
@@ -82,10 +77,10 @@ function ServicePanel({
     >
       <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch">
         <div>
-          <h3 className="text-2xl leading-tight font-normal text-balance tracking-tight text-black-text sm:text-3xl">
+          <h3 className="text-[24px] leading-snug font-medium text-balance tracking-heading text-black-text">
             {service.title}
           </h3>
-          <p className="mt-5 max-w-md text-sm leading-relaxed text-black-text/70 text-pretty sm:mt-5 sm:text-base">
+          <p className="mt-5 max-w-md text-[18px] leading-relaxed font-light tracking-body text-black-text/70 text-pretty">
             {service.description}
           </p>
         </div>
@@ -107,6 +102,7 @@ function ServicePanel({
         <Link
           href={service.href}
           aria-label="Learn More"
+          data-cursor="circle"
           onMouseEnter={() => setLearnMoreHovered(true)}
           onMouseLeave={() => setLearnMoreHovered(false)}
           className="mt-7 inline-flex w-fit items-center font-mono text-xs tracking-[0.14em] text-black-text uppercase transition-colors duration-300 hover:text-black-text/50 sm:mt-7 sm:text-sm"
@@ -192,15 +188,6 @@ export default function Services() {
         const track = trackRef.current;
         if (!pin || !track) return;
 
-        // Header has no ref into this component — Header and Services
-        // are siblings composed in app/page.tsx — so rather than
-        // reach for context/prop-drilling just for this, the same
-        // ScrollTrigger that drives the horizontal scroll also
-        // dispatches plain window events at the exact moments the pin
-        // engages/releases. Header listens for these (see
-        // Header/index.tsx's "SERVICES FOCUS MODE" effect) to morph
-        // itself down to a logo-only badge for the duration of the
-        // pin, in both scroll directions.
         const scrollTween = gsap.to(track, {
           x: () => -(track.scrollWidth - pin.offsetWidth),
           ease: "none",
@@ -213,14 +200,6 @@ export default function Services() {
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            onEnter: () =>
-              window.dispatchEvent(new Event(SERVICES_FOCUS_EVENT)),
-            onEnterBack: () =>
-              window.dispatchEvent(new Event(SERVICES_FOCUS_EVENT)),
-            onLeave: () =>
-              window.dispatchEvent(new Event(SERVICES_UNFOCUS_EVENT)),
-            onLeaveBack: () =>
-              window.dispatchEvent(new Event(SERVICES_UNFOCUS_EVENT)),
           },
         });
 
@@ -271,10 +250,6 @@ export default function Services() {
         return () => {
           scrollTween.scrollTrigger?.kill();
           scrollTween.kill();
-          // Belt-and-suspenders: if this unmounts while the pin is
-          // still engaged (e.g. navigating away mid-scroll), make sure
-          // Header doesn't get left stuck in focus mode.
-          window.dispatchEvent(new Event(SERVICES_UNFOCUS_EVENT));
         };
       });
 
@@ -292,31 +267,39 @@ export default function Services() {
   return (
     <section className="bg-white-bg">
       {/* Top padding matched to Strategy.tsx's outer container
-          (pt-16, no responsive step-up) instead of this section's
-          previous pt-20 sm:pt-24 md:pt-28. */}
-      <div className="mx-auto max-w-6xl px-6 pt-16">
-        {/* Eyebrow */}
-        <div className="flex items-center justify-center gap-3">
-          <span className="h-2.5 w-2.5 shrink-0 bg-black-text" />
-          <span className="font-mono text-xs tracking-[0.16em] text-black-text uppercase text-balance sm:text-sm">
-            Services
-          </span>
-        </div>
+          (pt-16, no responsive step-up). Horizontal padding matched
+          to QuestionsAnswers.tsx's scale (px-6 sm:px-8 md:px-12
+          lg:px-[90px]) instead of a fixed mx-auto max-w-6xl, so the
+          eyebrow/headline/paragraph row lines up with QA's on large
+          screens instead of sitting inside a narrower centered
+          column. */}
+      <div className="px-6 pt-16 sm:px-8 md:px-12 lg:px-[90px]">
+        {/* Header — eyebrow / headline / paragraph laid out the same
+            way as QuestionsAnswers.tsx: stacked on mobile, side-by-side
+            (eyebrow left, headline + description sharing the row) from
+            lg up, instead of the previous fully-centered stack. */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+          {/* Eyebrow */}
+          <div className="flex items-center gap-2 lg:shrink-0 lg:pt-2">
+            <span className="font-mono text-xs tracking-[0.16em] whitespace-nowrap text-black-text uppercase sm:text-sm">
+              [ ] Services
+            </span>
+          </div>
 
-        {/* Headline — word-by-word scroll rise-in via RevealUpText,
-            same classes it replaced. */}
-        <RevealUpText
-          as="h2"
-          text="Accelerate your online growth with proven digital marketing services"
-          className="mx-auto mt-7 max-w-4xl text-balance text-center text-[32px] leading-[1.2] font-medium tracking-tight text-black-text sm:mt-8 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:text-[56px] md:leading-[1.12] md:tracking-[-2px] lg:text-[64px]"
-        />
-        <p className="mx-auto mt-7 max-w-2xl text-center text-sm leading-loose text-black-text/60 text-pretty sm:mt-8 sm:text-base">
-          Our specialty is to help businesses grow faster online through
-          effective digital marketing services. If you&rsquo;re building
-          visibility from scratch or scaling an established brand, our
-          strategies are built around measurable outcomes: more traffic,
-          stronger leads, and better ROI.
-        </p>
+          {/* Headline — plain static heading, no reveal animation. */}
+          <h2 className="indent-8 text-[32px] leading-[1.1] font-medium tracking-heading text-black-text sm:indent-10 sm:text-[40px] md:indent-12 md:text-[44px] lg:w-[700px] lg:shrink-0">
+            Accelerate your online growth with proven digital marketing services
+          </h2>
+
+          {/* Description */}
+          <p className="max-w-70 text-[18px] leading-relaxed font-light tracking-body text-black-text/60 text-pretty lg:shrink-0 lg:pt-1">
+            Our specialty is to help businesses grow faster online through
+            effective digital marketing services. If you&rsquo;re building
+            visibility from scratch or scaling an established brand, our
+            strategies are built around measurable outcomes: more traffic,
+            stronger leads, and better ROI.
+          </p>
+        </div>
       </div>
 
       {/* Panel strip — full-bleed, outside the max-w-6xl container.
@@ -341,7 +324,7 @@ export default function Services() {
       >
         {/* Label */}
         <p className="mx-auto max-w-6xl px-6 pt-16 pb-10 text-center font-mono text-xs tracking-[0.14em] text-black-text/70 uppercase sm:pt-20 sm:pb-12 sm:text-sm md:shrink-0 md:pt-0 md:pb-8">
-          [ As a full-service marketing agency, our core services include ]
+          [OUR SERVICES ]
         </p>
 
         {/* Mobile / tablet: normal vertical stack — plain page scroll,

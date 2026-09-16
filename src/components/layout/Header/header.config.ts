@@ -33,10 +33,10 @@ export const SCROLL_ENTER_THRESHOLD = 80;
 export const SCROLL_LEAVE_THRESHOLD = 40;
 
 /**
- * Timing for the header's shape morph (TOP_STATE <-> PILL_STATE <->
- * FOCUS_STATE), pulled out as named constants rather than scattered
- * inline magic numbers so the whole morph's pacing lives in one
- * place. GLASS_FADE_DELAY + GLASS_FADE_DURATION deliberately sum to
+ * Timing for the header's shape morph (TOP_STATE <-> PILL_STATE),
+ * pulled out as named constants rather than scattered inline magic
+ * numbers so the whole morph's pacing lives in one place.
+ * GLASS_FADE_DELAY + GLASS_FADE_DURATION deliberately sum to
  * MORPH_DURATION so the glass background finishes fading in/out at
  * the exact instant the shape tween lands, instead of visibly
  * trailing or finishing early.
@@ -58,7 +58,7 @@ export const TOP_STATE = {
 };
 
 export const PILL_STATE = {
-  maxWidth: 760,
+  maxWidth: 820,
   marginTop: 16,
   // Side inset so the pill actually floats off the screen edges on
   // narrow viewports instead of stretching full-bleed (it has no
@@ -71,36 +71,6 @@ export const PILL_STATE = {
   borderRadius: 5,
   height: 60,
 };
-
-/**
- * THIRD HEADER STATE — "focus" mode.
- *
- * Same floating-pill geometry as PILL_STATE (marginTop/marginLeft/
- * marginRight/borderRadius/height all match), but shrunk down to a
- * small badge that hugs just the logo mark. Nav links, the CTA
- * button, and the mobile burger all fade out (autoAlpha, see
- * Header/index.tsx) at the same time this width tween runs, so the
- * shrinking wrapper reads as the header "collapsing down" to the
- * logo rather than clipping visible content.
- *
- * Driven by the "services:focus" / "services:unfocus" window events
- * dispatched from Services.tsx's own pin ScrollTrigger — see that
- * file for why a DOM event (rather than prop-drilling or context)
- * is the connection between the two.
- */
-export const FOCUS_STATE = {
-  maxWidth: 120,
-  marginTop: 16,
-  marginLeft: 16,
-  marginRight: 16,
-  paddingLeft: 20,
-  paddingRight: 20,
-  borderRadius: 5,
-  height: 60,
-};
-
-export const SERVICES_FOCUS_EVENT = "services:focus";
-export const SERVICES_UNFOCUS_EVENT = "services:unfocus";
 
 export const DROPDOWN_RADIUS = 20;
 
