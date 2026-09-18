@@ -1,0 +1,56 @@
+/* CSS-owned hovers reverse in place; no per-button timelines or listeners. */
+.fill,
+.underline {
+  --button-hover: 0;
+}
+.sheet,
+.underlineSheet {
+  transform: scaleX(var(--button-hover));
+  transition: transform 460ms cubic-bezier(0.76, 0, 0.24, 1);
+  transition-delay: calc(var(--button-band) * 38ms);
+}
+.underlineSheet {
+  transition-duration: 380ms;
+  transition-delay: calc(var(--button-band) * 50ms);
+}
+.arrowOut,
+.arrowIn {
+  transition:
+    transform 260ms ease,
+    opacity 260ms ease;
+}
+.arrowOut {
+  transform: translate(
+      calc(var(--button-hover) * 7px),
+      calc(var(--button-hover) * -7px)
+    )
+    rotate(45deg);
+  opacity: calc(1 - var(--button-hover));
+}
+.arrowIn {
+  transform: translate(
+      calc((var(--button-hover) - 1) * 7px),
+      calc((1 - var(--button-hover)) * 7px)
+    )
+    rotate(45deg);
+  opacity: var(--button-hover);
+  transition-delay: 160ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .fill:hover,
+  .underline:hover {
+    --button-hover: 1;
+  }
+}
+.fill:focus-visible,
+.underline:focus-visible {
+  --button-hover: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .underlineSheet,
+  .arrowOut,
+  .arrowIn {
+    transition: none;
+  }
+}

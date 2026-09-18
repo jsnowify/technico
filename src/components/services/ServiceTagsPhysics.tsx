@@ -44,8 +44,8 @@ interface ServiceTag {
 
 const TONE_CLASSES: Record<TagTone, string> = {
   white: "bg-white-primary text-black-text",
-  pink: "bg-pink-accent text-white-primary",
-  purple: "bg-purple-accent text-white-primary",
+  pink: "bg-pink-accent text-black-bg",
+  purple: "bg-purple-accent text-black-bg",
 };
 
 // Bottom-first drop order — see note above.

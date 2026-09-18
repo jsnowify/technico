@@ -1,772 +1,388 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { useGSAP } from "@gsap/react";
-import Image from "next/image";
-import { gsap, prefersReducedMotion, supportsFinePointer } from "@/lib/gsap";
-import { FEEDBACK } from "@/lib/constants";
+import { gsap } from "@/lib/gsap";
+import { FEEDBACK, type FeedbackItem } from "@/lib/constants";
+import PixelRevealImage from "./PixelRevealImage";
 
-/* ================================================================
-   FEEDBACK (eighth section)
-   ================================================================
-   ASSETS (expected in /public):
-     /feedback/technico-feedback-1.jpg
-     /feedback/technico-feedback-2.jpg
-     /feedback/technico-feedback-3.jpg
-     /feedback/technico-feedback-4.jpg
-     /feedback/technico-feedback-5.jpg
+const LOOP_ITEMS = [...FEEDBACK, ...FEEDBACK];
+const LOOP_DURATION = 48;
+const HOVER_SPEED = 0.16;
 
-   White section, same eyebrow + headline pattern as the rest of the
-   home page (Overview.tsx / Strategy.tsx), followed by a short
-   secondary sub-heading and intro paragraph, then a gallery of client
-   feedback cards built around the reference clip's two behaviors —
-   tuned per a second pass of feedback against the actual clip:
+function subscribeToMobile(callback: () => void) {
+  const query = window.matchMedia("(max-width: 639px)");
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
 
-   1. MARQUEE THAT SLOWS, NEVER STOPS — driven by a single GSAP tween
-      (xPercent 0 -> -50, `repeat: -1`, `ease: "none"`) rather than a
-      CSS keyframe, because a CSS keyframe's `animation-duration`
-      can't be changed mid-run without the position jumping (the
-      browser reinterprets elapsed time against the new duration).
-      GSAP's tween keeps its own elapsed-time clock, so hovering any
-      card just eases the tween's `timeScale` down to a crawl and
-      back up on leave — the row visibly decelerates and
-      re-accelerates instead of freezing or snapping speed. The track
-      renders FEEDBACK twice back-to-back so the -50% loop point is
-      seamless.
+function useIsMobile() {
+  return useSyncExternalStore(
+    subscribeToMobile,
+    () => window.matchMedia("(max-width: 639px)").matches,
+    () => false,
+  );
+}
 
-      SEAMLESS ONLY IF THE TWO HALVES ARE EXACTLY THE SAME WIDTH:
-      -50% shifts the track by exactly half of its OWN total width,
-      so that has to equal exactly one FEEDBACK-length for the wrap
-      to be invisible. Spacing between cards is a per-card trailing
-      margin (`mr-10`/`md:mr-12`), not a `gap` on the flex container.
-      `gap` only inserts space *between* items (N items => N-1 gaps),
-      so doubling the array doesn't double the gap total the same
-      way it doubles the card total — for 5 cards -> 10, that's 4
-      gaps -> 9, not 8, and -50% lands half a gap short of the true
-      loop point every cycle. It's a small, constant, 100%-repro
-      offset, which is exactly what makes it read as "the reset is
-      very noticeable" rather than a rare glitch. A trailing margin
-      on every card (including the last) makes each "card + spacing"
-      unit identical, so 10 units is exactly 2x 5 units and -50%
-      lands exactly on the seam.
+function possessive(name: string) {
+  return name.endsWith("s") ? `${name}'` : `${name}'s`;
+}
 
-   2. SMOOTH, TRAILING CURSOR PILL — one shared pill (not one per
-      card) tracks the pointer via `gsap.quickTo` on x/y, the same
-      spring-like trailing easing `useMagneticHover` already uses
-      elsewhere on this site, so it visibly glides toward the cursor
-      rather than snapping to it. A second pair of quickTo setters on
-      scale/opacity morphs it in with an overshoot ease (small dot ->
-      full pill) on enter and eases it back down on leave — the
-      "iMessage bubble" pop the brief asked for. Both are skipped
-      entirely on coarse pointers / reduced-motion, matching how
-      useMagneticHover already guards its own quickTo tweens. The
-      pointermove handler only records the latest x/y; the actual
-      `getBoundingClientRect()` + quickTo call is batched to at most
-      once per animation frame (see `followCursor` below), so a
-      high-poll-rate mouse sending far more than 60 events/sec isn't
-      forcing a layout read for each one.
+function FeedbackCard({
+  item,
+  index,
+  sizes,
+}: {
+  item: FeedbackItem;
+  index: number;
+  sizes: string;
+}) {
+  const number = String((index % FEEDBACK.length) + 1).padStart(2, "0");
 
-   3. CLEAN IMAGES — no gradient scrim over the photo and no
-      hover-zoom; the photo stays exactly as shot. Name + quote moved
-      off the image entirely and into a plain caption underneath, on
-      the section's own white background, which is what keeps every
-      card readable without needing an overlay in the first place.
+  return (
+    <article className="flex h-full min-w-0 flex-col border-y border-r border-white/15 bg-black-bg text-white-text first:border-l">
+      <div className="flex min-h-11 items-center justify-between gap-5 border-b border-white/15 px-4 font-mono text-[9px] tracking-[0.04em] text-content-muted uppercase sm:px-5 sm:text-[10px]">
+        <span>/ Client {number}</span>
+        <span className="text-right">Growth story</span>
+      </div>
 
-   4. COMPOSITOR-FRIENDLY BY DEFAULT — `will-change: transform` is
-      applied to the track and the pill (only when they'll actually
-      animate — never under reduced-motion) so the browser promotes
-      them to their own layer up front instead of doing it lazily on
-      first paint, which is where a lot of the "first few seconds are
-      janky, especially on mobile Safari" feeling comes from. The
-      duplicate half of the track is `aria-hidden` so assistive tech
-      doesn't announce every testimonial twice.
+      <figure className="relative aspect-[4/3] overflow-hidden border-b border-white/15 bg-white/5">
+        <PixelRevealImage src={item.image} alt={item.name} sizes={sizes} />
+        <figcaption className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-4 bg-black-bg/80 px-3 py-2 font-mono text-[9px] tracking-[0.04em] text-content uppercase backdrop-blur-sm sm:inset-x-5 sm:bottom-5 sm:text-[10px]">
+          <span className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 bg-accent" aria-hidden="true" />
+            Verified result
+          </span>
+          <span>
+            {number} / {String(FEEDBACK.length).padStart(2, "0")}
+          </span>
+        </figcaption>
+      </figure>
 
-   5. MOBILE GETS A DIFFERENT, CHEAPER WIDGET ENTIRELY — below the
-      `sm` breakpoint (see useIsMobile) this renders a plain
-      horizontally-scrolling, scroll-snap carousel with < / > arrow
-      buttons instead of the marquee: no GSAP tween ticking every
-      frame, no doubled TRACK array (so half as many <Image>s mount),
-      and no pointermove/rAF/quickTo pill machinery at all — that
-      machinery is already skipped at runtime on touch/coarse
-      pointers via supportsFinePointer, but on mobile it isn't even
-      *mounted*, which is the actual perf win (no wrapper listener,
-      no refs to set up, less JS shipped down the tree for that
-      screen size). Paging is done by directly reading/scrolling the
-      track DOM node on click (see scrollByCard) rather than tracking
-      an index in React state, so a manual swipe never gets fought by
-      a stale index on the next arrow tap, and arrow clicks don't
-      trigger a re-render. The desktop marquee's GSAP tween is also
-      paused via the Page Visibility API while the tab is hidden
-      (backgrounded/minimized), so it isn't burning CPU/battery on a
-      tab nobody's looking at.
-   ================================================================ */
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <h3 className="h3-section max-w-[24ch] leading-[1.12] font-medium tracking-heading text-white-text">
+          {item.name}
+        </h3>
+        <p className="body-copy mt-4 max-w-[56ch] leading-[1.6] tracking-[-0.035em] text-content">
+          &ldquo;{item.quote}&rdquo;
+        </p>
 
-// Feedback copy + asset paths live in lib/constants.ts (FEEDBACK), shared
-// with the rest of the site's content-in-constants.ts convention.
-
-// Rendered twice back-to-back so the marquee tween can loop at xPercent -50.
-const TRACK = [...FEEDBACK, ...FEEDBACK];
-
-const BASE_DURATION = 48;
-const SLOW_TIME_SCALE = 0.18;
-
-// "Sidhu Personal Injury Lawyers" -> "Lawyers' Story", not "Lawyers's Story".
-const possessive = (name: string) =>
-  name.endsWith("s") ? `${name}'` : `${name}'s`;
-
-// Real useLayoutEffect in the browser, so the mobile carousel swaps in
-// before the first paint instead of flashing the desktop marquee for
-// a frame. React warns if useLayoutEffect runs during SSR (it's a
-// no-op there), and this "use client" component still gets rendered
-// once on the server — so on the server (and during that first
-// pre-hydration pass) this falls back to a no-op.
-const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : () => {};
-
-// Matches Tailwind's `sm` breakpoint (640px) used everywhere else in
-// this component tree — below it is the single-column mobile layout,
-// where the marquee is replaced entirely by a static, arrow-driven
-// carousel (see point 5 in the doc comment above). Kept inline here
-// (rather than a separate hooks file) so this component's mobile
-// behavior can never end up half-wired from a missed file.
-function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useIsomorphicLayoutEffect(() => {
-    const mql = window.matchMedia("(max-width: 639px)");
-    setIsMobile(mql.matches);
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      setIsMobile(event.matches);
-    };
-
-    mql.addEventListener("change", handleChange);
-    return () => mql.removeEventListener("change", handleChange);
-  }, []);
-
-  return isMobile;
+        <div className="mt-auto flex items-center justify-between gap-5 border-t border-white/15 pt-4 font-mono text-[9px] tracking-[0.04em] text-content-muted uppercase sm:mt-6 sm:text-[10px]">
+          <span>Technico / Canada</span>
+          <span className="text-accent">+</span>
+        </div>
+      </div>
+    </article>
+  );
 }
 
 export default function Feedback() {
   const isMobile = useIsMobile();
-
+  const sectionRef = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLSpanElement>(null);
+  const pillNameRef = useRef<HTMLSpanElement>(null);
   const mobileTrackRef = useRef<HTMLDivElement>(null);
 
-  // Name shown in the shared pill — written directly to the DOM (see
-  // nameRef below) instead of React state, so hovering a card never
-  // triggers a re-render of the whole TRACK list; it's a pure GSAP/DOM
-  // side effect, same as the position/scale/opacity tweens already are.
-  const nameRef = useRef<HTMLSpanElement>(null);
+  useGSAP(
+    () => {
+      const wrapper = wrapperRef.current;
+      const track = trackRef.current;
+      const pill = pillRef.current;
+      const pillName = pillNameRef.current;
+      const mobileViewport = window.matchMedia("(max-width: 639px)").matches;
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
 
-  const tweenRef = useRef<gsap.core.Tween | null>(null);
-  const movePillXRef = useRef<((value: number) => void) | null>(null);
-  const movePillYRef = useRef<((value: number) => void) | null>(null);
-  // Split into scaleX/scaleY rather than the shorthand `scale`: GSAP's
-  // useGSAP() auto-reverts tweened props on cleanup by snapshotting
-  // and restoring the `transform` string, which x/y/xPercent/yPercent
-  // all resolve into cleanly. The standalone CSS `scale` property
-  // doesn't revert the same way when mixed with those, which is what
-  // throws GSAP's "scale not eligible for reset" warning on every
-  // cleanup. scaleX/scaleY resolve into `transform` like the others,
-  // so they revert cleanly too.
-  const setPillScaleXRef = useRef<((value: number) => void) | null>(null);
-  const setPillScaleYRef = useRef<((value: number) => void) | null>(null);
-  const setPillOpacityRef = useRef<((value: number) => void) | null>(null);
-
-  // rAF-throttling for followCursor: pointermove can fire far more
-  // often than the screen repaints (well over 60/sec on a high-poll-
-  // rate mouse). Only the latest x/y is kept here; the pending rAF
-  // callback below is what actually reads layout + moves the pill,
-  // at most once per frame, instead of doing that work on every raw
-  // event.
-  const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
-  const followCursorRafRef = useRef<number | null>(null);
-
-  // Debounces speedUp() across the ~2.5–3rem gaps between cards
-  // (mr-10/md:mr-12), which belong to no card element. Without this,
-  // crossing straight from one card into the next fires this card's
-  // pointerleave -> speedUp() (marquee re-accelerates, pill fades)
-  // immediately followed by the next card's pointerenter ->
-  // slowDown(), which reads as a visible flicker on a fast mouse
-  // move. Leaving now schedules speedUp() a beat later; entering the
-  // next card cancels that pending call so the slow/visible state
-  // carries through the gap uninterrupted.
-  const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useGSAP(() => {
-    // Skipped on mobile entirely — that screen size gets the
-    // scroll-snap carousel below instead, so there's no track to
-    // animate and no tween to tick every frame.
-    //
-    // NOTE: this re-checks matchMedia live (instead of trusting only
-    // the `isMobile` state) because `isMobile` starts `false` on
-    // purpose (to match SSR) and only flips after its own
-    // useLayoutEffect runs. On the very first effect pass — before
-    // that flip has happened — `isMobile` here can still read stale
-    // `false` even on an actual mobile viewport, which would let a
-    // tween get created for a frame before the isMobile-driven
-    // re-render unmounts it. Reading the media query directly closes
-    // that race regardless of effect/state ordering.
-    const isActuallyMobile =
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 639px)").matches;
-
-    if (
-      !trackRef.current ||
-      prefersReducedMotion ||
-      isMobile ||
-      isActuallyMobile
-    )
-      return;
-
-    // Set imperatively, only once we know the tween is actually
-    // starting — rather than via a className driven by the
-    // usePrefersReducedMotion() hook, which starts `false` (to match
-    // SSR) and only flips after its own effect runs. That render-time
-    // approach let `will-change-transform` apply for one client
-    // render even for reduced-motion users, right up until the hook
-    // caught up. Gating it here instead means it's only ever set
-    // when this effect has already confirmed the tween is running.
-    trackRef.current.style.willChange = "transform";
-
-    tweenRef.current = gsap.to(trackRef.current, {
-      xPercent: -50,
-      ease: "none",
-      duration: BASE_DURATION,
-      repeat: -1,
-    });
-
-    return () => {
-      // slowDown()/speedUp() animate `tweenRef.current.timeScale` via a
-      // separate tween that TARGETS the marquee tween object itself —
-      // killing the marquee tween below stops the marquee, but doesn't
-      // stop a different tween that's mid-flight adjusting a property
-      // on it. Without this, hovering/unhovering right as this effect
-      // tears down (isMobile flip or unmount) can leave that
-      // timeScale-adjustment tween running against an already-killed
-      // target.
-      if (tweenRef.current) gsap.killTweensOf(tweenRef.current);
-      tweenRef.current?.kill();
-      tweenRef.current = null;
-      if (trackRef.current) trackRef.current.style.willChange = "auto";
-    };
-  }, [isMobile]);
-
-  // Pauses the marquee tween while the tab is hidden (backgrounded,
-  // minimized, switched away from) so it isn't burning CPU/battery on
-  // a page nobody's looking at, and resumes it — at whatever
-  // timeScale it was already at, hovered-slow or not — the moment the
-  // tab becomes visible again. No-op on mobile / reduced-motion,
-  // where tweenRef.current is never set in the first place.
-  useEffect(() => {
-    if (prefersReducedMotion || isMobile) return;
-
-    const handleVisibilityChange = () => {
-      if (!tweenRef.current) return;
-      if (document.hidden) {
-        tweenRef.current.pause();
-      } else {
-        tweenRef.current.play();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isMobile]);
-
-  useGSAP(() => {
-    const pill = pillRef.current;
-    // Skipped on mobile too — the cursor-following pill is a
-    // fine-pointer-only affordance (supportsFinePointer already
-    // guards it at runtime), but on mobile it's better to not even
-    // mount the quickTo setters/refs for it at all.
-    const isActuallyMobile =
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 639px)").matches;
-
-    if (
-      !pill ||
-      prefersReducedMotion ||
-      !supportsFinePointer ||
-      isMobile ||
-      isActuallyMobile
-    )
-      return;
-
-    // Anchors the pill on the cursor point: xPercent/yPercent center it
-    // on its own (auto) width/height, x/y (below) then move that
-    // centered point around in px via quickTo. Corner radius is a
-    // fixed 5px the whole time (set in the className below, not
-    // animated) — the pill only scales up/down and fades, it never
-    // morphs shape.
-    gsap.set(pill, {
-      xPercent: -50,
-      yPercent: -50,
-      scaleX: 0.4,
-      scaleY: 0.4,
-      opacity: 0,
-    });
-    // Same reasoning as the track above: set only once this effect
-    // has confirmed the pill is actually going to animate, instead
-    // of via a hook-driven className.
-    pill.style.willChange = "transform";
-
-    movePillXRef.current = gsap.quickTo(pill, "x", {
-      duration: 0.5,
-      ease: "power3.out",
-    });
-    movePillYRef.current = gsap.quickTo(pill, "y", {
-      duration: 0.5,
-      ease: "power3.out",
-    });
-    // Scale and opacity durations/eases are tuned together on
-    // purpose: opacity used to finish faster (0.25s) than the scale
-    // grow (0.45s), and scaleX/Y used "back.out(1.8)" — an overshoot
-    // ease that resolves most of its motion very early in its
-    // duration. Combined, the pill was already ~fully formed by the
-    // time it became visible, so the grow read as an instant "pop"
-    // rather than a visible size change. Now opacity reveals it fast
-    // (0.18s) while scale keeps growing smoothly (0.55s, no-overshoot
-    // "power3.out"), so the size is still visibly changing well after
-    // it's already on screen.
-    setPillScaleXRef.current = gsap.quickTo(pill, "scaleX", {
-      duration: 0.55,
-      ease: "power3.out",
-    });
-    setPillScaleYRef.current = gsap.quickTo(pill, "scaleY", {
-      duration: 0.55,
-      ease: "power3.out",
-    });
-    setPillOpacityRef.current = gsap.quickTo(pill, "opacity", {
-      duration: 0.18,
-      ease: "power1.out",
-    });
-
-    return () => {
-      movePillXRef.current = null;
-      movePillYRef.current = null;
-      setPillScaleXRef.current = null;
-      setPillScaleYRef.current = null;
-      setPillOpacityRef.current = null;
-      gsap.killTweensOf(pill);
-      // gsap.killTweensOf(pill) only catches tweens targeting `pill`
-      // itself — nameRef's span is a separate child node with its own
-      // crossfade tween (see setPillName below), which isn't touched
-      // by that call and was never being killed anywhere. Without
-      // this, a mid-flight name crossfade (plus its onComplete, which
-      // queues a second tween) keeps running after this effect tears
-      // down and can still write into the span after cleanup.
-      if (nameRef.current) gsap.killTweensOf(nameRef.current);
-      pill.style.willChange = "auto";
-      if (followCursorRafRef.current !== null) {
-        cancelAnimationFrame(followCursorRafRef.current);
-        followCursorRafRef.current = null;
-      }
-      if (leaveTimeoutRef.current !== null) {
-        clearTimeout(leaveTimeoutRef.current);
-        leaveTimeoutRef.current = null;
-      }
-      pendingPointerRef.current = null;
-    };
-  }, [isMobile]);
-
-  // Drives scaleX/scaleY together so call sites can treat pill scale
-  // as one value, same as before the scale/scaleX+scaleY split above.
-  const setPillScale = (value: number) => {
-    setPillScaleXRef.current?.(value);
-    setPillScaleYRef.current?.(value);
-  };
-
-  const slowDown = () => {
-    // Cancel any speedUp() that's still waiting to fire from the
-    // previous card's pointerleave — see leaveTimeoutRef above.
-    if (leaveTimeoutRef.current !== null) {
-      clearTimeout(leaveTimeoutRef.current);
-      leaveTimeoutRef.current = null;
-    }
-
-    if (tweenRef.current) {
-      gsap.to(tweenRef.current, {
-        timeScale: SLOW_TIME_SCALE,
-        duration: 0.6,
-        ease: "power2.out",
-      });
-    }
-    setPillScale(1);
-    setPillOpacityRef.current?.(1);
-  };
-
-  const speedUp = () => {
-    if (tweenRef.current) {
-      gsap.to(tweenRef.current, {
-        timeScale: 1,
-        duration: 0.6,
-        ease: "power2.out",
-      });
-    }
-    setPillScale(0.4);
-    setPillOpacityRef.current?.(0);
-  };
-
-  // Called on pointerleave. Waits one short beat before actually
-  // speeding back up, so crossing the gap into the next card (which
-  // calls slowDown() -> clears this timeout) reads as one continuous
-  // slow glide instead of a speedUp/slowDown flicker.
-  const scheduleSpeedUp = () => {
-    if (leaveTimeoutRef.current !== null) clearTimeout(leaveTimeoutRef.current);
-    leaveTimeoutRef.current = setTimeout(() => {
-      leaveTimeoutRef.current = null;
-      speedUp();
-    }, 80);
-  };
-
-  // Smoothly crossfades the pill's name text instead of swapping it
-  // instantly, so sweeping from one card straight into the next
-  // reads as a soft dissolve rather than the label popping mid-hover.
-  // Kills any in-flight crossfade first so a fast sweep across
-  // several cards in quick succession doesn't stack up tweens or
-  // apply an older card's name after a newer one.
-  const setPillName = (text: string) => {
-    // Matches the guard snapPillTo/followCursor already use. Without
-    // this, setPillName could still fire off a tween on nameRef even
-    // when the pill effect above skipped setup entirely (reduced
-    // motion / coarse pointer) — the pill is invisible either way, so
-    // this doesn't change what's shown, it just stops creating an
-    // animation nothing ever cleans up in that case.
-    if (prefersReducedMotion || !supportsFinePointer) return;
-
-    const el = nameRef.current;
-    if (!el) return;
-
-    gsap.killTweensOf(el);
-    gsap.to(el, {
-      opacity: 0,
-      duration: 0.12,
-      ease: "power1.out",
-      onComplete: () => {
-        el.textContent = text;
-        gsap.to(el, { opacity: 1, duration: 0.15, ease: "power1.out" });
-      },
-    });
-  };
-
-  // The wrapper is `overflow-hidden` (needed to mask the doubled
-  // marquee track's excess width) and the pill lives inside it,
-  // centered on the cursor via xPercent/yPercent -50. Left unclamped,
-  // hovering near the wrapper's top/left/right edge pushes half the
-  // pill past that boundary and it gets visibly sliced off. Clamping
-  // x/y here keeps the full pill on-screen no matter where the
-  // cursor is. `offsetWidth`/`offsetHeight` are the pill's unscaled
-  // layout size — GSAP's `scale` is a transform, so it doesn't affect
-  // them — so this clamps against the pill's full size even while
-  // it's mid-way through its enter/leave scale tween.
-  const clampPillPosition = (x: number, y: number, wrapperRect: DOMRect) => {
-    const pill = pillRef.current;
-    if (!pill) return { x, y };
-
-    const halfWidth = pill.offsetWidth / 2;
-    const halfHeight = pill.offsetHeight / 2;
-
-    return {
-      x: Math.min(Math.max(x, halfWidth), wrapperRect.width - halfWidth),
-      y: Math.min(Math.max(y, halfHeight), wrapperRect.height - halfHeight),
-    };
-  };
-
-  // Snaps the pill straight to the entering pointer's position (no
-  // trailing ease) so it doesn't visibly fly in from wherever it was
-  // last left, then morphs it in from there via slowDown().
-  const snapPillTo = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (
-      prefersReducedMotion ||
-      !supportsFinePointer ||
-      event.pointerType !== "mouse" ||
-      !wrapperRef.current ||
-      !pillRef.current
-    ) {
-      return;
-    }
-
-    const rect = wrapperRef.current.getBoundingClientRect();
-    const { x, y } = clampPillPosition(
-      event.clientX - rect.left,
-      event.clientY - rect.top,
-      rect,
-    );
-    gsap.set(pillRef.current, { x, y });
-  };
-
-  const followCursor = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (
-      prefersReducedMotion ||
-      !supportsFinePointer ||
-      event.pointerType !== "mouse"
-    ) {
-      return;
-    }
-
-    // Just stash the latest position — the rect read + quickTo calls
-    // happen at most once per animation frame below, not once per
-    // raw event (see the doc comment above for why).
-    pendingPointerRef.current = { x: event.clientX, y: event.clientY };
-
-    if (followCursorRafRef.current !== null) return;
-
-    followCursorRafRef.current = requestAnimationFrame(() => {
-      followCursorRafRef.current = null;
-
-      const pending = pendingPointerRef.current;
-      if (
-        !pending ||
-        !wrapperRef.current ||
-        !movePillXRef.current ||
-        !movePillYRef.current
-      ) {
+      if (!wrapper || !track || isMobile || mobileViewport || reducedMotion) {
         return;
       }
 
-      const rect = wrapperRef.current.getBoundingClientRect();
-      const { x, y } = clampPillPosition(
-        pending.x - rect.left,
-        pending.y - rect.top,
-        rect,
-      );
-      movePillXRef.current(x);
-      movePillYRef.current(y);
-    });
-  };
+      const marquee = gsap.to(track, {
+        xPercent: -50,
+        duration: LOOP_DURATION,
+        ease: "none",
+        repeat: -1,
+        paused: true,
+      });
 
-  // Mobile carousel paging. Finds whichever card is currently
-  // nearest-centered in the scroll container (by real offsetLeft/
-  // width, not an assumed fixed step) and scrolls straight to the
-  // next/previous one via scrollIntoView.
-  //
-  // A fixed "step" derived from the first card's width + margin used
-  // to be used here, but that broke because (a) the last card has no
-  // trailing margin (`last:mr-0`) so its true position doesn't match
-  // N * step, and (b) cards snap-center rather than snap to their
-  // left edge, so left-edge-style stepping drifts from where the
-  // browser actually settles. That drift meant the last card was
-  // sometimes never fully reachable, and the accumulated overshoot
-  // could make `target > maxScroll` fire a click early — snapping
-  // straight back to the first card instead of landing on the last
-  // one. Reading each card's real offsetLeft/offsetWidth and letting
-  // scrollIntoView do the centering sidesteps both issues.
+      let inView = false;
+      let pointerFrame: number | null = null;
+      let latestPointer: PointerEvent | null = null;
+
+      const updatePlayback = () => {
+        const shouldRun = inView && !document.hidden;
+        track.dataset.running = String(shouldRun);
+        track.style.willChange = shouldRun ? "transform" : "auto";
+        if (shouldRun) marquee.play();
+        else marquee.pause();
+      };
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          inView = entry?.isIntersecting ?? false;
+          updatePlayback();
+        },
+        { rootMargin: "120px 0px", threshold: 0.01 },
+      );
+      observer.observe(wrapper);
+
+      const handleVisibility = () => updatePlayback();
+      document.addEventListener("visibilitychange", handleVisibility);
+
+      const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)")
+        .matches;
+      const cards = Array.from(
+        wrapper.querySelectorAll<HTMLElement>("[data-feedback-card]"),
+      );
+      const cardCleanups: Array<() => void> = [];
+
+      if (finePointer && pill && pillName) {
+        gsap.set(pill, {
+          xPercent: -50,
+          yPercent: -50,
+          scaleX: 0.65,
+          scaleY: 0.65,
+          opacity: 0,
+        });
+
+        const moveX = gsap.quickTo(pill, "x", {
+          duration: 0.42,
+          ease: "power3.out",
+        });
+        const moveY = gsap.quickTo(pill, "y", {
+          duration: 0.42,
+          ease: "power3.out",
+        });
+
+        const positionPill = (event: PointerEvent, immediate = false) => {
+          const bounds = wrapper.getBoundingClientRect();
+          const halfWidth = pill.offsetWidth / 2;
+          const halfHeight = pill.offsetHeight / 2;
+          const x = Math.min(
+            Math.max(event.clientX - bounds.left, halfWidth),
+            bounds.width - halfWidth,
+          );
+          const y = Math.min(
+            Math.max(event.clientY - bounds.top, halfHeight),
+            bounds.height - halfHeight,
+          );
+          if (immediate) gsap.set(pill, { x, y });
+          else {
+            moveX(x);
+            moveY(y);
+          }
+        };
+
+        const handlePointerMove = (event: PointerEvent) => {
+          latestPointer = event;
+          if (pointerFrame !== null) return;
+          pointerFrame = window.requestAnimationFrame(() => {
+            pointerFrame = null;
+            if (latestPointer) positionPill(latestPointer);
+          });
+        };
+
+        const handleWrapperLeave = () => {
+          gsap.killTweensOf(marquee);
+          gsap.to(marquee, {
+            timeScale: 1,
+            duration: 0.7,
+            ease: "power2.out",
+          });
+          gsap.to(pill, {
+            scaleX: 0.65,
+            scaleY: 0.65,
+            opacity: 0,
+            duration: 0.25,
+            ease: "power2.out",
+            overwrite: true,
+            onComplete: () => {
+              pill.style.willChange = "auto";
+            },
+          });
+        };
+
+        wrapper.addEventListener("pointermove", handlePointerMove);
+        wrapper.addEventListener("pointerleave", handleWrapperLeave);
+
+        for (const card of cards) {
+          const handleCardEnter = (event: PointerEvent) => {
+            pillName.textContent = `${possessive(card.dataset.feedbackName ?? "Client")} story`;
+            pill.style.willChange = "transform, opacity";
+            positionPill(event, true);
+            gsap.killTweensOf(marquee);
+            gsap.to(marquee, {
+              timeScale: HOVER_SPEED,
+              duration: 0.55,
+              ease: "power2.out",
+            });
+            gsap.to(pill, {
+              scaleX: 1,
+              scaleY: 1,
+              opacity: 1,
+              duration: 0.4,
+              ease: "power3.out",
+              overwrite: true,
+            });
+          };
+          card.addEventListener("pointerenter", handleCardEnter);
+          cardCleanups.push(() =>
+            card.removeEventListener("pointerenter", handleCardEnter),
+          );
+        }
+
+        cardCleanups.push(() => {
+          wrapper.removeEventListener("pointermove", handlePointerMove);
+          wrapper.removeEventListener("pointerleave", handleWrapperLeave);
+        });
+      }
+
+      return () => {
+        observer.disconnect();
+        document.removeEventListener("visibilitychange", handleVisibility);
+        cardCleanups.forEach((cleanup) => cleanup());
+        if (pointerFrame !== null) window.cancelAnimationFrame(pointerFrame);
+        latestPointer = null;
+        gsap.killTweensOf(marquee);
+        marquee.kill();
+        if (pill) gsap.killTweensOf(pill);
+        track.style.willChange = "auto";
+        track.dataset.running = "false";
+      };
+    },
+    { scope: sectionRef, dependencies: [isMobile], revertOnUpdate: true },
+  );
+
   const scrollByCard = (direction: 1 | -1) => {
     const track = mobileTrackRef.current;
     if (!track) return;
-
     const cards = Array.from(track.children) as HTMLElement[];
-    if (cards.length === 0) return;
+    if (!cards.length) return;
 
-    const viewportCenter = track.scrollLeft + track.clientWidth / 2;
+    const center = track.scrollLeft + track.clientWidth / 2;
+    const current = cards.reduce(
+      (closest, card, index) => {
+        const distance = Math.abs(
+          card.offsetLeft + card.offsetWidth / 2 - center,
+        );
+        return distance < closest.distance ? { index, distance } : closest;
+      },
+      { index: 0, distance: Number.POSITIVE_INFINITY },
+    ).index;
+    const next = (current + direction + cards.length) % cards.length;
+    const target =
+      cards[next].offsetLeft - (track.clientWidth - cards[next].offsetWidth) / 2;
 
-    let currentIndex = 0;
-    let smallestDistance = Infinity;
-    cards.forEach((card, i) => {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-      const distance = Math.abs(cardCenter - viewportCenter);
-      if (distance < smallestDistance) {
-        smallestDistance = distance;
-        currentIndex = i;
-      }
-    });
-
-    const nextIndex = (currentIndex + direction + cards.length) % cards.length;
-
-    cards[nextIndex].scrollIntoView({
-      behavior: "instant",
-      inline: "center",
-      block: "nearest",
+    track.scrollTo({
+      left: Math.max(0, Math.min(target, track.scrollWidth - track.clientWidth)),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
     });
   };
 
   return (
-    <section className="bg-[#0A0A0C]">
-      <div className="px-6 pt-20 sm:px-8 sm:pt-24 md:px-12 md:pt-28 lg:px-[90px]">
-        {/* Eyebrow / headline / paragraph — same row layout as
-            Approach.tsx (eyebrow left, headline in its own column,
-            paragraph right on `lg:`; stacked on mobile). */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
-          {/* Eyebrow — bracket-style marker, matching Approach.tsx's
-              "[ ] Proven Approach" instead of a square dot. */}
-          <div className="flex items-center gap-2 lg:shrink-0 lg:pt-2">
-            <span className="font-mono text-xs tracking-[0.16em] whitespace-nowrap text-white/85 uppercase sm:text-sm">
-              [ ] Real Feedbacks
-            </span>
+    <section id="feedback" ref={sectionRef} className="bg-black-bg text-white-text">
+      <div className="container-x mx-auto w-full max-w-[1920px] pt-10 sm:pt-12 md:pt-14 lg:pt-16">
+        <header className="grid grid-cols-1 gap-5 border-t border-white/20 pt-5 sm:grid-cols-[minmax(130px,0.35fr)_minmax(0,1.65fr)] sm:gap-8 lg:gap-16">
+          <div className="flex items-start gap-3 font-mono text-[11px] tracking-[0.04em] text-content-muted uppercase sm:pt-1 sm:text-xs">
+            <span aria-hidden="true">/</span>
+            <span>Client feedback</span>
           </div>
 
-          {/* Headline — indented + justified like the closing paragraph
-              in Approach.tsx, with a forced break so "Meets Results"
-              sits on its own second line regardless of viewport width. */}
-          <h2 className="indent-8 text-justify text-[2rem] leading-[1.2] font-normal tracking-tight text-white sm:indent-10 sm:text-[42px] sm:leading-[1.15] sm:tracking-[-1.5px] md:indent-12 md:text-[44px] md:leading-[1.12] md:tracking-[-2px] lg:w-[700px] lg:shrink-0">
-            Where Performance
-            <br />
-            Meets Results
-          </h2>
-
-          {/* Intro copy — merged into a single paragraph */}
-          <div className="max-w-80 lg:shrink-0 lg:pt-1">
-            <p className="text-[18px] leading-relaxed font-light tracking-body text-white/50 text-pretty">
-              How Our Solutions Deliver Success. Our marketing solutions help
-              businesses across Canada grow through targeted digital content
-              strategies to turn search visibility into measurable leads,
-              bookings, and consultations. Notable results include:
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(260px,0.75fr)] lg:gap-12">
+            <h2 className="h2-section max-w-[20ch] leading-[1.08] font-medium tracking-heading text-white-text">
+              Where performance meets measurable results.
+            </h2>
+            <p className="body-copy max-w-[48ch] leading-[1.6] tracking-[-0.02em] text-content uppercase lg:pt-1">
+              Our marketing solutions help businesses across Canada turn search
+              visibility into measurable leads, bookings, and consultations.
+              Explore the results behind each partnership.
             </p>
           </div>
-        </div>
+        </header>
       </div>
 
       {isMobile ? (
-        /* Mobile carousel — plain scroll-snap track + arrow buttons,
-           no GSAP tween, no doubled array, no pointer/pill machinery.
-           See point 5 in the doc comment above. */
-        <div className="mt-14">
+        <div className="mt-8">
           <div
             ref={mobileTrackRef}
+            data-feedback-mobile-track
             className="flex snap-x snap-mandatory overflow-x-auto px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {FEEDBACK.map((item) => (
+            {FEEDBACK.map((item, index) => (
               <div
                 key={item.name}
-                className="mr-5 w-[78vw] shrink-0 snap-center last:mr-0"
+                className="mr-px w-[84vw] shrink-0 snap-center last:mr-0"
               >
-                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    sizes="78vw"
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="pt-5">
-                  <span className="block text-[24px] leading-snug font-medium tracking-heading text-white">
-                    {item.name}
-                  </span>
-                  <p className="mt-2 text-[18px] leading-relaxed font-light tracking-body text-white/55 text-pretty">
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
-                </div>
+                <FeedbackCard item={item} index={index} sizes="84vw" />
               </div>
             ))}
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <button
-              type="button"
-              aria-label="Previous testimonial"
-              onClick={() => scrollByCard(-1)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white active:bg-white/10"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                <path
-                  d="M15 5l-7 7 7 7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Next testimonial"
-              onClick={() => scrollByCard(1)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white active:bg-white/10"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                <path
-                  d="M9 5l7 7-7 7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+          <div className="container-x mt-4 flex items-center justify-between gap-5">
+            <span className="font-mono text-[10px] tracking-[0.04em] text-content-muted uppercase">
+              Swipe / explore stories
+            </span>
+            <div className="flex items-center gap-px">
+              <button
+                type="button"
+                aria-label="Previous testimonial"
+                onClick={() => scrollByCard(-1)}
+                className="flex h-11 w-11 items-center justify-center border border-white/20 text-white-text transition-colors active:bg-accent active:text-black-bg"
+              >
+                <span aria-hidden="true">&larr;</span>
+              </button>
+              <button
+                type="button"
+                aria-label="Next testimonial"
+                onClick={() => scrollByCard(1)}
+                className="flex h-11 w-11 items-center justify-center border border-white/20 text-white-text transition-colors active:bg-accent active:text-black-bg"
+              >
+                <span aria-hidden="true">&rarr;</span>
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        /* Feedback marquee */
-        <div
-          ref={wrapperRef}
-          className="relative mt-14 overflow-hidden sm:mt-16 md:mt-20"
-          onPointerMove={followCursor}
-        >
-          <div ref={trackRef} className="flex w-max items-start">
-            {TRACK.map((item, i) => (
+        <div ref={wrapperRef} className="relative mt-10 overflow-hidden">
+          <div
+            ref={trackRef}
+            data-feedback-track
+            data-running="false"
+            className="flex w-max items-stretch"
+          >
+            {LOOP_ITEMS.map((item, index) => (
               <div
-                key={`${item.name}-${i}`}
-                aria-hidden={i >= FEEDBACK.length || undefined}
-                className="mr-10 w-[78vw] shrink-0 sm:w-[46vw] md:mr-12 md:w-[23rem]"
-                onPointerEnter={(event) => {
-                  if (event.pointerType !== "mouse") return;
-                  setPillName(possessive(item.name));
-                  snapPillTo(event);
-                  slowDown();
-                }}
-                onPointerLeave={(event) => {
-                  if (event.pointerType === "mouse") scheduleSpeedUp();
-                }}
+                key={`${item.name}-${index}`}
+                data-feedback-card
+                data-feedback-name={item.name}
+                aria-hidden={index >= FEEDBACK.length || undefined}
+                className="mr-px w-[48vw] shrink-0 md:w-[26rem]"
               >
-                <div className="relative aspect-[3/4] overflow-hidden rounded-3xl">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    sizes="(min-width: 768px) 23rem, (min-width: 640px) 46vw, 78vw"
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="pt-5 sm:pt-6">
-                  <span className="block text-[24px] leading-snug font-medium tracking-heading text-white">
-                    {item.name}
-                  </span>
-                  <p className="mt-2 text-[18px] leading-relaxed font-light tracking-body text-white/55 text-pretty">
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
-                </div>
+                <FeedbackCard
+                  item={item}
+                  index={index}
+                  sizes="(min-width: 768px) 26rem, 48vw"
+                />
               </div>
             ))}
           </div>
 
-          {/* Shared cursor-following pill. Labeled with whichever card is
-              currently hovered — written via setPillName's crossfade into
-              nameRef's textContent (no React state involved), so hovering
-              never re-renders the TRACK list. Reads e.g. "MAG SOLAR'S
-              STORY". This only ever renders on fine-pointer/mouse input (see
-              supportsFinePointer above) — never on touch — so it's one
-              fixed, generous size instead of scaling down at narrow
-              breakpoints; a resized desktop window is still a desktop, not a
-              phone, and the previous responsive sizing was quietly shrinking
-              it back to tiny on any viewport under 640px, which is what kept
-              reading as "small". Corner radius is a fixed 5px at all times
-              (rounded-[5px] below, not GSAP-driven) — the pill only scales
-              and fades in the effect above, it never morphs shape.
-              Glass/blur treatment: translucent dark fill + backdrop-blur so
-              whatever's under the cursor (card image, white section bg)
-              shows through softened, with a hairline border to keep the
-              edge readable against light backgrounds. */}
           <span
             ref={pillRef}
             aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-0 z-10 flex items-baseline gap-2 rounded-[5px] border border-white/15 bg-black-text/40 px-8 py-4 font-mono text-2xl tracking-[0.02em] text-white uppercase whitespace-nowrap opacity-0 backdrop-blur-xl"
+            className="pointer-events-none absolute top-0 left-0 z-10 flex items-center border border-black-bg/20 bg-accent px-5 py-3 font-mono text-xs tracking-[-0.025em] text-black-bg uppercase whitespace-nowrap opacity-0"
           >
-            <span ref={nameRef} className="font-semibold" />
-            <span className="font-normal text-white/55">Story</span>
+            <span ref={pillNameRef} className="font-medium" />
           </span>
         </div>
       )}
 
-      <div className="pb-20 sm:pb-24 md:pb-28" />
+      <div className="pb-10 sm:pb-12 md:pb-14 lg:pb-16" />
     </section>
   );
 }

@@ -29,7 +29,7 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
         <h2
           key={key}
           id={block.id}
-          className="pt-4 text-2xl leading-tight font-semibold text-white"
+          className="scroll-mt-32 pt-8 text-[clamp(1.75rem,3vw,2.75rem)] leading-[1.1] font-medium tracking-heading text-white-text"
         >
           {block.text}
         </h2>
@@ -38,14 +38,17 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
       return (
         <h3
           key={key}
-          className="pt-2 text-xl leading-tight font-semibold text-white"
+          className="scroll-mt-32 pt-6 h3-section leading-tight font-medium tracking-heading text-white-text"
         >
           {block.text}
         </h3>
       );
     case "list":
       return (
-        <ul key={key} className="list-disc space-y-2 pl-5">
+        <ul
+          key={key}
+          className="body-copy list-disc space-y-2 pl-5 leading-[1.7] text-content"
+        >
           {block.items.map((item, j) => (
             <li key={j}>{item}</li>
           ))}
@@ -54,7 +57,7 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
     case "image":
       return (
         <figure key={key} className="!mt-8 space-y-3">
-          <div className="relative aspect-video w-full overflow-hidden rounded-[20px] bg-[#1A1B1E]">
+          <div className="relative aspect-video w-full overflow-hidden border border-white/20 bg-black-bg">
             <Image
               src={block.src}
               alt={block.alt}
@@ -64,7 +67,7 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
             />
           </div>
           {block.caption && (
-            <figcaption className="text-sm text-white/40">
+            <figcaption className="font-mono text-xs text-content-muted">
               {block.caption}
             </figcaption>
           )}
@@ -107,6 +110,10 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
       );
     case "paragraph":
     default:
-      return <p key={key}>{block.text}</p>;
+      return (
+        <p key={key} className="body-copy leading-[1.75] text-content">
+          {block.text}
+        </p>
+      );
   }
 }

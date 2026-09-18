@@ -26,7 +26,7 @@ export default async function OpengraphImage({
         padding: "64px",
       }}
     >
-      <div style={{ display: "flex", fontSize: 28, color: "#6b26d9" }}>
+      <div style={{ display: "flex", fontSize: 28, color: "#a78bfa" }}>
         {SITE_NAME}
       </div>
       <div

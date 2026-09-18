@@ -1,0 +1,84 @@
+.header {
+  --header-paper: #d9d9d9;
+  --header-accent: var(--color-accent);
+  --header-ease: cubic-bezier(0.22, 0.8, 0.22, 1);
+}
+
+.drop {
+  display: grid;
+  grid-template-rows: 0fr;
+  pointer-events: none;
+  transition: grid-template-rows 460ms var(--header-ease);
+}
+
+.drop[data-open="true"] {
+  grid-template-rows: 1fr;
+  pointer-events: auto;
+}
+
+.dropClip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dropBody {
+  background: var(--header-paper);
+  transform: translateY(-12px);
+  transition: transform 460ms var(--header-ease);
+}
+
+.drop[data-open="true"] .dropBody {
+  transform: translateY(0);
+}
+
+.tileClip {
+  height: 48px;
+  overflow: hidden;
+}
+
+.tileTravel {
+  transform: translateY(0);
+  transition: transform 520ms var(--header-ease);
+}
+
+.nav[data-hidden="true"] .tileTravel,
+.tileTravel[data-dropped="true"] {
+  transform: translateY(105%);
+}
+
+.nav[data-hidden="true"] {
+  pointer-events: none;
+}
+
+.serviceHeading {
+  transform: translateY(-8px) rotateX(-65deg);
+  transform-origin: center top;
+  transition: transform 520ms var(--header-ease);
+}
+
+.drop[data-open="true"] .serviceHeading {
+  transform: translateY(0) rotateX(0deg);
+}
+
+.stripe {
+  transform: scaleX(0);
+  transition: transform 360ms
+    var(--header-ease, cubic-bezier(0.22, 0.8, 0.22, 1));
+  transition-delay: var(--stripe-out);
+}
+
+.wipe[data-active="true"] .stripe {
+  transform: scaleX(1);
+  transition-delay: var(--stripe-in);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop,
+  .dropBody,
+  .tileTravel,
+  .serviceHeading,
+  .stripe {
+    transition-duration: 0ms;
+    transition-delay: 0ms;
+  }
+}

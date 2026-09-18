@@ -3,158 +3,110 @@
 import { useId, useState, type ReactNode } from "react";
 import JsonLd from "@/components/seo/JsonLd";
 import Button from "@/components/ui/Button";
-
-/**
- * FAQ (ui/FAQ.tsx)
- * -----------------------------------------------------------------
- * The one FAQ component for the whole site — every question/answer
- * accordion is this component called directly, with each call site
- * passing its own copy/data as props. No per-page wrapper
- * components sit in between anymore:
- *   - app/page.tsx (homepage FAQ) — eyebrow + 3-line heading +
- *     description + FAQS data.
- *   - app/services/page.tsx (/services list) — eyebrow + 1-line
- *     heading + SERVICES_FAQS data.
- *   - app/services/[slug]/page.tsx — the "faq" section, built from
- *     that service's own content data.
- *   - app/blog/[slug]/page.tsx — "faq" content blocks, built from
- *     that post's own content data.
- * Changing the visual design (spacing, colors, animation, markup)
- * only ever needs to happen in this one file.
- *
- * Layout/markup is carried over from the original
- * components/services/ServiceFAQ.tsx (the /services/[slug] version,
- * now retired) — two-column, no max-width cap on the grid, flat
- * (non-responsive) card type sizes, un-indented justified answers.
- * `eyebrow` and `description` are additive, optional slots on top
- * of that for the call sites that use them (home + services-list
- * intros) — omit both and you get the original ServiceFAQ look
- * exactly.
- */
+import GridCorners from "@/components/ui/GridCorners";
+import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
 
 export interface FaqItem {
   question: string;
   answer: string;
-  /** Substring of `answer` to underline for emphasis, e.g. "Search Engine Marketing". */
   emphasis?: string;
-  /** Substring of `answer` that renders as an external link instead — mutually exclusive with `emphasis`. */
   link?: { label: string; href: string };
 }
 
 export interface FAQProps {
-  /** Small mono label above the heading, e.g. "[ ] Services FAQ". Omitted entirely when not set. */
   eyebrow?: string;
-  /** Heading content. Pass your own <br /> between lines for multi-line headings. */
   heading: ReactNode;
-  /** Optional supporting paragraph under the heading. */
   description?: string;
-  /** CTA rendered under the heading. Defaults to "Get In Touch" -> /contact; pass `false` to hide it. */
   cta?: { label: string; href: string } | false;
   items: FaqItem[];
-  /** Emits FAQPage JSON-LD structured data built from `items`. Default true. */
   includeJsonLd?: boolean;
 }
-
-const PANEL_EASE = "ease-[cubic-bezier(0.77,0,0.175,1)]";
 
 function renderAnswer(
   answer: string,
   emphasis?: string,
   link?: { label: string; href: string },
 ) {
-  if (link) {
-    const idx = answer.indexOf(link.label);
-    if (idx !== -1) {
-      return (
-        <>
-          {answer.slice(0, idx)}
-          <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-cursor="circle"
-            className="text-white underline decoration-1 underline-offset-4 hover:text-white/80"
-          >
-            {link.label}
-          </a>
-          {answer.slice(idx + link.label.length)}
-        </>
-      );
-    }
-  }
+  const match = link?.label ?? emphasis;
+  if (!match) return answer;
+  const index = answer.indexOf(match);
+  if (index < 0) return answer;
 
-  if (!emphasis) return answer;
-
-  const idx = answer.indexOf(emphasis);
-  if (idx === -1) return answer;
+  const marked = link ? (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline underline-offset-4 hover:text-accent-light"
+    >
+      {match}
+    </a>
+  ) : (
+    <span className="underline underline-offset-4">{match}</span>
+  );
 
   return (
     <>
-      {answer.slice(0, idx)}
-      <span className="text-white underline decoration-1 underline-offset-4">
-        {emphasis}
-      </span>
-      {answer.slice(idx + emphasis.length)}
+      {answer.slice(0, index)}
+      {marked}
+      {answer.slice(index + match.length)}
     </>
   );
 }
 
-interface FaqAccordionItemProps {
+function FaqItemRow({
+  item,
+  index,
+  open,
+  onToggle,
+}: {
   item: FaqItem;
-  isOpen: boolean;
+  index: number;
+  open: boolean;
   onToggle: () => void;
-}
-
-function FaqAccordionItem({ item, isOpen, onToggle }: FaqAccordionItemProps) {
-  const reactId = useId();
-  const panelId = `faq-panel-${reactId}`;
-  const buttonId = `faq-question-${reactId}`;
+}) {
+  const id = useId();
 
   return (
-    <div className="overflow-hidden rounded-[28px] bg-[#1A1B1E]">
+    <div className="border-b border-white/20 last:border-b-0">
       <button
-        id={buttonId}
         type="button"
+        data-stagger-hover
+        data-stagger-persist
         onClick={onToggle}
-        aria-expanded={isOpen}
-        aria-controls={panelId}
-        className="flex w-full items-center justify-between gap-6 p-7 text-left sm:p-8"
+        aria-expanded={open}
+        aria-controls={id}
+        className="relative grid w-full grid-cols-[38px_minmax(0,1fr)_28px] items-center gap-3 overflow-hidden px-5 py-6 text-left sm:grid-cols-[54px_minmax(0,1fr)_32px] sm:gap-5 sm:px-7 sm:py-8"
       >
-        <span className="text-[24px] leading-snug font-medium tracking-tight text-white">
+        <HorizontalStaggerRows />
+        <span className="relative font-mono text-[10px] tracking-[0.06em] text-content-muted sm:text-xs">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="relative h3-section leading-[1.15] font-medium tracking-heading text-white-text">
           {item.question}
         </span>
         <span
           aria-hidden="true"
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 transition-transform duration-500 sm:h-10 sm:w-10 ${PANEL_EASE} ${
-            isOpen ? "rotate-180" : "rotate-0"
-          }`}
+          className="relative justify-self-end font-mono text-2xl font-light text-accent"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4 text-white"
-          >
-            <path d="M7 17 17 7M9 7h8v8" />
-          </svg>
+          {open ? "\u2212" : "+"}
         </span>
       </button>
 
       <div
-        id={panelId}
-        role="region"
-        aria-labelledby={buttonId}
-        className={`grid transition-[grid-template-rows,opacity] duration-700 motion-reduce:transition-none ${PANEL_EASE} ${
-          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        id={id}
+        aria-hidden={!open}
+        inert={!open}
+        className={`grid transition-[grid-template-rows] duration-700 ease-[cubic-bezier(0.22,0.8,0.22,1)] motion-reduce:transition-none ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
-        <div className="overflow-hidden">
-          <p className="px-7 pb-7 text-justify text-[18px] leading-relaxed font-light text-white/50 sm:px-8 sm:pb-8">
-            {renderAnswer(item.answer, item.emphasis, item.link)}
-          </p>
+        <div className="min-h-0 overflow-hidden">
+          <div className="grid border-t border-white/15 px-5 py-7 sm:grid-cols-[54px_minmax(0,1fr)_32px] sm:gap-5 sm:px-7 sm:py-8">
+            <p className="body-copy max-w-[76ch] leading-[1.65] text-content sm:col-start-2">
+              {renderAnswer(item.answer, item.emphasis, item.link)}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -169,14 +121,7 @@ export default function FAQ({
   items,
   includeJsonLd = true,
 }: FAQProps) {
-  // Only one question open at a time — opening a new one closes
-  // whatever was previously open. All items start closed.
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const toggleItem = (index: number) => {
-    setOpenIndex((current) => (current === index ? null : index));
-  };
-
   const faqJsonLd = includeJsonLd
     ? {
         "@context": "https://schema.org",
@@ -184,60 +129,54 @@ export default function FAQ({
         mainEntity: items.map((item) => ({
           "@type": "Question",
           name: item.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: item.answer,
-          },
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
         })),
       }
     : null;
 
   return (
-    <section className="container-x bg-black-bg py-20 sm:py-24 md:py-28">
+    <section className="bg-black-bg py-20 sm:py-24 lg:py-28">
       {faqJsonLd && <JsonLd data={faqJsonLd} />}
-
-      <div className="grid w-full grid-cols-1 gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-x-16">
-        {/* LEFT — FAQ INTRO */}
-        <div className="lg:sticky lg:top-32 lg:self-start">
+      <div className="container-x mx-auto w-full max-w-[1920px]">
+        <header className="mx-auto flex max-w-[900px] flex-col items-center text-center">
           {eyebrow && (
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xs tracking-[0.16em] text-white/60 uppercase sm:text-sm">
-                {eyebrow}
-              </span>
-            </div>
+            <p className="font-mono text-xs tracking-[0.05em] text-content-muted uppercase">
+              <span className="text-accent">{"// "}</span>
+              {eyebrow}
+            </p>
           )}
-
           <h2
-            className={`text-[32px] leading-[1.15] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px] ${
-              eyebrow ? "mt-7 sm:mt-8" : ""
+            className={`h2-section max-w-[22ch] leading-[1.08] font-medium tracking-heading text-white-text text-balance ${
+              eyebrow ? "mt-5" : ""
             }`}
           >
             {heading}
           </h2>
-
           {description && (
-            <p className="mt-7 max-w-md text-sm leading-loose text-white/45 sm:mt-8 sm:text-base">
+            <p className="body-copy mt-6 max-w-[62ch] leading-[1.65] text-content">
               {description}
             </p>
           )}
-
           {cta && (
             <div className="mt-8">
-              <Button to={cta.href} variant="purple" size="lg">
+              <Button to={cta.href} variant="purple-fill" size="md">
                 {cta.label}
               </Button>
             </div>
           )}
-        </div>
+        </header>
 
-        {/* RIGHT — FAQ CARDS */}
-        <div className="flex flex-col gap-5">
+        <div className="relative mt-12 border-y border-white/20 sm:mt-16">
+          <GridCorners />
           {items.map((item, index) => (
-            <FaqAccordionItem
+            <FaqItemRow
               key={item.question}
               item={item}
-              isOpen={openIndex === index}
-              onToggle={() => toggleItem(index)}
+              index={index}
+              open={openIndex === index}
+              onToggle={() =>
+                setOpenIndex((current) => (current === index ? null : index))
+              }
             />
           ))}
         </div>

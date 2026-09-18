@@ -99,10 +99,10 @@ export default async function BlogPostPage({
           ContactSection) instead of the dark text-black-text color
           so it stays readable against black.
           ============================================================== */}
-      <div className="container-x mx-auto flex items-start gap-10 py-16">
+      <div className="container-x mx-auto grid w-full max-w-[1920px] grid-cols-1 items-start py-16 sm:py-20 lg:grid-cols-[220px_minmax(0,820px)_58px] lg:justify-between lg:gap-10 lg:py-24">
         <BlogContents headings={headings} readTime={readTime} />
 
-        <div className="min-w-0 flex-1 space-y-4 text-lg leading-8 text-white/70">
+        <div className="min-w-0 space-y-5 text-base leading-[1.75] text-content sm:text-lg">
           {bodyBlocks.map((block, i) => renderBlogBlock(block, i))}
         </div>
 
@@ -127,7 +127,7 @@ export default async function BlogPostPage({
 
       {post.disclaimer && (
         <div className="container-x mx-auto pb-16">
-          <p className="text-sm leading-relaxed text-white/40">
+          <p className="font-mono text-sm leading-relaxed text-content-muted">
             {post.disclaimer}
           </p>
         </div>

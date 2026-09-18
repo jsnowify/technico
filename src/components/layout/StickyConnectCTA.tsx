@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useMagneticHover } from "@/lib/hooks/useMagneticHover";
@@ -95,6 +96,7 @@ const RING_CHARS = Array.from(
  *   rest (distance 0) and never animated again.
  */
 export default function StickyConnectCTA() {
+  const pathname = usePathname();
   const pathRef = useRef<SVGPathElement>(null);
   const charRefs = useRef<(SVGTextElement | null)[]>([]);
 
@@ -104,6 +106,7 @@ export default function StickyConnectCTA() {
   >({ maxX: 8, maxY: 8, radius: 90 });
 
   useGSAP(() => {
+    if (pathname === "/contact" || window.innerWidth < 640) return;
     const pathEl = pathRef.current;
     if (!pathEl) return;
 
@@ -220,7 +223,11 @@ export default function StickyConnectCTA() {
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(idleTimeout);
     };
-  }, []);
+  }, { dependencies: [pathname], revertOnUpdate: true });
+
+  // The contact page already is the destination. Keeping a fixed CTA over
+  // the form would obscure fields on narrow screens and waste animation work.
+  if (pathname === "/contact") return null;
 
   return (
     <Link
@@ -232,7 +239,8 @@ export default function StickyConnectCTA() {
       onPointerLeave={reset}
       className="
         fixed right-6 bottom-6 z-[95]
-        flex h-28 w-28 items-center justify-center
+        hidden h-28 w-28 items-center justify-center
+        sm:flex
         sm:right-8 sm:bottom-8 sm:h-32 sm:w-32
       "
     >
@@ -240,7 +248,7 @@ export default function StickyConnectCTA() {
         ref={targetRef}
         className="
           relative flex h-full w-full items-center justify-center
-          overflow-hidden rounded-[28px] bg-[#8B5CF6]
+          overflow-hidden rounded-[28px] bg-accent-dark
           shadow-[0_8px_30px_rgba(0,0,0,0.35)]
         "
       >

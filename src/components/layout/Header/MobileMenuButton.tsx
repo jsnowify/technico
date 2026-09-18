@@ -5,13 +5,6 @@ interface MobileMenuButtonProps {
   onClick: () => void;
 }
 
-/**
- * Hamburger / close toggle for the mobile nav.
- * Two bars that morph into an X, matching the rotate/transition
- * treatment already used for the services chevron in MobileNav.tsx.
- * Color is inherited (`currentColor`) so it follows the parent's
- * text-black / text-white swap in Header/index.tsx.
- */
 export default function MobileMenuButton({
   open,
   onClick,
@@ -22,16 +15,26 @@ export default function MobileMenuButton({
       onClick={onClick}
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
-      className="relative flex h-10 w-10 shrink-0 items-center justify-center"
+      aria-controls="mobile-header-menu"
+      className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden"
     >
       <span
-        className={`absolute h-px w-6 bg-current transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] ${
-          open ? "translate-y-0 rotate-45" : "-translate-y-[3px] rotate-0"
+        className={`absolute h-px bg-current transition-[width,transform] duration-700 [transition-timing-function:cubic-bezier(.16,1,.3,1)] ${
+          open
+            ? "w-5 translate-x-1 -translate-y-[5px]"
+            : "w-6 translate-x-0 -translate-y-[5px]"
         }`}
       />
       <span
-        className={`absolute h-px w-6 bg-current transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] ${
-          open ? "translate-y-0 -rotate-45" : "translate-y-[3px] rotate-0"
+        className={`absolute h-px bg-current transition-[width,transform] delay-75 duration-700 [transition-timing-function:cubic-bezier(.16,1,.3,1)] ${
+          open ? "w-4 -translate-x-1" : "w-6 translate-x-0"
+        }`}
+      />
+      <span
+        className={`absolute h-px bg-current transition-[width,transform] delay-150 duration-700 [transition-timing-function:cubic-bezier(.16,1,.3,1)] ${
+          open
+            ? "w-5 translate-x-1 translate-y-[5px]"
+            : "w-6 translate-x-0 translate-y-[5px]"
         }`}
       />
     </button>

@@ -8,7 +8,7 @@ import {
 } from "@/lib/content/services";
 import JsonLd from "@/components/seo/JsonLd";
 import Cta from "@/components/ui/CTA";
-import GeometricIcon from "@/components/ui/icons";
+import FAQ from "@/components/ui/FAQ";
 import ServiceHighlights from "@/components/services/ServiceHighlights";
 import ServiceComparison from "@/components/services/ServiceComparison";
 import ServiceFeatureList from "@/components/services/ServiceFeatureList";
@@ -22,10 +22,11 @@ import ServiceResults from "@/components/services/ServiceResults";
 import ServiceContentPillars from "@/components/services/ServiceContentPillars";
 import ServicePillarCards from "@/components/services/ServicePillarCards";
 import ServicesGrowBusiness from "@/components/services/ServicesGrowBusiness";
-import FAQ from "@/components/ui/FAQ";
 import TrustedBy from "@/components/home/TrustedBy";
 import TechStack from "@/components/services/TechStack";
 import ServiceIntroPanel from "@/components/services/ServiceIntroPanel";
+import ServiceSectionFrame from "@/components/services/ServiceSectionFrame";
+import detailStyles from "@/components/services/ServiceSectionFrame.module.css";
 import type { ServiceSection } from "@/lib/content/types";
 import {
   SITE_NAME,
@@ -72,7 +73,7 @@ function renderHeroParagraph({
       {text.slice(0, idx)}
       <Link
         href={link.href}
-        className="text-white underline decoration-1 underline-offset-4 hover:text-white/80"
+        className="text-content underline decoration-1 underline-offset-4 hover:text-accent-light"
       >
         {link.label}
       </Link>
@@ -95,6 +96,73 @@ const CTA_SPACING_CLASS: Record<
   compact: "bg-black-bg !pt-0 !pb-0",
   "tight-bottom": "bg-black-bg !pt-0 !pb-[80px]",
 };
+
+interface ServiceHeroProps {
+  eyebrow: string;
+  headline: string;
+  paragraphs: Extract<ServiceSection, { type: "hero" }>["paragraphs"];
+  accent: "pink" | "purple";
+  position: number;
+  total: number;
+}
+
+function ServiceHero({
+  eyebrow,
+  headline,
+  paragraphs,
+  accent,
+  position,
+  total,
+}: ServiceHeroProps) {
+  const current = String(position).padStart(2, "0");
+  const count = String(total).padStart(2, "0");
+
+  return (
+    <section className={detailStyles.hero} data-accent={accent}>
+      <div className={detailStyles.heroInner}>
+        <div className={detailStyles.heroMeta} aria-hidden="true">
+          <span>TECHNICO_</span>
+          <span>DIGITAL SOLUTIONS / SERVICES</span>
+          <span>
+            {current} / {count}
+          </span>
+        </div>
+
+        <div className={detailStyles.heroGrid}>
+          <div className={detailStyles.heroRail} aria-hidden="true">
+            {"// Service detail"}
+          </div>
+
+          <div className={detailStyles.heroContent}>
+            <div>
+              <p className={detailStyles.heroEyebrow}>
+                <span aria-hidden="true">{"//"}</span>
+                <span>{eyebrow}</span>
+              </p>
+              <h1 className={detailStyles.heroTitle}>{headline}</h1>
+            </div>
+
+            <div className={detailStyles.heroCopy}>
+              {paragraphs.map((paragraph, index) => (
+                <p key={index}>{renderHeroParagraph(paragraph)}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={detailStyles.heroFooter} aria-hidden="true">
+          <span>{"// Profit over traffic"}</span>
+          <div className={detailStyles.heroSignal}>
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default async function ServiceDetailPage({
   params,
@@ -142,6 +210,12 @@ export default async function ServiceDetailPage({
   const accent = getServiceAccent(service.slug);
   const sections = service.sections ?? [];
   const hasHero = sections.some((section) => section.type === "hero");
+  const allServices = await getAllServices();
+  const servicePosition =
+    Math.max(
+      allServices.findIndex((item) => item.slug === service.slug),
+      0,
+    ) + 1;
 
   return (
     <>
@@ -153,297 +227,282 @@ export default async function ServiceDetailPage({
             `hero` block in their sections yet — keeps the page from
             rendering blank instead of inventing hero copy for them. */}
         {!hasHero && (
-          <section className="bg-black-bg px-10 pt-20 pb-10 sm:pt-24 md:pt-28">
-            <h1 className="max-w-xl text-[32px] leading-[1.05] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
-              {service.title}
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed font-light text-white/60">
-              {service.shortDescription}
-            </p>
-          </section>
+          <ServiceHero
+            eyebrow={service.title}
+            headline={service.title}
+            paragraphs={[{ text: service.shortDescription }]}
+            accent={accent}
+            position={servicePosition}
+            total={allServices.length}
+          />
         )}
 
         {sections.map((section, index) => {
-          switch (section.type) {
-            case "hero":
-              return (
-                <section
-                  key={index}
-                  className="relative overflow-hidden bg-black-bg"
-                >
-                  <div className="px-10 pt-20 pb-0 sm:pt-24 md:pt-28">
-                    <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
-                      <div>
-                        <div className="flex items-center gap-2.5">
-                          <span
-                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-sm font-light text-white ${
-                              accent === "pink"
-                                ? "bg-pink-accent"
-                                : "bg-purple-accent"
-                            }`}
-                          >
-                            <GeometricIcon index={10} className="h-3 w-3" />
-                          </span>
-                          <p className="text-base leading-none font-light tracking-wide text-white">
-                            {section.eyebrow}
-                          </p>
-                        </div>
-                        <h1 className="mt-6 max-w-xl text-[32px] leading-[1.05] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
-                          {section.headline}
-                        </h1>
-                      </div>
-                      <div className="space-y-6 text-lg leading-relaxed font-light text-white/60 md:pt-1">
-                        {section.paragraphs.map((paragraph, i) => (
-                          <p key={i}>{renderHeroParagraph(paragraph)}</p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              );
+          const renderedSection = (() => {
+            switch (section.type) {
+              case "hero":
+                return (
+                  <ServiceHero
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraphs={section.paragraphs}
+                    accent={accent}
+                    position={servicePosition}
+                    total={allServices.length}
+                  />
+                );
 
-            case "cta":
-              return (
-                <Cta
-                  key={index}
-                  title={section.title}
-                  description={section.description}
-                  cta={section.cta}
-                  wide={section.wide}
-                  className={CTA_SPACING_CLASS[section.spacing ?? "standalone"]}
-                />
-              );
+              case "cta":
+                return (
+                  <Cta
+                    key={index}
+                    title={section.title}
+                    description={section.description}
+                    cta={section.cta}
+                    wide={section.wide}
+                    className={
+                      CTA_SPACING_CLASS[section.spacing ?? "standalone"]
+                    }
+                  />
+                );
 
-            case "highlights": {
-              // Drop this block's own top padding when it's stacked
-              // directly after another `highlights` block — that
-              // first block's bottom padding already supplies the
-              // gap, so stacking both blocks' padding would leave a
-              // much bigger gap here than between any other pair of
-              // sections on the page. See ServiceHighlights.tsx's
-              // doc comment for the full explanation.
-              const previousSection = sections[index - 1];
-              const spacing =
-                previousSection?.type === "highlights"
-                  ? "tight-top"
-                  : "default";
+              case "highlights":
+                return (
+                  <ServiceHighlights
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraph={section.paragraph}
+                    items={section.items}
+                    accent={accent}
+                    cta={section.cta}
+                    subheading={section.subheading}
+                  />
+                );
 
-              return (
-                <ServiceHighlights
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  paragraph={section.paragraph}
-                  items={section.items}
-                  accent={accent}
-                  cta={section.cta}
-                  subheading={section.subheading}
-                  spacing={spacing}
-                />
-              );
+              case "conversion":
+                return (
+                  <ServiceConversion
+                    key={index}
+                    headline={section.headline}
+                    description={section.description}
+                    image={section.image}
+                    features={section.features}
+                    accent={accent}
+                  />
+                );
+
+              case "insights":
+                return (
+                  <ServiceInsights
+                    key={index}
+                    image={section.image}
+                    headline={section.headline}
+                    intro={section.intro}
+                    introLink={section.introLink}
+                    items={section.items}
+                    closingParagraph={section.closingParagraph}
+                  />
+                );
+
+              case "results":
+                return (
+                  <ServiceResults
+                    key={index}
+                    headline={section.headline}
+                    description={section.description}
+                    descriptionLink={section.descriptionLink}
+                    items={section.items}
+                    accent={accent}
+                  />
+                );
+
+              case "contentPillars":
+                return (
+                  <ServiceContentPillars
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraph={section.paragraph}
+                    quote={section.quote}
+                    quoteAttribution={section.quoteAttribution}
+                    image={section.image}
+                    items={section.items}
+                  />
+                );
+
+              case "pillarCards":
+                return (
+                  <ServicePillarCards
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    intro={section.intro}
+                    items={section.items}
+                    closingParagraph={section.closingParagraph}
+                    accent={accent}
+                  />
+                );
+
+              case "growBusiness":
+                return (
+                  <ServicesGrowBusiness
+                    key={index}
+                    headline={section.headline}
+                    intro={section.intro}
+                    items={section.items}
+                    closing={section.closing}
+                  />
+                );
+
+              case "comparison":
+                return (
+                  <ServiceComparison
+                    key={index}
+                    headline={section.headline}
+                    intro={section.intro}
+                    cta={section.cta}
+                    columns={section.columns}
+                    closing={section.closing}
+                    accent={accent}
+                  />
+                );
+
+              case "marqueeCta":
+                return (
+                  <ServiceMarqueeCta
+                    key={index}
+                    text={section.text}
+                    cta={section.cta}
+                    accent={accent}
+                  />
+                );
+
+              case "featuresSplit":
+                return (
+                  <ServiceFeatureList
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraphs={section.paragraphs}
+                    listHeading={section.listHeading}
+                    items={section.items}
+                    accent={accent}
+                    image={section.image}
+                  />
+                );
+
+              case "featureCard":
+                return (
+                  <ServiceFeatureCard
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraph={section.paragraph}
+                    image={section.image}
+                    cta={section.cta}
+                    checklist={section.checklist}
+                    accent={accent}
+                  />
+                );
+
+              case "imageStatement":
+                return (
+                  <ServiceImageStatement
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    cta={section.cta}
+                    image={section.image}
+                    shape={section.shape}
+                    paragraph={section.paragraph}
+                    bullets={section.bullets}
+                    closingParagraph={section.closingParagraph}
+                    accent={accent}
+                  />
+                );
+
+              case "process":
+                return (
+                  <ServicesProcess
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraph={section.paragraph}
+                    steps={section.steps}
+                    descriptionLayout={section.descriptionLayout}
+                    accent={accent}
+                  />
+                );
+
+              case "trustedBy":
+                return <TrustedBy key={index} />;
+
+              case "techStack":
+                return section.variant === "graphicDesignWork" ? (
+                  <TechStack
+                    key={index}
+                    items={GRAPHIC_DESIGN_WORK}
+                    heading={
+                      <>
+                        Our Recent
+                        <br />
+                        Graphic Design Work
+                      </>
+                    }
+                  />
+                ) : (
+                  <TechStack key={index} />
+                );
+
+              case "introPanel":
+                return (
+                  <ServiceIntroPanel
+                    key={index}
+                    eyebrow={section.eyebrow}
+                    headline={section.headline}
+                    paragraphs={section.paragraphs}
+                    image={section.image}
+                    accent={accent}
+                  />
+                );
+
+              case "faq":
+                return (
+                  <FAQ
+                    key={index}
+                    heading={
+                      <>
+                        {section.headline[0]}
+                        <br />
+                        {section.headline[1]}
+                      </>
+                    }
+                    cta={section.cta}
+                    items={section.items}
+                  />
+                );
+
+              default:
+                return null;
             }
+          })();
 
-            case "conversion":
-              return (
-                <ServiceConversion
-                  key={index}
-                  headline={section.headline}
-                  description={section.description}
-                  image={section.image}
-                  features={section.features}
-                  accent={accent}
-                />
-              );
-
-            case "insights":
-              return (
-                <ServiceInsights
-                  key={index}
-                  image={section.image}
-                  headline={section.headline}
-                  intro={section.intro}
-                  introLink={section.introLink}
-                  items={section.items}
-                  closingParagraph={section.closingParagraph}
-                />
-              );
-
-            case "results":
-              return (
-                <ServiceResults
-                  key={index}
-                  headline={section.headline}
-                  description={section.description}
-                  descriptionLink={section.descriptionLink}
-                  items={section.items}
-                />
-              );
-
-            case "contentPillars":
-              return (
-                <ServiceContentPillars
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  paragraph={section.paragraph}
-                  quote={section.quote}
-                  quoteAttribution={section.quoteAttribution}
-                  image={section.image}
-                  items={section.items}
-                />
-              );
-
-            case "pillarCards":
-              return (
-                <ServicePillarCards
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  intro={section.intro}
-                  items={section.items}
-                  closingParagraph={section.closingParagraph}
-                />
-              );
-
-            case "growBusiness":
-              return (
-                <ServicesGrowBusiness
-                  key={index}
-                  headline={section.headline}
-                  intro={section.intro}
-                  items={section.items}
-                  closing={section.closing}
-                />
-              );
-
-            case "comparison":
-              return (
-                <ServiceComparison
-                  key={index}
-                  headline={section.headline}
-                  intro={section.intro}
-                  cta={section.cta}
-                  columns={section.columns}
-                  closing={section.closing}
-                  accent={accent}
-                />
-              );
-
-            case "marqueeCta":
-              return (
-                <ServiceMarqueeCta
-                  key={index}
-                  text={section.text}
-                  cta={section.cta}
-                  accent={accent}
-                />
-              );
-
-            case "featuresSplit":
-              return (
-                <ServiceFeatureList
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  paragraphs={section.paragraphs}
-                  listHeading={section.listHeading}
-                  items={section.items}
-                  accent={accent}
-                  image={section.image}
-                />
-              );
-
-            case "featureCard":
-              return (
-                <ServiceFeatureCard
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  paragraph={section.paragraph}
-                  image={section.image}
-                  cta={section.cta}
-                  checklist={section.checklist}
-                />
-              );
-
-            case "imageStatement":
-              return (
-                <ServiceImageStatement
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  cta={section.cta}
-                  image={section.image}
-                  shape={section.shape}
-                  paragraph={section.paragraph}
-                  bullets={section.bullets}
-                  closingParagraph={section.closingParagraph}
-                />
-              );
-
-            case "process":
-              return (
-                <ServicesProcess
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  paragraph={section.paragraph}
-                  steps={section.steps}
-                  descriptionLayout={section.descriptionLayout}
-                />
-              );
-
-            case "trustedBy":
-              return <TrustedBy key={index} />;
-
-            case "techStack":
-              return section.variant === "graphicDesignWork" ? (
-                <TechStack
-                  key={index}
-                  items={GRAPHIC_DESIGN_WORK}
-                  heading={
-                    <>
-                      Our Recent
-                      <br />
-                      Graphic Design Work
-                    </>
-                  }
-                />
-              ) : (
-                <TechStack key={index} />
-              );
-
-            case "introPanel":
-              return (
-                <ServiceIntroPanel
-                  key={index}
-                  eyebrow={section.eyebrow}
-                  headline={section.headline}
-                  paragraphs={section.paragraphs}
-                  image={section.image}
-                />
-              );
-
-            case "faq":
-              return (
-                <FAQ
-                  key={index}
-                  heading={
-                    <>
-                      {section.headline[0]}
-                      <br />
-                      {section.headline[1]}
-                    </>
-                  }
-                  cta={section.cta}
-                  items={section.items}
-                  includeJsonLd={false}
-                />
-              );
-
-            default:
-              return null;
+          if (!renderedSection || section.type === "hero") {
+            return renderedSection;
           }
+
+          return (
+            <ServiceSectionFrame
+              key={`${section.type}-${index}`}
+              index={index}
+              type={section.type}
+              accent={accent}
+            >
+              {renderedSection}
+            </ServiceSectionFrame>
+          );
         })}
       </div>
     </>

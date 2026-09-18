@@ -16,7 +16,7 @@ import { NAV_LINKS as SITE_NAV_LINKS } from "@/lib/constants";
 export const NAV_LINKS = SITE_NAV_LINKS.filter((link) => link.href !== "/").map(
   (link) => ({
     href: link.href,
-    label: link.label === "Contact" ? "CONTACT US" : link.label.toUpperCase(),
+    label: link.label.toUpperCase(),
     hasDropdown: link.href === "/services",
   }),
 );
@@ -47,18 +47,20 @@ export const GLASS_FADE_DELAY = 0.05;
 export const GLASS_FADE_DURATION = MORPH_DURATION - GLASS_FADE_DELAY;
 
 export const TOP_STATE = {
-  maxWidth: 1280,
+  maxWidth: 1920,
   marginTop: 0,
   marginLeft: 0,
   marginRight: 0,
-  paddingLeft: 24,
-  paddingRight: 24,
+  paddingLeft: "var(--container-gutter)",
+  paddingRight: "var(--container-gutter)",
   borderRadius: 0,
   height: 80,
 };
 
 export const PILL_STATE = {
-  maxWidth: 820,
+  // The wordmark now remains visible in the compact state, so the pill
+  // needs enough room for it, all four nav items, and the CTA to breathe.
+  maxWidth: 1280,
   marginTop: 16,
   // Side inset so the pill actually floats off the screen edges on
   // narrow viewports instead of stretching full-bleed (it has no
@@ -66,8 +68,8 @@ export const PILL_STATE = {
   // this it just reads as a squashed full-width bar).
   marginLeft: 16,
   marginRight: 16,
-  paddingLeft: 28,
-  paddingRight: 28,
+  paddingLeft: 36,
+  paddingRight: 36,
   borderRadius: 5,
   height: 60,
 };

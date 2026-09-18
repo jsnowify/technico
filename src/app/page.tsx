@@ -2,6 +2,7 @@ import { buildMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, FAQS } from "@/lib/constants";
 import FAQ from "@/components/ui/FAQ";
 import Hero from "@/components/home/Hero";
+import HeroReveal from "@/components/home/HeroReveal";
 import HeroStats from "@/components/home/HeroStats";
 import Overview from "@/components/home/Overview";
 import MarqueeText from "@/components/ui/MarqueeText";
@@ -23,7 +24,23 @@ export const metadata = buildMetadata({
 export default function Home() {
   return (
     <>
-      <Hero />
+      {/*
+        A two-viewport, CSS-only stack. HeroReveal stays pinned behind the
+        foreground Hero for exactly one viewport: the same distance the Hero
+        needs to leave the screen. Once the Hero is gone, the sticky boundary
+        is over too, so the next section immediately pushes HeroReveal away.
+
+        No negative margins, empty hold spacer, ScrollTrigger pin, or wheel
+        listener participates in this transition.
+      */}
+      <div className="home-hero-stack relative isolate h-[200svh] bg-black-bg">
+        <div className="home-hero-panel absolute inset-x-0 top-0 z-10 h-[100svh]">
+          <Hero />
+        </div>
+        <div className="home-reveal-panel sticky top-0 z-0 h-[100svh]">
+          <HeroReveal />
+        </div>
+      </div>
       <TrustedBy />
       <HeroStats />
       <Overview />

@@ -1,74 +1,44 @@
-"use client";
-
-import Image from "next/image";
 import Button from "@/components/ui/Button";
+import EditorialHeader from "@/components/ui/EditorialHeader";
+import GridCorners from "@/components/ui/GridCorners";
+import PixelRevealImage from "@/components/home/PixelRevealImage";
 import { SITE_PHONE_HREF } from "@/lib/constants";
-
-/* ================================================================
-   ABOUT HERO
-   ================================================================
-   Redesigned to match the client's reference: a plain stacked
-   layout instead of the old two-column split.
-
-     - Headline sits alone on the left, using the site's shared
-       `.h1-hero` fluid clamp (font-medium, 62px true desktop size —
-       same class/weight as every other page's H1, per globals.css)
-       instead of a one-off size.
-     - A short supporting line + the purple "Book a Call" pill sit
-       top-right, next to (not under) the headline — same row on
-       sm+, stacked on mobile.
-     - A single full-width rounded image panel sits below, echoing
-       ServicesHero.tsx's image-panel treatment (rounded-[32px],
-       dark placeholder bg so it never flashes white while the
-       image loads).
-
-   Fully static — no GSAP, no fade/rise-in, no scroll parallax,
-   no floating card — per client request.
-
-   ASSET (expected in /public, already used elsewhere in the site):
-     /technico-digital-solutions-inc-bg.webp     (home/Hero.tsx)
-   ================================================================ */
 
 const HERO_IMAGE = "/technico-digital-solutions-inc-bg.webp";
 
 export default function AboutHero() {
   return (
-    <section className="relative isolate overflow-hidden bg-black-bg">
-      <div className="container-x mx-auto flex max-w-[1440px] flex-col gap-8 pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24">
-        {/* TOP ROW — headline left, short blurb + CTA top-right.
-            Stacks on mobile, sits side by side from sm+ so the CTA
-            lines up with the top of the headline, not its center. */}
-        <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-          <h1 className="h1-hero tracking-heading max-w-2xl leading-[1.05] font-medium text-white">
-            Your Trusted Digital Marketers For Business Transformation
-          </h1>
-
-          <div className="flex max-w-[260px] flex-col items-start gap-4 sm:pt-1">
-            <p className="text-sm leading-relaxed text-white/60">
+    <section className="bg-black-bg">
+      <div className="container-x mx-auto w-full max-w-[1920px] pt-28 pb-16 sm:pt-32 sm:pb-20 lg:pt-36 lg:pb-24">
+        <EditorialHeader
+          label="About Technico"
+          headingLevel="h1"
+          title="Your Trusted Digital Marketers For Business Transformation"
+          copy={
+            <p>
               At Technico Solutions, We&apos;re Your Trusted Digital Marketers,
               All About Driving Results That Matter.
             </p>
-
-            <Button to={SITE_PHONE_HREF} variant="purple">
+          }
+          aside={
+            <Button to={SITE_PHONE_HREF} variant="purple-fill">
               Book a Call
             </Button>
-          </div>
-        </div>
+          }
+        />
 
-        {/* BOTTOM — single full-width rounded image panel, same
-            dark-placeholder-bg pattern as ServicesHero's image
-            panel so there's never a white flash while it loads. */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[32px] bg-[#17181c] sm:aspect-[16/9] lg:aspect-[21/8]">
-          <Image
+        <figure className="relative mt-10 aspect-[4/3] overflow-hidden border border-white/20 sm:mt-14 sm:aspect-[16/9] lg:aspect-[21/8]">
+          <GridCorners />
+          <PixelRevealImage
             src={HERO_IMAGE}
-            loading="eager"
             alt=""
-            fill
-            unoptimized
-            sizes="100vw"
-            className="object-cover object-center"
+            sizes="(min-width: 1920px) 1740px, 100vw"
           />
-        </div>
+          <figcaption className="absolute inset-x-0 bottom-0 flex justify-between gap-4 bg-black-bg/85 p-4 font-mono text-[10px] tracking-[0.06em] text-content uppercase backdrop-blur-sm sm:p-5 sm:text-xs">
+            <span>{"// Digital marketing agency"}</span>
+            <span>About / 00</span>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );

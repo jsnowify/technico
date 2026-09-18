@@ -139,7 +139,7 @@ const CHAPTERS: ChapterData[] = [
   },
 ];
 
-const ACCENT = "var(--color-purple-accent)"; // brand purple (#6b26d9)
+const ACCENT = "var(--color-purple-accent)"; // Home-derived brand purple
 const PANEL_EASE = "ease-[cubic-bezier(0.77,0,0.175,1)]";
 // Springy, slight-overshoot curve for hover/press feedback — mimics a
 // tactile "click" rather than a flat linear/eased move, so hovers and
@@ -172,13 +172,6 @@ const TAB_STYLES = [
 // opens (see isOpen check at the call site). Only kicks in from sm
 // up — on small screens the tabs stay flat, separated cards instead
 // of a fanned, overlapping stack (harder to read on narrow screens).
-const CLOSED_TILT = [
-  "sm:-rotate-1",
-  "sm:rotate-1",
-  "sm:-rotate-[0.6deg]",
-  "sm:rotate-[0.8deg]",
-];
-
 /** Diagonal-arrow toggle, same treatment as the site's FAQ accordion
  *  (circle badge, rotates 180° open->closed) recolored to whichever
  *  tab it sits on. */
@@ -221,7 +214,7 @@ function IndustryCard({ item, index }: { item: ChapterItem; index: number }) {
   const style = TAB_STYLES[index % TAB_STYLES.length];
   return (
     <div
-      className={`flex h-full min-h-[280px] flex-col rounded-3xl p-7 transition-transform duration-400 ${SPRING_EASE} hover:-translate-y-1.5 hover:shadow-xl active:translate-y-0 active:scale-[0.98] active:duration-150 sm:min-h-[300px] sm:p-8 ${style.bg} ${style.text}`}
+      className={`flex h-full min-h-[280px] flex-col border border-white/15 p-7 sm:min-h-[300px] sm:p-8 ${style.bg} ${style.text}`}
     >
       <GeometricIcon index={style.icon} className="h-8 w-8" />
       <span className="mt-6 block text-sm font-medium opacity-60">
@@ -239,9 +232,7 @@ function IndustryCard({ item, index }: { item: ChapterItem; index: number }) {
 
 function RegionRow({ item, index }: { item: ChapterItem; index: number }) {
   return (
-    <div
-      className={`flex gap-4 rounded-2xl border border-white/10 p-5 transition-[transform,background-color,border-color] duration-400 ${SPRING_EASE} hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.03] active:translate-y-0 active:scale-[0.99] active:duration-150`}
-    >
+    <div className="flex gap-4 border-b border-white/15 p-5 last:border-b-0">
       <span
         aria-hidden="true"
         className="mt-0.5 shrink-0 text-sm font-medium text-white/35"
@@ -279,7 +270,7 @@ function ProcessStep({
       )}
       <span
         aria-hidden="true"
-        className="relative z-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white"
+        className="relative z-1 flex h-8 w-8 shrink-0 items-center justify-center text-xs font-medium text-white"
         style={{ background: ACCENT }}
       >
         {index + 1}
@@ -375,21 +366,14 @@ function ChapterTab({
   const buttonId = `chapter-heading-${reactId}`;
 
   return (
-    <div
-      className={`group relative overflow-hidden rounded-[32px] transition-[transform,box-shadow] duration-500 ${SPRING_EASE} ${style.bg} ${
-        isOpen
-          ? "rotate-0 shadow-2xl"
-          : `${CLOSED_TILT[index % CLOSED_TILT.length]} shadow-md hover:-translate-y-2 hover:rotate-0 hover:shadow-xl active:translate-y-0 active:scale-[0.985] active:shadow-lg active:duration-150`
-      } ${index === 0 ? "" : "mt-4 sm:-mt-9"}`}
-      style={{ zIndex: isOpen ? 40 : 10 + index }}
-    >
+    <div className={`group relative overflow-hidden ${style.bg}`}>
       <button
         id={buttonId}
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        className="flex w-full items-center gap-4 p-6 text-left sm:gap-6 sm:p-8 md:p-10"
+        className="flex w-full items-center gap-4 border-b border-black/15 p-5 text-left sm:gap-6 sm:p-7 md:p-8"
       >
         <span
           aria-hidden="true"
@@ -451,8 +435,18 @@ export default function ServicesChapterReel() {
       aria-label="Services: Industries We Know, Strengthen Your Digital Presence Across Canada, What Do You Get When You Work With Technico, One Strategy Even When Your Business Needs More Than One Channel"
       className="w-full bg-black-bg"
     >
-      <div className="container-x w-full pt-2 pb-16 sm:pt-4 sm:pb-20 md:pt-6 md:pb-24">
-        <div>
+      <div className="container-x mx-auto w-full max-w-[1920px] section-y">
+        <header className="grid grid-cols-1 gap-5 border-t border-white/20 pt-5 sm:grid-cols-[minmax(130px,0.35fr)_minmax(0,1.65fr)] sm:gap-8 lg:gap-16">
+          <div className="flex items-start gap-3 font-mono text-[11px] tracking-[0.04em] text-white/50 uppercase sm:pt-1 sm:text-xs">
+            <span aria-hidden="true">/</span>
+            <span>Built around you</span>
+          </div>
+          <h2 className="h2-section max-w-[21ch] leading-[1.08] font-medium tracking-heading text-white">
+            One connected strategy across industries, markets, and channels.
+          </h2>
+        </header>
+
+        <div className="mt-8 grid gap-px overflow-hidden border border-white/15 bg-white/15 lg:mt-10">
           {CHAPTERS.map((chapter, i) => (
             <ChapterTab
               key={chapter.id}

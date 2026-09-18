@@ -11,7 +11,7 @@ import Image from "next/image";
 
    COLOR — left panel is now black (#0A0A0C, same hex as the intro
    section's bg above it) at rest, sliding in the site's purple
-   accent (#6B26D9, same as purple-accent everywhere else) on hover,
+   accent (the site-wide Home purple) on hover,
    instead of the old purple-base/pink-hover combo — matches the
    black+purple scheme the rest of this page now uses.
 
@@ -108,7 +108,7 @@ export default function ChannelsJigsawCard() {
           <path d={LEFT_PATH} fill="#0A0A0C" />
           <path
             d={LEFT_PATH}
-            fill="#6B26D9"
+            fill="var(--color-purple-accent)"
             style={{ transformBox: "fill-box", transformOrigin: "left center" }}
             className="scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
           />

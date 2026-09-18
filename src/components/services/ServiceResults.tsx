@@ -1,4 +1,8 @@
 import GeometricIcon from "@/components/ui/icons";
+import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
+import GridCorners from "@/components/ui/GridCorners";
+import ServiceSectionHeader from "./ServiceSectionHeader";
+import { SERVICE_ACCENT, type ServiceAccent } from "./serviceAccent";
 
 interface ServiceResultsItem {
   icon?: number;
@@ -17,6 +21,7 @@ interface ServiceResultsProps {
    * link. */
   descriptionLink?: { label: string; href: string };
   items: ServiceResultsItem[];
+  accent?: ServiceAccent;
 }
 
 /** Renders `text` as plain text, with `link.label` (an exact
@@ -35,7 +40,7 @@ function renderWithLink(text: string, link?: { label: string; href: string }) {
         href={link.href}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-white underline decoration-1 underline-offset-4 hover:text-white/80"
+        className="text-white-text underline decoration-1 underline-offset-4 hover:text-content"
       >
         {link.label}
       </a>
@@ -47,24 +52,14 @@ function renderWithLink(text: string, link?: { label: string; href: string }) {
 /**
  * ServiceResults
  * -----------------------------------------------------------------
- * Dark rounded card (same #1A1A1A panel convention as
- * ServiceHighlights) pairing a headline + intro paragraph at the top
- * with a 2-column grid of short "results by industry" cards below —
- * each with a small mono "---" marker, an icon + title row, a short
- * description, and a bottom divider (same border-b treatment as
- * ServiceHighlights' own item list).
+ * "What this looks like by industry" grid. Rebuilt in the
+ * service-detail system: the old rounded #1A1A1A panel and the
+ * continuously-spinning icons are gone — these are outcomes a reader
+ * scans, so the section is a flat hairline grid whose only motion
+ * answers a hover.
  *
- * The header row (headline | paragraph) and the items grid are two
- * independent grids rather than one shared layout — the items grid
- * runs the section's full width instead of being confined under the
- * paragraph column, matching the reference mock.
- *
- * ICONS: each item defaults to a different mark from the shared
- * GeometricIcon set (rather than repeating the same one four times)
- * so the grid doesn't read as visually flat — callers can still pass
- * their own `icon` index per item to override. A slow, staggered
- * continuous spin (pure CSS keyframes, no JS) keeps them feeling
- * alive without needing a client component.
+ * Each cell is labelled with the industry rather than a number:
+ * these are alternatives to compare, not a sequence to follow.
  */
 const DEFAULT_ICONS = [5, 9, 3, 10];
 
@@ -73,53 +68,47 @@ export default function ServiceResults({
   description,
   descriptionLink,
   items,
+  accent = "purple",
 }: ServiceResultsProps) {
+  const tone = SERVICE_ACCENT[accent];
+
   return (
-    <section className="rounded-3xl bg-[#1A1A1A] px-10 pt-12 pb-20 sm:pt-14 sm:pb-24 md:pt-16 md:pb-28">
-      {/* Scoped keyframes for the icon idle spin — see file header. */}
-      <style>{`
-        @keyframes serviceResultsIconSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+    <section className="bg-black-bg">
+      <ServiceSectionHeader
+        headline={headline}
+        accent={accent}
+        paragraph={renderWithLink(description, descriptionLink)}
+      />
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[300px_1fr] md:gap-16 lg:grid-cols-[340px_1fr]">
-        <h2 className="text-[44px] leading-[1.15] font-medium tracking-tight text-white">
-          {headline}
-        </h2>
-        <p className="text-[18px] leading-relaxed font-light text-justify text-white/60">
-          {renderWithLink(description, descriptionLink)}
-        </p>
-      </div>
+      <div className="relative mt-12 grid grid-cols-1 border-t border-l border-white/18 sm:mt-16 sm:grid-cols-2">
+        <GridCorners accent={accent} />
 
-      <div className="mt-14 grid grid-cols-1 gap-x-16 gap-y-10 sm:grid-cols-2">
-        {items.map((item, i) => {
+        {items.map((item, index) => {
           const iconIndex =
-            item.icon ?? DEFAULT_ICONS[i % DEFAULT_ICONS.length];
+            item.icon ?? DEFAULT_ICONS[index % DEFAULT_ICONS.length];
 
           return (
-            <div key={i} className="border-b border-white/15 pb-6">
-              <div className="flex items-center gap-3">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-purple-accent">
-                  <span
-                    className="flex items-center justify-center"
-                    style={{
-                      animation: "serviceResultsIconSpin 3s linear infinite",
-                      animationDelay: `${i * 0.2}s`,
-                    }}
-                  >
-                    <GeometricIcon
-                      index={iconIndex}
-                      className="h-7 w-7 text-black"
-                    />
-                  </span>
+            <div
+              key={`${item.title}-${index}`}
+              data-stagger-hover
+              className="group relative overflow-hidden border-r border-b border-white/18 p-5 sm:p-7 lg:p-9"
+            >
+              <HorizontalStaggerRows />
+
+              <div className="relative flex items-center gap-4">
+                <span
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center ${tone.fill} text-black-bg`}
+                >
+                  <GeometricIcon index={iconIndex} className="h-5 w-5" />
                 </span>
-                <h3 className="text-[32px] leading-snug font-medium text-white">
+                <h3
+                  className={`text-[clamp(1.35rem,2.1vw,1.9rem)] leading-[1.1] font-medium tracking-heading text-white-text`}
+                >
                   {item.title}
                 </h3>
               </div>
-              <p className="mt-3 text-[18px] leading-relaxed font-light text-white/60">
+
+              <p className="body-copy relative mt-5 max-w-[52ch] leading-[1.62] text-content">
                 {renderWithLink(item.description, item.link)}
               </p>
             </div>

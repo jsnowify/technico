@@ -72,7 +72,10 @@ export default function TimezonePicker({
   useDismiss(containerRef, isOpen, () => setIsOpen(false));
 
   useEffect(() => {
-    setAllZones(getTimezoneOptions());
+    const frame = requestAnimationFrame(() =>
+      setAllZones(getTimezoneOptions()),
+    );
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const selected = allZones.find((zone) => zone.value === value);
@@ -164,16 +167,17 @@ export default function TimezonePicker({
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-controls={`${id}-listbox`}
         className={FIELD_TRIGGER_CLASSES}
       >
         <span
-          className={`flex items-center gap-2.5 truncate ${value ? "" : "text-white/30"}`}
+          className={`flex items-center gap-2.5 truncate ${value ? "" : "text-content-muted"}`}
         >
-          <GlobeIcon className="size-4 shrink-0 text-white/40" />
+          <GlobeIcon className="size-4 shrink-0 text-content-muted" />
           <span className="truncate">{triggerLabel}</span>
         </span>
         <ChevronDownIcon
-          className={`size-4 shrink-0 text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`size-4 shrink-0 text-content-muted transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -196,6 +200,7 @@ export default function TimezonePicker({
           </div>
 
           <ul
+            id={`${id}-listbox`}
             role="listbox"
             aria-label="Time zone"
             className={OPTION_LIST_CLASSES}

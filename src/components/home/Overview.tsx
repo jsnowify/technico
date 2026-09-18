@@ -1,140 +1,142 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import Button from "@/components/ui/Button";
-import RevealUpText from "@/components/motion/RevealUpText";
-import TiltIn from "@/components/motion/TiltIn";
+import PixelRevealImage from "./PixelRevealImage";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 
-/* ================================================================
-   HOME OVERVIEW — redesigned to match the supplied reference:
-     [ ] Technico Digital Solutions   (small eyebrow, top-left)
-     Big left-aligned headline
-     Book a Call (purple goo pill) / Free Strategy (dark outline pill)
-     ---------------------------------------------------------
-     3 standalone rounded cards, each with a solid purple "image"
-     block up top, a title, and a paragraph underneath.
-   ---------------------------------------------------------
-   Whole section now sits on bg-black-bg (was bg-white-bg with
-   black inset panels) — the reference is dark end-to-end. The old
-   border-x-only frame + divided panel grid is gone; cards are now
-   discrete rounded-[20px] boxes with their own border and gap,
-   matching the reference's card spacing instead of a seamless
-   divided strip.
+// Replace this one path when the final Overview campaign image is ready.
+const OVERVIEW_IMAGE = "/technico-digital-solutions-inc-bg.webp";
 
-   The old octagon-framed line-art icons are replaced with a solid
-   purple-accent rounded block per card (the reference's "image"
-   slot) — TiltIn still wraps it for the same scroll-settle entrance
-   the rest of the site uses on this kind of element.
-   ================================================================ */
+const STRATEGY_TEXT = (
+  <>
+    Technico Digital Solutions is a{" "}
+    <Link
+      href="https://technicosolutions.com/"
+      className="text-purple-secondary underline decoration-1 underline-offset-2 transition-colors duration-300 hover:text-purple-accent"
+    >
+      digital marketing agency
+    </Link>{" "}
+    that will unlock your brand&rsquo;s potential to drive substantial growth.
+    Benefit from our data-driven strategies focused on increasing your revenues
+    and positioning your brand as a leader in the market.
+  </>
+);
 
-type Panel = {
+const TIMELINE_TEXT = (
+  <>
+    Our digital marketing professionals establish a realistic timeline for
+    implementing digital marketing strategies and setting milestones to track
+    progress.
+  </>
+);
+
+const GROWTH_TEXT = (
+  <>
+    Let us show you how we can elevate your revenue, amplify your profits, and
+    expand your brand&rsquo;s reach in the digital realm.
+  </>
+);
+
+interface OverviewCardProps {
+  index: string;
   title: string;
-  text: ReactNode;
-};
+  children: ReactNode;
+  className?: string;
+}
 
-const PANELS: Panel[] = [
-  {
-    title: "Strategy",
-    text: (
-      <>
-        Technico Digital Solutions is a{" "}
-        <Link
-          href="/services"
-          className="text-purple-secondary underline decoration-1 underline-offset-2 transition-colors duration-300 hover:text-purple-accent"
-        >
-          digital marketing agency
-        </Link>{" "}
-        that will unlock your brand&rsquo;s potential to drive substantial
-        growth. Benefit from our data-driven strategies focused on increasing
-        your revenues and positioning your brand as a leader in the market.
-      </>
-    ),
-  },
-  {
-    title: "Timeline",
-    text: (
-      <>
-        Our digital marketing professionals establish a realistic timeline for
-        implementing digital marketing strategies and setting milestones to
-        track progress.
-      </>
-    ),
-  },
-  {
-    title: "Growth",
-    text: (
-      <>
-        Let us show you how we can elevate your revenue, amplify your profits,
-        and expand your brand&rsquo;s reach in the digital realm.
-      </>
-    ),
-  },
-];
+function OverviewCard({
+  index,
+  title,
+  children,
+  className = "",
+}: OverviewCardProps) {
+  return (
+    <article className={`bg-black-bg p-5 sm:p-7 lg:p-8 ${className}`}>
+      <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-4 font-mono text-[10px] tracking-[0.08em] text-white/45 uppercase sm:text-xs">
+        <span>{index}</span>
+        <span>Introduction</span>
+      </div>
+      <h3 className="h3-section mt-5 font-medium tracking-heading text-white">
+        {title}
+      </h3>
+      <p className="body-copy mt-4 leading-[1.6] tracking-[-0.02em] text-content uppercase">
+        {children}
+      </p>
+    </article>
+  );
+}
 
 export default function Overview() {
   return (
     <section className="bg-black-bg">
-      <div className="mx-4 px-4 pt-16 pb-16 sm:mx-[70px] sm:px-[30px] sm:pb-20">
-        {/* Eyebrow + headline + CTAs share one grid: eyebrow sits in
-            the fixed-width left column, headline and CTAs both sit
-            in the right column so the buttons land directly under
-            the headline's left edge instead of the eyebrow's. */}
-        <div className="grid grid-cols-1 gap-y-6 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-10 lg:gap-y-8">
-          {/* Eyebrow */}
-          <div className="flex items-center gap-2 lg:pt-2">
-            <span className="eyebrow-text font-mono tracking-[0.16em] whitespace-nowrap text-white/50 uppercase">
-              [ ] Technico Digital Solutions
-            </span>
+      <div className="container-x mx-auto w-full max-w-[1920px] section-y">
+        <header className="grid grid-cols-1 gap-5 border-t border-white/20 pt-5 sm:grid-cols-[minmax(130px,0.35fr)_minmax(0,1.65fr)] sm:gap-8 lg:gap-16">
+          <div className="flex items-start gap-3 font-mono text-[11px] tracking-[0.04em] text-white/50 uppercase sm:pt-1 sm:text-xs">
+            <span aria-hidden="true">/</span>
+            <span>Introduction</span>
           </div>
-
-          {/* Heading */}
-          <h2 className="h2-section indent-12 leading-[1.1] font-medium tracking-heading text-white sm:indent-16 md:indent-20 lg:w-[700px]">
+          <h2 className="h2-section max-w-[22ch] leading-[1.08] font-medium tracking-heading text-white">
             Boost revenues, maximize profits, generate qualified leads, and
             enhance brand visibility.
           </h2>
+        </header>
 
-          {/* Spacer — reserves the left grid column on the CTA row
-              so the buttons below land in the right column, aligned
-              under the heading rather than the eyebrow. */}
-          <div className="hidden lg:block" aria-hidden />
-
-          <div className="flex flex-col gap-10 sm:flex-row sm:items-center">
-            <Button to={SITE_PHONE_HREF} variant="purple-fill">
-              Book a Call
-            </Button>
-
-            <Button to="/contact" variant="underline">
-              Free Strategy
-            </Button>
-          </div>
-        </div>
-
-        {/* Card grid — 3 standalone rounded cards with their own
-            border + gap (was a single seamless divided strip). */}
-        <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {PANELS.map((panel) => (
+        <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 lg:mt-10 lg:grid-cols-12 lg:grid-rows-[minmax(190px,auto)_minmax(190px,auto)_auto]">
+          <figure className="relative min-h-[300px] overflow-hidden bg-purple-secondary sm:col-span-2 sm:aspect-[16/9] sm:min-h-0 lg:col-span-7 lg:row-span-2 lg:aspect-auto">
+            <PixelRevealImage
+              src={OVERVIEW_IMAGE}
+              alt="Purple digital environment representing scalable online growth"
+              sizes="(min-width: 1024px) 58vw, 100vw"
+            />
             <div
-              key={panel.title}
-              className="group rounded-[20px] border border-white/10 bg-white/[0.02] p-6 transition-colors duration-300 hover:border-white/20 sm:p-7"
-            >
-              <TiltIn className="block">
-                <div
-                  aria-hidden
-                  className="h-36 w-full rounded-2xl bg-purple-accent transition-transform duration-500 ease-out group-hover:scale-[1.02] sm:h-40"
-                />
-              </TiltIn>
+              aria-hidden="true"
+              className="absolute inset-0 bg-linear-to-t from-black/75 via-black/5 to-black/20"
+            />
+            <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-5 font-mono text-[10px] tracking-[0.06em] text-white uppercase sm:p-7 sm:text-xs lg:p-8">
+              <span>/ Growth infrastructure</span>
+              <span className="text-right text-white/55">
+                Image slot / 01
+              </span>
+            </figcaption>
+          </figure>
 
-              <RevealUpText
-                as="h3"
-                text={panel.title}
-                className="card-title mt-6 block leading-snug font-medium tracking-heading text-white"
-              />
+          <OverviewCard
+            index="01"
+            title="A strategy built around measurable growth."
+            className="lg:col-start-8 lg:col-span-5 lg:row-start-1"
+          >
+            {STRATEGY_TEXT}
+          </OverviewCard>
 
-              <p className="body-copy mt-3 leading-relaxed font-light tracking-body text-white/55">
-                {panel.text}
-              </p>
+          <OverviewCard
+            index="02"
+            title="Clear milestones from launch to scale."
+            className="lg:col-start-8 lg:col-span-5 lg:row-start-2"
+          >
+            {TIMELINE_TEXT}
+          </OverviewCard>
+
+          <OverviewCard
+            index="03"
+            title="More revenue, reach, and brand visibility."
+            className="lg:col-start-1 lg:col-span-7 lg:row-start-3"
+          >
+            {GROWTH_TEXT}
+          </OverviewCard>
+
+          <div className="flex flex-col items-start justify-between gap-8 bg-black-bg p-5 sm:p-7 lg:col-start-8 lg:col-span-5 lg:row-start-3 lg:p-8">
+            <p className="font-mono text-[10px] tracking-[0.08em] text-white/45 uppercase sm:text-xs">
+              / Ready to grow?
+            </p>
+            <div className="flex flex-col items-start gap-6 xl:flex-row xl:items-center">
+              <Button to={SITE_PHONE_HREF} variant="purple-fill">
+                Book a Call
+              </Button>
+              <Button to="/contact" variant="underline">
+                Free Strategy
+              </Button>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>

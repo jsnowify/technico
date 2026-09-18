@@ -1,5 +1,9 @@
 import GeometricIcon from "@/components/ui/icons";
 import Button from "@/components/ui/Button";
+import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
+import GridCorners from "@/components/ui/GridCorners";
+import ServiceSectionHeader from "./ServiceSectionHeader";
+import { SERVICE_ACCENT, type ServiceAccent } from "./serviceAccent";
 
 interface FeatureListItem {
   text: string;
@@ -14,41 +18,16 @@ interface ServiceFeatureListProps {
   listHeading: string;
   items: FeatureListItem[];
   /** "pink" | "purple" — matches getServiceAccent(), same as the hero badge. */
-  accent: "pink" | "purple";
-  /** Optional — renders a notched photo card under the paragraphs
-   *  (left column) when provided. Omit to leave that space blank,
-   *  same as before this prop existed. */
+  accent: ServiceAccent;
+  /** Optional — renders a photo panel under the paragraphs (left
+   *  column) when provided. Omit to leave that column as copy only. */
   image?: { src: string; alt: string };
-  /** Optional CTA rendered beside the headline — defaults to /contact,
+  /** Optional CTA rendered above the list — defaults to /contact,
    *  same convention as ServiceHighlights. */
   cta?: { label: string; href: string };
 }
 
-const IMAGE_VIEW_W = 716;
-const IMAGE_VIEW_H = 682;
-
-// Client-supplied shape (see the section's own SVG reference) — same
-// notch-corner technique as ServiceFeatureCard/ChannelsJigsawCard:
-// drawn at its native viewBox with preserveAspectRatio="none" against
-// an aspect-716/682 wrapper so the notch scales uniformly instead of
-// stretching.
-const IMAGE_CARD_PATH =
-  "M716 475C716 502.614 693.614 525 666 525H609C581.386 525 559 547.386 559 575V632C559 659.614 536.614 682 509 682H50C22.3857 682 0 659.614 0 632V50C0 22.3858 22.3858 0 50 0H666C693.614 0 716 22.3858 716 50V475Z";
-
-/**
- * ServiceFeatureList
- * -----------------------------------------------------------------
- * Plain bg-black-bg section (no card panel — sits directly on the
- * page background, same as the "hero" block). Left column is the
- * eyebrow + headline, with the eyebrow floated left so the headline
- * text wraps around it on the first line only, then continues full
- * width on subsequent lines. Below the paragraphs, an optional
- * notched photo card fills what used to be blank space (same
- * clipPath technique as ServiceFeatureCard). Right column is a
- * sub-heading followed by a single-column list with the same
- * GeometricIcon-badge + divider treatment as ServiceFeatureCard's
- * checklist.
- */
+/** Copy and image alongside a connected list of deliverables. */
 export default function ServiceFeatureList({
   eyebrow,
   headline,
@@ -59,138 +38,85 @@ export default function ServiceFeatureList({
   image,
   cta = { label: "Let's connect", href: "/contact" },
 }: ServiceFeatureListProps) {
-  const accentBg = accent === "pink" ? "bg-pink-accent" : "bg-purple-accent";
+  const tone = SERVICE_ACCENT[accent];
 
   // Shortest text first, longest last — reads as a clean visual ramp
   // top-to-bottom instead of whatever order the content was authored
-  // in. Sorted by character count (not word count — two items can
-  // have the same number of words but very different lengths) on a
-  // copy so the original `items` prop order (and its indices used
-  // for icon selection below) stays intact.
+  // in. Sorted on a copy so the original `items` prop order stays
+  // intact for callers.
   const sortedItems = [...items].sort((a, b) => a.text.length - b.text.length);
 
   return (
-    <section className="bg-black-bg px-10 py-20 sm:py-24 md:py-28">
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:grid-rows-[auto_auto] md:gap-x-16 md:gap-y-10">
-        {/* ========================================================
-            ROW 1, LEFT: EYEBROW (floated) + HEADLINE, WRAPPING
-            AROUND IT. Right column has nothing in this row, so
-            row 2 (paragraphs / list) sits level regardless of how
-            many lines the headline wraps to.
-        ======================================================== */}
+    <section className="bg-black-bg">
+      <ServiceSectionHeader
+        eyebrow={eyebrow}
+        headline={headline}
+        accent={accent}
+      />
 
-        <div className="md:col-start-1 md:row-start-1">
-          <span className="float-left mt-3 mr-4 flex items-center gap-2">
-            <span aria-hidden="true" className="h-2 w-2 shrink-0 bg-white/70" />
-            <span className="text-sm leading-none font-light tracking-widest whitespace-nowrap text-white/70 uppercase">
-              {eyebrow}
-            </span>
-          </span>
+      <div className="relative mt-12 grid grid-cols-1 border border-white/18 sm:mt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <GridCorners accent={accent} />
 
-          <h2 className="text-[32px] leading-[1.15] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
-            {headline}
-          </h2>
-
-          <div className="clear-both" />
-        </div>
-
-        {/* ========================================================
-            ROW 2, LEFT: PARAGRAPHS
-        ======================================================== */}
-
-        <div className="mt-6 space-y-4 md:col-start-1 md:row-start-2 md:mt-0">
-          {paragraphs.map((paragraph, i) => (
-            <p
-              key={i}
-              className="text-lg leading-relaxed font-light text-justify indent-6 text-white/50 sm:indent-8"
-            >
-              {paragraph}
-            </p>
-          ))}
-
-          {/* Notched photo card — fills the leftover space below the
-              paragraphs (previously blank). Same clipPath + aspect
-              wrapper technique as ServiceFeatureCard/ChannelsJigsawCard,
-              at the shape supplied for this section. Optional: omit
-              `image` to leave this column exactly as it was before. */}
-          {image && (
-            <div className="relative aspect-716/682 w-full overflow-hidden">
-              <svg
-                viewBox={`0 0 ${IMAGE_VIEW_W} ${IMAGE_VIEW_H}`}
-                preserveAspectRatio="none"
-                className="absolute inset-0 h-full w-full"
+        {/* LEFT — prose, then the photo in its own cell. */}
+        <div className="flex flex-col border-b border-white/18 lg:sticky lg:top-28 lg:self-start lg:border-r lg:border-b-0">
+          <div className="p-5 sm:p-7 lg:p-9">
+            {paragraphs.map((paragraph, index) => (
+              <p
+                key={index}
+                className={`body-copy max-w-[62ch] leading-[1.62] text-content ${
+                  index > 0 ? "mt-5" : ""
+                }`}
               >
-                <defs>
-                  <clipPath id="service-feature-list-image-clip">
-                    <path d={IMAGE_CARD_PATH} />
-                  </clipPath>
-                </defs>
-                <g clipPath="url(#service-feature-list-image-clip)">
-                  <path d={IMAGE_CARD_PATH} fill="#1A1B1E" />
-                  <foreignObject
-                    x="0"
-                    y="0"
-                    width={IMAGE_VIEW_W}
-                    height={IMAGE_VIEW_H}
-                  >
-                    <div
-                      // @ts-expect-error -- xmlns required for the foreignObject's
-                      // root element to render as HTML rather than SVG.
-                      xmlns="http://www.w3.org/1999/xhtml"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        position: "relative",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={image.src}
-                        alt={image.alt}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
-                    </div>
-                  </foreignObject>
-                </g>
-              </svg>
+                {paragraph}
+              </p>
+            ))}
+
+            <div className="mt-7">
+              <Button to={cta.href} variant={tone.button} size="md">
+                {cta.label}
+              </Button>
+            </div>
+          </div>
+
+          {image && (
+            <div className="relative mt-auto aspect-[16/10] overflow-hidden border-t border-white/18">
+              {/* Some service placeholders use remote hosts that are not in
+                  next/image's allowlist, so this remains a plain image. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <span className="absolute top-4 left-4 bg-black-bg px-3 py-2 font-mono text-[10px] tracking-[0.06em] text-content uppercase sm:top-6 sm:left-6 sm:text-xs">
+                <span aria-hidden="true">{"// "}</span>
+                {eyebrow}
+              </span>
             </div>
           )}
         </div>
 
-        {/* ========================================================
-            ROW 2, RIGHT: LIST HEADING + BULLETED LIST — same grid
-            row as the paragraphs above, so it lines up with them
-            instead of the headline.
-        ======================================================== */}
-
-        <div className="md:col-start-2 md:row-start-2">
-          <Button to={cta.href} variant="purple">
-            {cta.label}
-          </Button>
-
-          <h3 className="mt-6 text-lg leading-relaxed font-light text-white/50">
+        {/* RIGHT — list heading, then one connected column of rows. */}
+        <div className="flex flex-col">
+          <p className="border-b border-white/18 p-5 font-mono text-xs leading-[1.6] tracking-[0.05em] text-content-muted uppercase sm:p-7 lg:px-9">
             {listHeading}
-          </h3>
+          </p>
 
-          {/* Icon badge + divider per row — same GeometricIcon /
-              rounded-md / border-b treatment as ServiceFeatureCard's
-              checklist, instead of the small checkmark-in-a-square
-              this list used before. `accentBg` still drives the badge
-              color (pink/purple) so this stays in sync with whichever
-              accent the page passed in. */}
-          <ul className="mt-4 flex flex-col gap-8">
-            {sortedItems.map((item, i) => (
+          <ul className="flex flex-1 flex-col">
+            {sortedItems.map((item, index) => (
               <li
-                key={i}
-                className="flex items-start gap-4 border-b border-white/15 pb-8 last:border-b-0 last:pb-0"
+                key={index}
+                data-stagger-hover
+                className="group relative flex min-h-20 flex-1 items-center gap-4 overflow-hidden border-b border-white/18 p-5 last:border-b-0 sm:p-6 lg:px-9"
               >
+                <HorizontalStaggerRows />
                 <span
                   aria-hidden="true"
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md ${accentBg}`}
+                  className={`relative flex h-11 w-11 shrink-0 items-center justify-center ${tone.fill} text-black-bg`}
                 >
-                  <GeometricIcon index={i} className="h-5 w-5 text-black" />
+                  <GeometricIcon index={index} className="h-5 w-5" />
                 </span>
-                <p className="pt-2 text-lg leading-relaxed font-normal text-white/80">
+                <p className={`body-copy relative leading-[1.55] text-content`}>
                   {renderItemText(item)}
                 </p>
               </li>
@@ -211,7 +137,7 @@ function renderItemText({ text, emphasis }: FeatureListItem) {
   return (
     <>
       {text.slice(0, idx)}
-      <span className="text-white underline decoration-1 underline-offset-4">
+      <span className="text-white-text underline decoration-1 underline-offset-4">
         {emphasis}
       </span>
       {text.slice(idx + emphasis.length)}

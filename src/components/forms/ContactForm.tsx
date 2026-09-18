@@ -18,99 +18,11 @@ import {
   TAG_BASE_CLASSES,
   CHIP_INACTIVE_CLASSES,
 } from "@/components/forms/fieldStyles";
+import GridCorners from "@/components/ui/GridCorners";
 
 const initialState: ContactFormState = { status: "idle" };
 
-/* ================================================================
-   CONTACT FORM
-   ================================================================
-   Extends the original name/email/message form with the fields the
-   business actually needs to qualify and schedule a lead: first/last
-   name, phone, company, which services they're after, project
-   details, and a call-scheduling cluster (date / time / timezone).
-   Company, Services, and Project Details are the only genuinely
-   optional fields — everything else, including the whole scheduling
-   cluster, is required to send.
-
-   LAYOUT — F-pattern two column on desktop:
-   Eyes land top-left first, so the calendar (the one thing that's
-   actually a visual, glanceable choice rather than typing) anchors
-   the left column full-height. The right column carries every field
-   a visitor types into, top to bottom — Your Details, Project Scope,
-   then Submit — which is exactly the reading order the eye naturally
-   drops into after the left anchor. On mobile there's only one
-   column, so `order-*` restores the original top-to-bottom priority
-   instead: Your Details and Project Scope first, Schedule A Call
-   after, Submit last — see the grid comment below for how the two
-   breakpoints get different orders from the same three DOM blocks.
-
-   Field styling (boxed inputs, sans-serif labels, soft white-on-black
-   fill) is kept identical across every field — see fieldStyles.ts for
-   the shared tokens — rather than switched to the font-mono uppercase
-   voice used in the marketing sections; that voice reads great as
-   short decorative copy but hurts legibility on a form people
-   actually have to fill out. The font-mono uppercase treatment used
-   for section captions elsewhere on the site isn't used here at all —
-   see the sr-only note below on why the three group captions aren't
-   visible.
-
-   Services and Time both use the same pill/chip toggle (see
-   CHIP_* in fieldStyles.ts) instead of two different-looking
-   controls — Services used to be plain native checkboxes in a grid,
-   which read as a different, less finished control sitting right
-   next to Time's pills. Services keeps real `<input type="checkbox">`
-   elements under the hood (so the form still works with JS off /
-   the server action still receives normal `services` values) but
-   visually hides them and styles the sibling label as the pill via
-   `peer-checked`.
-
-   Group headings ("Your Details" / "Project Scope" / "Schedule A
-   Call") are `sr-only` on the fieldset legends rather than removed
-   outright — screen readers still get the grouping, but visually the
-   form isn't broken into three captioned blocks, which was reading
-   as more sections than four fields plus a chip row and a calendar
-   actually warrants. The page's own "Contact" H1 (app/contact/page.tsx)
-   stays the only visible heading around the form.
-
-   RHYTHM — two spacing tiers, used consistently everywhere:
-   20 (space-y-20 / gap-y-20) between major blocks — Your Details vs.
-   Project Scope, and the three reordered DOM blocks on mobile — and
-   10 (space-y-10 / mt-10) between individual fields inside a block.
-   Before this pass those numbers drifted (16 / 9 / 8 depending on
-   which block you were in), which read as uneven rather than calm.
-   A thin `border-white/5` rule now sits between Your Details and
-   Project Scope too — with the group legends hidden (see below),
-   whitespace alone wasn't giving the eye a clear pause between the
-   two, and a hairline reads as a much quieter break than bringing
-   the captions back would.
-
-   Date, time, and time zone are custom controls (DatePicker /
-   TimeSlotPicker / TimezonePicker) instead of native
-   input[type=date]/<select> — an always-visible calendar grid, a
-   row of tappable time pills, and a searchable time zone combobox
-   that isn't limited to a handful of North American zones. Time Zone
-   stays a popover since it's a single value picked once and then
-   mostly ignored; Date and Time stay open on the page since they're
-   what a visitor is actually comparing when picking a slot.
-
-   `minDate` and the timezone guess are both resolved client-side in
-   an effect (not at render) so the server-rendered HTML and the
-   first client render stay identical — computing "today" or reading
-   the visitor's timezone directly during render risks a hydration
-   mismatch.
-
-   First Name, Last Name, Email, Phone, and the Date/Time/Time Zone
-   scheduling cluster are the required fields, so all seven are now
-   controlled inputs (Time Zone is auto-filled from the visitor's
-   browser via `guessTimezone()`, so it's usually already satisfied)
-   and Submit is gated on `canSubmit` — disabled until all seven are
-   non-empty, with a small hint underneath explaining why. Company,
-   Services, and Project Details stay uncontrolled/native since
-   they're genuinely optional. The form still carries `noValidate`,
-   since the server action is the real source of truth for
-   validation; this is just a friendlier front-end nudge, not a
-   replacement for it.
-   ================================================================ */
+/** Qualified lead form with a mobile-first reading order and desktop schedule rail. */
 
 function slugify(value: string) {
   return value
@@ -120,7 +32,7 @@ function slugify(value: string) {
 }
 
 function Optional() {
-  return <span className="text-white/35 font-normal"> (optional)</span>;
+  return <span className="font-normal text-content-muted"> (optional)</span>;
 }
 
 export default function ContactForm() {
@@ -148,12 +60,11 @@ export default function ContactForm() {
     timezone.trim() !== "";
 
   useEffect(() => {
-    setMinDate(toISODate(new Date()));
-
-    // The visitor's actual IANA zone (e.g. "Asia/Manila"), not just a
-    // North-American bucket — precise, and they can still change it
-    // via the searchable picker below.
-    setTimezone(guessTimezone());
+    const frame = requestAnimationFrame(() => {
+      setMinDate(toISODate(new Date()));
+      setTimezone(guessTimezone());
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   return (
@@ -164,11 +75,14 @@ export default function ContactForm() {
           repositions them into the F-pattern two column grid —
           Schedule spans both rows in column 1, the two field
           fieldsets + Submit sit in column 2. */}
-      <div className="grid grid-cols-1 gap-y-20 md:grid-cols-2 md:items-start md:gap-x-16 md:gap-y-0 lg:gap-x-24">
+      <div className="relative grid grid-cols-1 border border-white/20 md:grid-cols-2 md:items-start">
+        <GridCorners />
         {/* Your Details + Project Scope */}
-        <div className="order-1 space-y-20 md:order-2 md:col-start-2 md:row-start-1">
+        <div className="order-1 space-y-14 border-b border-white/20 p-5 sm:p-7 md:order-2 md:col-start-2 md:row-start-1 md:border-b-0 md:border-l md:p-9">
           <fieldset className={FIELDSET_CLASSES}>
-            <legend className="sr-only">Your Details</legend>
+            <legend className="mb-8 font-mono text-xs tracking-[0.08em] text-accent uppercase">
+              {"// Your Details"}
+            </legend>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
               <div>
                 <label htmlFor="firstName" className={LABEL_CLASSES}>
@@ -250,10 +164,12 @@ export default function ContactForm() {
             </div>
           </fieldset>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-white/20" />
 
           <fieldset className={FIELDSET_CLASSES}>
-            <legend className="sr-only">Project Scope</legend>
+            <legend className="mb-8 font-mono text-xs tracking-[0.08em] text-accent uppercase">
+              {"// Project Scope"}
+            </legend>
 
             <fieldset className={FIELDSET_CLASSES}>
               <legend className={LABEL_CLASSES}>
@@ -273,7 +189,7 @@ export default function ContactForm() {
                         className="peer sr-only"
                       />
                       <span
-                        className={`${TAG_BASE_CLASSES} ${CHIP_INACTIVE_CLASSES} block cursor-pointer peer-checked:border-purple-secondary peer-checked:bg-purple-secondary peer-checked:text-white peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-purple-accent`}
+                        className={`${TAG_BASE_CLASSES} ${CHIP_INACTIVE_CLASSES} block cursor-pointer peer-checked:border-accent peer-checked:bg-accent peer-checked:text-black-bg peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent`}
                       >
                         {service.title}
                       </span>
@@ -302,9 +218,11 @@ export default function ContactForm() {
         {/* Schedule a call — left column anchor on desktop, spans
             both rows so it sits full-height next to the two
             fieldsets + submit button in column 2. */}
-        <div className="order-2 md:order-1 md:col-start-1 md:row-span-2 md:row-start-1">
+        <div className="order-2 border-b border-white/20 p-5 sm:p-7 md:order-1 md:col-start-1 md:row-span-2 md:row-start-1 md:border-b-0 md:p-9">
           <fieldset className={FIELDSET_CLASSES}>
-            <legend className="sr-only">Schedule A Call</legend>
+            <legend className="mb-8 font-mono text-xs tracking-[0.08em] text-accent uppercase">
+              {"// Schedule A Call"}
+            </legend>
 
             <div className="space-y-10">
               <div>
@@ -352,17 +270,17 @@ export default function ContactForm() {
 
         {/* Submit — stays with the fields it submits, at the foot of
             column 2 on desktop; last on mobile. */}
-        <div className="order-3 md:order-2 md:col-start-2 md:row-start-2 md:pt-20">
+        <div className="order-3 p-5 sm:p-7 md:order-2 md:col-start-2 md:row-start-2 md:border-t md:border-l md:border-white/20 md:p-9">
           <button
             type="submit"
             disabled={pending || !canSubmit}
-            className="flex w-full items-center justify-center rounded-[5px] bg-purple-secondary px-10 py-5 font-mono text-sm uppercase tracking-[0.14em] text-white transition-opacity duration-300 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-accent sm:inline-flex sm:w-auto"
+            className="flex w-full items-center justify-center bg-accent px-10 py-5 font-mono text-sm tracking-[0.08em] text-black-bg uppercase transition-colors hover:bg-accent-light disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-content-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:inline-flex sm:w-auto"
           >
             {pending ? "Sending…" : "Send Message"}
           </button>
 
           {!canSubmit && (
-            <p className="mt-4 text-sm text-white/40">
+            <p className="mt-4 text-sm text-content-muted">
               Fill in your first name, last name, email, phone, and a call date,
               time, and time zone to send.
             </p>

@@ -1,170 +1,381 @@
 "use client";
 
-import Image from "next/image";
-import Button from "@/components/ui/Button";
-import { SITE_PHONE_HREF } from "@/lib/constants";
-import ServiceTagsPhysics from "@/components/services/ServiceTagsPhysics";
+import { useEffect, useRef } from "react";
+import { useGSAP } from "@gsap/react";
 
-/* ================================================================
-   SERVICES HERO
-   ================================================================
-   v3 layout, driven by the client's SVG (1243x385 viewBox).
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { isSiteReady, SITE_READY_EVENT } from "@/lib/site-ready";
+import ScrambleText from "@/components/motion/ScrambleText";
 
-   The heading text is completely separate from the image — it sits
-   as plain text on the black section background ABOVE the image
-   panel (no mask, no overlap).
+/**
+ * A new visual direction, not a rearrangement of the old image hero:
+ * purple editorial stage, oversized black typography, an abstract stepped
+ * signal. The black sheet is now a separate ServicesHeroReveal component,
+ * following the exact homepage two-viewport sticky stack.
+ * All existing visible copy is retained verbatim.
+ */
+const SIGNAL = [
+  { left: 0, width: 24 },
+  { left: 8, width: 34 },
+  { left: 2, width: 48 },
+  { left: 18, width: 46 },
+  { left: 7, width: 68 },
+  { left: 0, width: 86 },
+  { left: 12, width: 88 },
+  { left: 0, width: 100 },
+  { left: 22, width: 72 },
+  { left: 7, width: 80 },
+  { left: 28, width: 55 },
+  { left: 14, width: 52 },
+  { left: 38, width: 34 },
+] as const;
 
-   The image panel below it is its own rounded block, with a small
-   notch cut out of its TOP-RIGHT corner only (bounding box from the
-   path: x 949-1243, y 0-72 → 23.7% width, 18.7% height of the
-   1243x385 panel). That notch is where "Book a Call" sits — the
-   button is backed by black (via the cutout) instead of the image,
-   so it reads as a separate pill floating at the image's corner,
-   per the client's reference screenshot.
+/**
+ * Pointer position selects one row. That row opens fully while nearby rows
+ * follow from alternating sides with a distance-based delay. A slower echo
+ * follows each solid bar, creating a horizontal trail without scaling bars.
+ */
+function InteractiveServicesSignal() {
+  const fieldRef = useRef<HTMLDivElement>(null);
 
-   NOTE: the GSAP scroll parallax on the image has been removed —
-   it was sharing a transformed ancestor with the button and causing
-   the button's hover (goo/circle-detach) effect to glitch. This
-   section is now fully static/plain, per client request.
-   ================================================================ */
+  useEffect(() => {
+    const field = fieldRef.current;
+    if (!field) return;
 
-const HERO_IMAGE =
-  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1789032026/temporary-placeholder/Gemini_Generated_Image_3f5bts3f5bts3f5b_qjxyw0.avif";
+    const bars = Array.from(
+      field.querySelectorAll<HTMLElement>("[data-services-signal-bar]"),
+    );
+    const echoes = Array.from(
+      field.querySelectorAll<HTMLElement>("[data-services-signal-echo]"),
+    );
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reducedMotion) return;
 
-// Client's v3 notch path (viewBox 0 0 1243 385) — notch cut at top-right,
-// all corners rounded to 20px to match the site's global 20px radius
-// (was 30px in the original client SVG).
-const NOTCH_PATH =
-  "M959 0C970.0457 0 979 8.9543 979 20V52C979 63.0457 987.9543 72 999 72H1223C1234.0457 72 1243 80.9543 1243 92V365C1243 376.0457 1234.0457 385 1223 385H20C8.9543 385 0 376.0457 0 365V20C0 8.9543 8.9543 0 20 0H959Z";
+    let animationFrame = 0;
+    let pointerY = 0;
+    let activeRow = Math.floor(SIGNAL.length / 2);
 
-const NOTCH_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1243 385'><path d='${NOTCH_PATH}' fill='white'/></svg>`;
+    const animateAtPointer = () => {
+      animationFrame = 0;
+      const rect = field.getBoundingClientRect();
+      const rowPitch = rect.height / SIGNAL.length;
+      activeRow = Math.max(
+        0,
+        Math.min(SIGNAL.length - 1, Math.floor(pointerY / rowPitch)),
+      );
 
-const NOTCH_MASK = `url("data:image/svg+xml,${encodeURIComponent(NOTCH_SVG)}")`;
+      bars.forEach((bar, index) => {
+        const distance = Math.abs(index - activeRow);
+        const influenced = distance <= 4;
+        const width = influenced
+          ? Math.max(SIGNAL[index].width, 100 - distance * 13)
+          : SIGNAL[index].width;
+        const fromLeft = (index - activeRow + 4) % 2 === 0;
+        const left = influenced
+          ? fromLeft
+            ? 0
+            : 100 - width
+          : SIGNAL[index].left;
+
+        gsap.to(bar, {
+          left: `${left}%`,
+          width: `${width}%`,
+          opacity: influenced ? 1 : 0.72,
+          duration: 0.34,
+          delay: distance * 0.018,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+
+        gsap.to(echoes[index], {
+          left: `${left}%`,
+          width: `${width}%`,
+          opacity: influenced ? 0.32 : 0.14,
+          duration: 0.78,
+          delay: 0.06 + distance * 0.025,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      });
+    };
+
+    const updatePointer = (event: PointerEvent) => {
+      const rect = field.getBoundingClientRect();
+      pointerY = Math.max(
+        0,
+        Math.min(rect.height - 0.01, event.clientY - rect.top),
+      );
+      if (!animationFrame) {
+        animationFrame = window.requestAnimationFrame(animateAtPointer);
+      }
+    };
+
+    const reset = () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+
+      bars.forEach((bar, index) => {
+        const distance = Math.abs(index - activeRow);
+        gsap.to(bar, {
+          left: `${SIGNAL[index].left}%`,
+          width: `${SIGNAL[index].width}%`,
+          opacity: 1,
+          duration: 0.46,
+          delay: distance * 0.012,
+          ease: "power3.inOut",
+          overwrite: "auto",
+        });
+        gsap.to(echoes[index], {
+          left: `${SIGNAL[index].left}%`,
+          width: `${SIGNAL[index].width}%`,
+          opacity: 0.16,
+          duration: 0.82,
+          delay: 0.04 + distance * 0.018,
+          ease: "power2.inOut",
+          overwrite: "auto",
+        });
+      });
+    };
+
+    field.addEventListener("pointerenter", updatePointer);
+    field.addEventListener("pointermove", updatePointer);
+    field.addEventListener("pointerdown", updatePointer);
+    field.addEventListener("pointerleave", reset);
+    field.addEventListener("pointerup", reset);
+    field.addEventListener("pointercancel", reset);
+
+    return () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      field.removeEventListener("pointerenter", updatePointer);
+      field.removeEventListener("pointermove", updatePointer);
+      field.removeEventListener("pointerdown", updatePointer);
+      field.removeEventListener("pointerleave", reset);
+      field.removeEventListener("pointerup", reset);
+      field.removeEventListener("pointercancel", reset);
+      gsap.killTweensOf([...bars, ...echoes]);
+    };
+  }, []);
+
+  return (
+    <div aria-hidden="true" className="relative min-w-0 pb-1">
+      <div className="mb-3 flex items-center justify-between gap-4 font-mono text-[9px] tracking-[0.08em] uppercase sm:mb-4 sm:text-[10px]">
+        <span>/ Capability signal</span>
+        <span className="opacity-55">Hover / trace</span>
+      </div>
+
+      <div className="mb-3 h-px w-full bg-black-bg/40 sm:mb-4" />
+      <div
+        ref={fieldRef}
+        className="flex h-[clamp(112px,18svh,180px)] w-full touch-pan-y cursor-crosshair flex-col justify-between overflow-hidden py-1 sm:h-[clamp(150px,22svh,240px)] lg:h-[clamp(220px,28vw,340px)]"
+      >
+        {SIGNAL.map((bar, index) => (
+          <div
+            key={index}
+            className="relative h-[clamp(3px,0.5vw,7px)] w-full shrink-0"
+          >
+            <span
+              data-services-entrance-bar
+              data-services-signal-echo
+              className="absolute top-0 block h-full bg-black-bg/30 will-change-[left,width]"
+              style={{ left: `${bar.left}%`, width: `${bar.width}%` }}
+            />
+            <span
+              data-services-entrance-bar
+              data-services-signal-bar
+              className="absolute top-0 block h-full bg-black-bg will-change-[left,width]"
+              style={{ left: `${bar.left}%`, width: `${bar.width}%` }}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 h-px w-full bg-black-bg/40 sm:mt-4" />
+    </div>
+  );
+}
 
 export default function ServicesHero() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      const section = sectionRef.current;
+      if (!section || prefersReducedMotion) return;
+
+      const words = gsap.utils.toArray<HTMLElement>(
+        section.querySelectorAll("[data-services-word]"),
+      );
+      const bars = gsap.utils.toArray<HTMLElement>(
+        section.querySelectorAll("[data-services-entrance-bar]"),
+      );
+      const secondary = gsap.utils.toArray<HTMLElement>(
+        section.querySelectorAll("[data-services-reveal]"),
+      );
+
+      gsap.set(words, { autoAlpha: 0, yPercent: 115 });
+      gsap.set(bars, { scaleX: 0, transformOrigin: "left center" });
+      gsap.set(secondary, { autoAlpha: 0, y: 20 });
+
+      let entrance: gsap.core.Timeline | undefined;
+
+      const reveal = () => {
+        if (entrance) return;
+
+        entrance = gsap.timeline({ defaults: { ease: "power3.out" } });
+        entrance
+          .to(
+            words,
+            {
+              autoAlpha: 1,
+              yPercent: 0,
+              duration: 0.95,
+              stagger: 0.13,
+              ease: "power4.out",
+            },
+            0.12,
+          )
+          .to(
+            bars,
+            {
+              scaleX: 1,
+              duration: 0.7,
+              stagger: { each: 0.035, from: "center" },
+              ease: "power3.out",
+            },
+            0.36,
+          )
+          .to(
+            secondary,
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.7,
+              stagger: 0.065,
+            },
+            0.55,
+          )
+          .set([...words, ...bars, ...secondary], {
+            clearProps: "opacity,visibility,transform,transformOrigin",
+          });
+      };
+
+      // Same preloader handshake as the homepage; no new loader or scroll pin.
+      if (isSiteReady()) {
+        reveal();
+      } else {
+        window.addEventListener(SITE_READY_EVENT, reveal, { once: true });
+      }
+
+      return () => {
+        window.removeEventListener(SITE_READY_EVENT, reveal);
+        entrance?.kill();
+      };
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="relative isolate overflow-hidden bg-[#0A0A0C]">
-      {/* Waving hand animation for the "[ ] SERVICES 👋" eyebrow label */}
-      <style jsx global>{`
-        @keyframes wave {
-          0%,
-          60%,
-          100% {
-            transform: rotate(0deg);
-          }
-          10% {
-            transform: rotate(14deg);
-          }
-          20% {
-            transform: rotate(-8deg);
-          }
-          30% {
-            transform: rotate(14deg);
-          }
-          40% {
-            transform: rotate(-4deg);
-          }
-          50% {
-            transform: rotate(10deg);
-          }
-        }
-        .wave-emoji {
-          transform-origin: 70% 70%;
-          animation: wave 2.4s ease-in-out infinite;
-        }
-      `}</style>
-      <div className="container-x mx-auto max-w-[1440px] pt-24 pb-10 sm:pt-28 sm:pb-12 md:pb-14 lg:pt-24 lg:pb-16 xl:pt-28">
-        {/* MOBILE / TABLET (< lg) — unchanged, simple stacked layout */}
-        <div className="flex flex-col gap-8 lg:hidden">
-          <div className="flex flex-col gap-5">
-            <p className="font-mono text-sm font-light tracking-[-0.02em] text-white/70 uppercase">
-              [ ] SERVICES <span className="wave-emoji inline-block">👋</span>
-            </p>
-            <h1 className="max-w-xl text-[36px] leading-[1.05] font-medium tracking-[-1px] text-white sm:text-[48px] sm:tracking-[-1.5px]">
-              <span className="underline decoration-[#EC4899] underline-offset-4 text-[#EC4899]">
-                Digital Marketing Services
-              </span>{" "}
-              that deliver real business growth.
-            </h1>
-            <div className="w-full max-w-xs sm:w-auto">
-              <Button to={SITE_PHONE_HREF} variant="pink-fill">
-                Book a Call
-              </Button>
+    <section
+      ref={sectionRef}
+      aria-labelledby="services-hero-title"
+      className="relative isolate flex h-full min-h-[100svh] flex-col overflow-hidden bg-purple-hero text-black-bg"
+    >
+      {/* Violet stage: a full-height composition like the real homepage Hero. */}
+      <div className="container-x mx-auto flex w-full max-w-[1920px] flex-1 flex-col pt-[clamp(104px,14svh,154px)] pb-[clamp(30px,5svh,62px)]">
+        {/* The homepage's fine, technical metadata treatment. */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-b border-black-bg/45 pb-4 font-mono text-[10px] leading-[1.2] tracking-[-0.02em] uppercase sm:grid-cols-4 sm:text-xs">
+          <ScrambleText
+            text="TECHNICO_"
+            trigger="inview-repeat"
+            repeatEvery={5}
+            waitForSiteReady
+          />
+          <ScrambleText
+            text="DIGITAL SOLUTIONS"
+            trigger="inview-repeat"
+            repeatEvery={5}
+            waitForSiteReady
+            className="sm:text-center"
+          />
+          <ScrambleText
+            text="2026 / SERVICES"
+            trigger="inview-repeat"
+            repeatEvery={5}
+            waitForSiteReady
+          />
+          <ScrambleText
+            text="06 / CAPABILITIES"
+            trigger="inview-repeat"
+            repeatEvery={5}
+            waitForSiteReady
+            className="text-right"
+          />
+        </div>
+
+        {/* Entirely new asymmetric stage: monumental type + abstract signal. */}
+        <div className="grid min-w-0 flex-1 items-end gap-x-[clamp(24px,4vw,84px)] gap-y-8 pt-[clamp(36px,7svh,94px)] lg:grid-cols-[minmax(0,1fr)_minmax(190px,0.31fr)] lg:pb-[clamp(14px,3svh,42px)]">
+          <div className="min-w-0 self-end">
+            <div
+              data-services-reveal
+              className="mb-[clamp(22px,4svh,48px)] flex items-center gap-3 font-mono text-[10px] font-medium tracking-[0.05em] uppercase sm:text-xs"
+            >
+              <span
+                aria-hidden="true"
+                className="h-[7px] w-[7px] bg-black-bg"
+              />
+              / WHAT WE DO
             </div>
+
+            <h1
+              id="services-hero-title"
+              className="min-w-0 font-bold uppercase"
+              style={{
+                fontSize: "clamp(2.75rem, 9.45vw, 10.5rem)",
+                letterSpacing: "-0.085em",
+                lineHeight: 0.91,
+              }}
+            >
+              <span className="block overflow-hidden pb-[0.11em]">
+                <span data-services-word className="block">
+                  Digital
+                </span>
+              </span>
+              <span className="block overflow-hidden pb-[0.11em]">
+                <span data-services-word className="block">
+                  Marketing
+                </span>
+              </span>
+              <span className="block overflow-hidden pb-[0.11em]">
+                <span data-services-word className="block">
+                  Services
+                </span>
+              </span>
+            </h1>
           </div>
 
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] bg-[#1A1A1A] sm:aspect-[16/10]">
-            <Image
-              src={HERO_IMAGE}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center"
-            />
-            <ServiceTagsPhysics />
+          {/* Graphic language from the homepage's stepped wave, newly composed
+              as a vertical signal sculpture instead of reusing the old image. */}
+          <div
+            data-services-reveal
+            className="relative flex min-w-0 flex-col justify-end lg:pb-[clamp(12px,2.4svh,32px)]"
+          >
+            <InteractiveServicesSignal />
           </div>
         </div>
 
-        {/* DESKTOP (lg+) — v3 layout: plain heading block on top,
-            image panel (with top-right notch for the button) below.
-            Fully static now — no parallax/ref/GSAP anywhere here. */}
-        <div className="hidden w-full flex-col gap-8 lg:flex">
-          {/* Heading block — plain text on the black section bg,
-              no mask, no overlap with the image below it */}
-          <div className="max-w-4xl">
-            <p className="mb-3 font-mono text-[14px] font-light tracking-[-0.02em] text-white/70 uppercase">
-              [ ] SERVICES <span className="wave-emoji inline-block">👋</span>
-            </p>
-            <h1 className="text-[62px] leading-[1.08] font-medium tracking-[-0.5px] text-white">
-              <span className="underline decoration-[#EC4899] underline-offset-4 text-[#EC4899]">
-                Digital Marketing Services
-              </span>{" "}
-              that deliver real business growth.
-            </h1>
-          </div>
-
-          {/* Image panel — masked to the notch at its top-right corner */}
-          <div
-            className="relative w-full"
-            style={{ aspectRatio: "1243 / 385" }}
+        {/* Exploration remains in the purple stage, not hidden inside a notch. */}
+        <div
+          data-services-reveal
+          className="mt-[clamp(22px,4svh,48px)] flex items-center justify-end gap-4 border-t border-black-bg/40 pt-4 font-mono text-[10px] font-medium uppercase sm:text-xs"
+        >
+          <a
+            href="#services-gallery-heading"
+            data-cursor="highlight"
+            className="inline-flex min-h-9 shrink-0 items-center gap-3 transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black-bg sm:gap-6"
           >
-            <div
-              className="absolute inset-0 overflow-hidden rounded-[20px] bg-[#0E0F11]"
-              style={{
-                WebkitMaskImage: NOTCH_MASK,
-                maskImage: NOTCH_MASK,
-                WebkitMaskSize: "100% 100%",
-                maskSize: "100% 100%",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-                WebkitMaskPosition: "center",
-                maskPosition: "center",
-              }}
-            >
-              <Image
-                src={HERO_IMAGE}
-                alt=""
-                fill
-                priority
-                sizes="(min-width: 1024px) 1243px, 100vw"
-                className="object-cover object-center"
-              />
-
-              <ServiceTagsPhysics />
-            </div>
-
-            {/* "Book a Call" sits in the top-right notch, backed by
-                black (the cutout) instead of the image. Plain
-                top/right offset, no constrained box, so its hover
-                effect (circle detaching from the label) behaves
-                normally. */}
-            <div className="absolute top-2 right-6">
-              <Button to={SITE_PHONE_HREF} variant="pink-fill">
-                Book a Call
-              </Button>
-            </div>
-          </div>
+            EXPLORE SERVICES <span aria-hidden="true">↓</span>
+          </a>
         </div>
       </div>
     </section>

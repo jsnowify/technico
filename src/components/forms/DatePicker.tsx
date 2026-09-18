@@ -88,14 +88,14 @@ export default function DatePicker({
       id={id}
       role="group"
       aria-label="Choose a date"
-      className="mt-2 w-full overflow-hidden rounded-lg border border-white/10 bg-white/5"
+      className="mt-2 w-full overflow-hidden border border-white/20 bg-black-bg"
     >
       <input type="hidden" name={name} value={value} />
 
       {/* Month header + nav */}
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-6">
         <span className="flex items-center gap-2.5 text-sm font-bold tracking-tight text-white uppercase sm:text-base">
-          <CalendarIcon className="size-4 shrink-0 text-purple-accent" />
+          <CalendarIcon className="size-4 shrink-0 text-accent" />
           {MONTH_LABELS[visibleMonth.getMonth()]} {visibleMonth.getFullYear()}
         </span>
 
@@ -105,7 +105,7 @@ export default function DatePicker({
             onClick={() => setVisibleMonth((month) => addMonths(month, -1))}
             disabled={!canGoToPreviousMonth}
             aria-label="Previous month"
-            className="flex size-7 items-center justify-center rounded-full border border-white/10 text-white/60 transition-colors hover:bg-purple-accent/15 disabled:pointer-events-none disabled:opacity-30"
+            className="flex size-7 items-center justify-center border border-white/20 text-content transition-colors hover:bg-accent-surface disabled:pointer-events-none disabled:opacity-30"
           >
             <ChevronDownIcon className="size-3.5 rotate-90" />
           </button>
@@ -114,7 +114,7 @@ export default function DatePicker({
             type="button"
             onClick={() => setVisibleMonth((month) => addMonths(month, 1))}
             aria-label="Next month"
-            className="flex size-7 items-center justify-center rounded-full border border-white/10 text-white/60 transition-colors hover:bg-purple-accent/15"
+            className="flex size-7 items-center justify-center border border-white/20 text-content transition-colors hover:bg-accent-surface"
           >
             <ChevronDownIcon className="size-3.5 -rotate-90" />
           </button>
@@ -147,15 +147,15 @@ export default function DatePicker({
                 disabled={disabled}
                 aria-current={isToday ? "date" : undefined}
                 aria-pressed={Boolean(selected)}
-                className={`mx-auto flex size-9 items-center justify-center rounded-full text-sm transition-colors sm:size-10 ${
+                className={`mx-auto flex size-9 items-center justify-center text-sm transition-colors sm:size-10 ${
                   selected
-                    ? "bg-purple-secondary text-white"
+                    ? "bg-accent text-black-bg"
                     : disabled
-                      ? "text-white/20"
+                      ? "text-content-muted/50"
                       : !inVisibleMonth
-                        ? "text-white/25 hover:bg-purple-accent/15"
-                        : "text-white-text hover:bg-purple-accent/15"
-                } ${isToday && !selected ? "ring-1 ring-inset ring-purple-accent/50" : ""} disabled:cursor-not-allowed disabled:hover:bg-transparent`}
+                        ? "text-content-muted hover:bg-accent-surface"
+                        : "text-white-text hover:bg-accent-surface"
+                } ${isToday && !selected ? "ring-1 ring-inset ring-accent" : ""} disabled:cursor-not-allowed disabled:hover:bg-transparent`}
               >
                 {day.getDate()}
               </button>
@@ -167,7 +167,7 @@ export default function DatePicker({
       {/* Footer: selected date + jump to today */}
       <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 px-5 py-3.5 sm:px-6">
         <span
-          className={`truncate text-sm ${selectedLabel ? "text-white-text" : "text-white/30"}`}
+          className={`truncate text-sm ${selectedLabel ? "text-white-text" : "text-content-muted"}`}
         >
           {selectedLabel ?? "No date selected"}
         </span>
@@ -176,7 +176,7 @@ export default function DatePicker({
           type="button"
           onClick={() => handleSelect(today)}
           disabled={isDisabled(today)}
-          className="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 font-mono text-[11px] tracking-[0.14em] text-white/60 uppercase transition-colors hover:bg-purple-accent/15 disabled:pointer-events-none disabled:opacity-30"
+          className="shrink-0 border border-white/20 px-3 py-1.5 font-mono text-[11px] tracking-[0.08em] text-content uppercase transition-colors hover:bg-accent-surface disabled:pointer-events-none disabled:opacity-30"
         >
           Today
         </button>

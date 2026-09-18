@@ -1,314 +1,274 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
-import Image from "next/image";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
-import {
-  gsap,
-  prefersReducedMotion,
-  usePrefersReducedMotion,
-} from "@/lib/gsap";
-import Button from "@/components/ui/Button";
-import { SITE_PHONE_HREF } from "@/lib/constants";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { isSiteReady, SITE_READY_EVENT } from "@/lib/site-ready";
+import ScrambleText from "@/components/motion/ScrambleText";
 
-const HERO_BG =
-  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1788870336/hero-bg-shapes/technico-bg_z3fyss.avif";
-const HERO_CIRCLE =
-  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1788870624/hero-bg-shapes/hero-home-circle.avif";
-
-/*
- * Portrait frame path, supplied at 667x896. Normalized to
- * objectBoundingBox (0-1) fractions so the clip-path scales cleanly
- * with the responsive container instead of being pinned to one
- * pixel size. The notch carved out of the top-right corner is what
- * the floating arrow badge sits into.
+/**
+ * Two moving, stepped waveforms, based on the supplied motion reference.
+ *
+ * Each waveform is made of several THICK, stacked horizontal blocks of
+ * different widths. Together they form visible crests and descending steps;
+ * they are not six lanes of isolated, hairline strokes.
+ *
+ * Coordinates use percentages of ONE full-width pattern. Two identical
+ * patterns sit side-by-side, so moving the 200%-wide track by exactly 50%
+ * produces a seamless loop without a jump at the edge of the screen.
  */
-const PORTRAIT_CLIP_PATH =
-  "M0.655172,0 C0.671733,0 0.685157,0.009994 0.685157,0.022321 V0.212054 C0.685157,0.224381 0.698582,0.234375 0.715142,0.234375 H0.970015 C0.986575,0.234375 1,0.244369 1,0.256696 V0.977679 C1,0.990006 0.986575,1 0.970015,1 H0.029985 C0.013425,1 0,0.990006 0,0.977679 V0.022321 C0,0.009994 0.013425,0 0.029985,0 H0.655172 Z";
+type Step = readonly [left: number, width: number, level: number];
+
+type Wave = {
+  top: string;
+  height: string;
+  duration: number;
+  steps: readonly Step[];
+};
+
+const WAVES: readonly Wave[] = [
+  {
+    top: "0%",
+    height: "46%",
+    duration: 19,
+    steps: [
+      // Broken baseline: leave breathing room between the crests.
+      [0, 18, 0],
+      [20, 30, 0],
+      [53, 15, 0],
+      [71, 29, 0],
+      // First wide, terraced peak. Each higher step is shorter.
+      [14, 37, 1],
+      [19, 29, 2],
+      [24, 22, 3],
+      [29, 14, 4],
+      [33, 7, 5],
+      // Second peak flows back down into the following baseline.
+      [61, 36, 1],
+      [65, 29, 2],
+      [70, 21, 3],
+      [74, 13, 4],
+      [78, 6, 5],
+    ],
+  },
+  {
+    top: "60%",
+    height: "40%",
+    duration: 24,
+    steps: [
+      // A quieter second wave, like the lower register in the reference.
+      [0, 23, 0],
+      [29, 43, 0],
+      [78, 22, 0],
+      [13, 25, 1],
+      [19, 17, 2],
+      [24, 9, 3],
+      [43, 27, 1],
+      [49, 18, 2],
+      [54, 9, 3],
+      [79, 18, 1],
+      [83, 12, 2],
+      [86, 6, 3],
+    ],
+  },
+];
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
-  const parallaxRef = useRef<HTMLDivElement>(null);
-  const floatRef = useRef<HTMLDivElement>(null);
-  const [strategyHovered, setStrategyHovered] = useState(false);
-  const clipId = useId();
-  const reduceMotion = usePrefersReducedMotion();
+  const metaRef = useRef<HTMLDivElement>(null);
+  const motionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const exploreRef = useRef<HTMLAnchorElement>(null);
 
-  useGSAP(() => {
-    const section = sectionRef.current;
-    const parallaxEl = parallaxRef.current;
-    const floatEl = floatRef.current;
-    if (!section || !parallaxEl || !floatEl || prefersReducedMotion) return;
+  useGSAP(
+    () => {
+      // Reduced motion: show the completed composition without animating it.
+      if (prefersReducedMotion) return;
 
-    const mm = gsap.matchMedia();
+      const motion = motionRef.current;
+      if (!motion) return;
 
-    // Fine-pointer (mouse/trackpad) devices get the full effect.
-    mm.add("(pointer: fine)", () => {
-      const float = gsap.fromTo(
-        floatEl,
-        { y: -15, rotation: -2 },
-        {
-          y: 45,
-          rotation: 2,
-          duration: 2.8,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-        },
+      const steps = gsap.utils.toArray<HTMLElement>(
+        motion.querySelectorAll("[data-wave-step]"),
       );
-
-      const parallax = gsap.fromTo(
-        parallaxEl,
-        { y: -60 },
-        {
-          y: 180,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.3,
-          },
-        },
+      const tracks = gsap.utils.toArray<HTMLElement>(
+        motion.querySelectorAll("[data-wave-track]"),
       );
+      const metaItems = metaRef.current?.children;
+      const title = titleRef.current;
+      const explore = exploreRef.current;
+
+      let entrance: gsap.core.Timeline | undefined;
+      const loops: gsap.core.Tween[] = [];
+
+      gsap.set(steps, { autoAlpha: 0 });
+      if (metaItems) gsap.set(metaItems, { autoAlpha: 0, y: 14 });
+      if (title) gsap.set(title, { autoAlpha: 0, y: 34 });
+      if (explore) gsap.set(explore, { autoAlpha: 0, y: 16 });
+
+      const startWaveMotion = () => {
+        tracks.forEach((track, index) => {
+          loops.push(
+            gsap.fromTo(
+              track,
+              { xPercent: 0 },
+              {
+                xPercent: -50,
+                duration: WAVES[index].duration,
+                ease: "none",
+                repeat: -1,
+              },
+            ),
+          );
+        });
+      };
+
+      const playEntrance = () => {
+        if (entrance) return;
+
+        entrance = gsap.timeline({ defaults: { ease: "power3.out" } });
+        entrance
+          .to(steps, {
+            autoAlpha: 1,
+            duration: 0.65,
+            stagger: { each: 0.018, from: "center" },
+          })
+          .to(
+            metaItems ?? [],
+            { autoAlpha: 1, y: 0, stagger: 0.045, duration: 0.5 },
+            0.12,
+          )
+          .to(title, { autoAlpha: 1, y: 0, duration: 0.72 }, 0.32)
+          .to(explore, { autoAlpha: 1, y: 0, duration: 0.55 }, 0.48)
+          .call(startWaveMotion, [], 0.38)
+          .set(steps, { clearProps: "opacity,visibility" })
+          .set([...(metaItems ? Array.from(metaItems) : []), title, explore], {
+            clearProps: "transform,opacity,visibility",
+          });
+      };
+
+      // Preserve your preloader's existing timing and site-ready event.
+      if (isSiteReady()) {
+        playEntrance();
+      } else {
+        window.addEventListener(SITE_READY_EVENT, playEntrance, { once: true });
+      }
 
       return () => {
-        float.kill();
-        parallax.scrollTrigger?.kill();
-        parallax.kill();
+        window.removeEventListener(SITE_READY_EVENT, playEntrance);
+        loops.forEach((loop) => loop.kill());
+        entrance?.kill();
       };
-    });
-
-    // Touch/coarse-pointer devices: lighter bob, shorter scroll range, and
-    // fastScrollEnd so a quick flick doesn't leave the scrub animation
-    // visibly "catching up" after the finger lifts.
-    mm.add("(pointer: coarse)", () => {
-      const float = gsap.fromTo(
-        floatEl,
-        { y: -8, rotation: -1 },
-        {
-          y: 20,
-          rotation: 1,
-          duration: 3.4,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-        },
-      );
-
-      const parallax = gsap.fromTo(
-        parallaxEl,
-        { y: -25 },
-        {
-          y: 70,
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.5,
-            fastScrollEnd: true,
-          },
-        },
-      );
-
-      return () => {
-        float.kill();
-        parallax.scrollTrigger?.kill();
-        parallax.kill();
-      };
-    });
-
-    return () => mm.revert();
-  }, []);
+    },
+    { scope: sectionRef },
+  );
 
   return (
     <section
       ref={sectionRef}
-      className="relative isolate overflow-hidden bg-black-bg text-white"
+      aria-label="Technico Digital Solutions"
+      className="relative isolate overflow-hidden bg-purple-hero text-black-bg"
+      style={{
+        backgroundColor: "var(--color-purple-hero, #a78bfa)",
+        color: "var(--color-black-bg, #080808)",
+      }}
     >
-      <div className="container-x mx-auto grid min-h-svh w-full max-w-360 grid-cols-1 pt-20 pb-10 lg:grid-cols-[minmax(0,1fr)_667px] lg:pt-18.25 lg:pb-13.75">
-        {/* LEFT */}
-        <div className="relative z-20 flex flex-col justify-center lg:justify-start lg:pt-29.5">
-          <p className="mb-7 font-mono text-[14px] tracking-[-0.02em] text-white/85 uppercase">
-            [ ] YOOHOOOO HELLOOOO{" "}
-            <span
-              className={
-                reduceMotion ? "inline-block" : "eyebrow-wave inline-block"
-              }
-            >
-              👋
-            </span>
-          </p>
-
-          {/* Font-size now lives in globals.css (`.h1-hero`) as a
-              fluid clamp() instead of stepped Tailwind breakpoints —
-              see that class for the full reasoning. Letter-spacing
-              switched from a fixed -2.5px to an em-based -0.04em so
-              it scales together with the now-continuously-changing
-              font-size instead of staying a flat px value. */}
-          <h1 className="h1-hero max-w-132.5 leading-[0.98] font-medium tracking-[-0.04em] text-white">
-            <span className="underline decoration-[#8B5CF6] underline-offset-4 text-[#8B5CF6]">
-              Digital Marketing Agency
-            </span>{" "}
-            that prioritize your profit, not just traffic.
-          </h1>
-
-          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 lg:mt-16">
-            <Button to={SITE_PHONE_HREF} variant="purple-fill">
-              BOOK A CALL
-            </Button>
-            <Button to={SITE_PHONE_HREF} variant="underline">
-              Free Strategy
-            </Button>
-          </div>
-
-          {/* Desktop overlapping statement card — fixed 617px width (matches
-              the source design) so the overlap into the portrait stays
-              consistent no matter how wide the left column gets. */}
+      <div className="container-x mx-auto flex min-h-[100svh] w-full max-w-[1920px] flex-col pt-[clamp(96px,13svh,138px)] pb-[clamp(18px,3svh,36px)]">
+        <div className="mt-auto min-w-0 pt-[clamp(8px,2svh,20px)]">
           <div
-            className="mt-14 hidden lg:mt-16 lg:block"
-            style={{ width: "617px" }}
+            ref={metaRef}
+            className="mb-[clamp(10px,1.5svh,16px)] grid grid-cols-2 gap-x-3 gap-y-2 font-mono text-[10px] leading-none tracking-[-0.02em] uppercase sm:grid-cols-4 sm:text-xs"
           >
-            <div className="relative min-h-36.5 overflow-hidden rounded-[20px] border border-white/10 backdrop-blur-xl">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 617 146"
-                preserveAspectRatio="none"
-                className="absolute inset-0 h-full w-full"
-              >
-                <rect
-                  width="617"
-                  height="146"
-                  rx="20"
-                  fill="#000000"
-                  fillOpacity="0.25"
-                />
-              </svg>
-              <div className="relative flex min-h-36.5 items-center gap-6 px-7 py-5">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 102 102"
-                  className="h-21.5 w-21.5 shrink-0"
-                  fill="none"
-                >
-                  <path
-                    d="M0 0C0 13.5263 5.37171 26.4985 14.9365 36.0621C24.5013 45.6271 37.4734 51.0002 50.9995 51.0002V0H0ZM50.9995 51.0002H102V0C88.4739 0 75.5008 5.3731 65.936 14.9367C56.3712 24.5017 50.9995 37.4726 50.9995 51.0002ZM50.9995 51.0002V102H102C102 88.4741 96.6282 75.5018 87.0634 65.9369C77.4986 56.3733 64.5252 51.0002 50.9995 51.0002ZM50.9995 51.0002H0V102C13.5261 102 26.4994 96.6269 36.0642 87.0633C45.6291 77.4983 50.9995 64.5261 50.9995 51.0002Z"
-                    fill="white"
-                  />
-                </svg>
-                <p className="max-w-102.5 text-[15px] leading-[1.35] text-white/95 xl:text-[17px]">
-                  Achieve Business Success Through Effective Brand Development.
-                  Explore new digital marketing opportunities with Technico
-                  Digital Solutions.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT VISUAL */}
-        <div
-          className="relative z-10 mt-10 h-[72svh] min-h-155 w-full self-start overflow-visible lg:mt-0 lg:h-auto lg:min-h-0"
-          style={{ aspectRatio: "667 / 896" }}
-        >
-          {/* Portrait frame — clipped to the supplied notch shape so the
-              floating arrow badge sits flush into the cut top-right corner
-              instead of merely overlapping a plain rounded rect. */}
-          <svg aria-hidden="true" className="absolute h-0 w-0">
-            <defs>
-              <clipPath id={clipId} clipPathUnits="objectBoundingBox">
-                <path d={PORTRAIT_CLIP_PATH} />
-              </clipPath>
-            </defs>
-          </svg>
-
-          <div
-            className="absolute inset-0 overflow-hidden bg-[#eceaf0]"
-            style={{ clipPath: `url(#${clipId})` }}
-          >
-            <Image
-              src={HERO_BG}
-              alt=""
-              fill
-              priority
-              sizes="(min-width: 1024px) 667px, 100vw"
-              className="object-cover object-center"
+            <ScrambleText
+              text="TECHNICO_"
+              trigger="inview-repeat"
+              repeatEvery={5}
+              waitForSiteReady
+            />
+            <ScrambleText
+              text="BUILT FOR GROWTH"
+              trigger="inview-repeat"
+              repeatEvery={5}
+              waitForSiteReady
+            />
+            <ScrambleText
+              text="2026 / HOME"
+              trigger="inview-repeat"
+              repeatEvery={5}
+              waitForSiteReady
+            />
+            <ScrambleText
+              text="DIGITAL SOLUTIONS_"
+              trigger="inview-repeat"
+              repeatEvery={5}
+              waitForSiteReady
+              className="sm:text-right"
             />
           </div>
 
+          {/* Two layered, black stepped waveforms instead of isolated lines. */}
           <div
-            ref={parallaxRef}
-            className="absolute top-[45%] left-1/2 w-[54%] max-w-102.5 -translate-x-1/2 -translate-y-1/2 will-change-transform"
+            ref={motionRef}
+            aria-hidden="true"
+            className="relative min-w-0 overflow-hidden"
+            style={{ height: "clamp(82px, calc(60svh - 115px), 360px)" }}
           >
-            <div ref={floatRef} className="relative aspect-square w-full">
-              <Image
-                src={HERO_CIRCLE}
-                alt=""
-                fill
-                draggable={false}
-                sizes="(min-width: 1024px) 360px, 54vw"
-                className="object-contain drop-shadow-[0_24px_35px_rgba(0,0,0,0.18)]"
-              />
-            </div>
-          </div>
-
-          {/* Floating arrow badge — sits inside the notch cut from the portrait */}
-          <div className="absolute top-0 right-0 z-30 aspect-square w-[28%] overflow-hidden rounded-[20px] bg-[#8B5CF6]">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 187 187"
-              className="absolute inset-0 h-full w-full"
-            >
-              <rect width="187" height="187" rx="20" fill="#8B5CF6" />
-            </svg>
-            <a
-              href={SITE_PHONE_HREF}
-              aria-label="Book a free strategy call"
-              data-cursor="highlight"
-              onMouseEnter={() => setStrategyHovered(true)}
-              onMouseLeave={() => setStrategyHovered(false)}
-              className="relative flex h-full w-full items-center justify-center"
-            >
-              <svg
-                viewBox="0 0 80 80"
-                fill="none"
-                className={`aspect-square w-[44%] text-black transition-transform duration-500 ease-out ${strategyHovered ? "rotate-45" : "rotate-0"}`}
-                aria-hidden="true"
+            {WAVES.map((wave, waveIndex) => (
+              <div
+                key={waveIndex}
+                className="absolute inset-x-0"
+                style={{ top: wave.top, height: wave.height }}
               >
-                <path
-                  d="M15 65L65 15M65 15H28M65 15V52"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </a>
+                <div
+                  data-wave-track
+                  className="relative flex h-full w-[200%] will-change-transform"
+                >
+                  {[0, 1].map((copy) => (
+                    <div key={copy} className="relative h-full w-1/2 shrink-0">
+                      {wave.steps.map(([left, width, level], stepIndex) => (
+                        <span
+                          key={stepIndex}
+                          data-wave-step
+                          className="absolute block bg-black-bg"
+                          style={{
+                            left: `${left}%`,
+                            width: `${width}%`,
+                            // Layering progressively shorter strips makes a
+                            // crest/valley silhouette instead of thin lines.
+                            top: `${85 - level * 14}%`,
+                            height: "clamp(3px, 0.85svh, 9px)",
+                            backgroundColor: "var(--color-black-bg, #080808)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Mobile statement card */}
-          <div className="absolute right-4 bottom-4 left-4 z-30 lg:hidden">
-            <div className="relative min-h-36.5 overflow-hidden rounded-[20px] border border-white/10 bg-black/25 backdrop-blur-md">
-              <div className="relative flex min-h-36.5 items-center gap-5 px-6 py-5">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 102 102"
-                  className="h-16 w-16 shrink-0"
-                  fill="none"
-                >
-                  <path
-                    d="M0 0C0 13.5263 5.37171 26.4985 14.9365 36.0621C24.5013 45.6271 37.4734 51.0002 50.9995 51.0002V0H0ZM50.9995 51.0002H102V0C88.4739 0 75.5008 5.3731 65.936 14.9367C56.3712 24.5017 50.9995 37.4726 50.9995 51.0002ZM50.9995 51.0002V102H102C102 88.4741 96.6282 75.5018 87.0634 65.9369C77.4986 56.3733 64.5252 51.0002 50.9995 51.0002ZM50.9995 51.0002H0V102C13.5261 102 26.4994 96.6269 36.0642 87.0633C45.6291 77.4983 50.9995 64.5261 50.9995 51.0002Z"
-                    fill="white"
-                  />
-                </svg>
-                <p className="text-sm leading-snug text-white">
-                  Achieve Business Success Through Effective Brand Development.
-                  Explore new digital marketing opportunities with Technico
-                  Digital Solutions.
-                </p>
-              </div>
-            </div>
+          <div className="mt-[clamp(12px,1.8svh,18px)] flex min-w-0 flex-col items-start gap-2 sm:gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <h1
+              ref={titleRef}
+              className="min-w-0 max-w-full whitespace-nowrap font-bold uppercase"
+              style={{
+                fontSize: "clamp(2.125rem, min(14.8vw, 21svh), 14rem)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.085em",
+              }}
+            >
+              TECHNICO_
+            </h1>
+            <a
+              ref={exploreRef}
+              href="#services"
+              data-cursor="highlight"
+              className="inline-flex min-h-8 shrink-0 items-center gap-3 self-end font-mono text-[10px] font-medium tracking-[0.03em] uppercase transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black-bg sm:gap-6 sm:text-xs lg:mb-2"
+            >
+              <span className="hidden sm:inline">/</span>
+              EXPLORE <span aria-hidden="true">↓</span>
+            </a>
           </div>
         </div>
       </div>

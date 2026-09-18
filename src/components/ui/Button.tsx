@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 
 import Link from "next/link";
-import gsap from "gsap";
+import styles from "./Button.module.css";
 
 import SlidingText from "@/components/motion/SlidingText";
 
@@ -44,12 +44,9 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // Purple organic goo pill + arrow circle. Rendered separately below.
   purple: "bg-purple-accent text-white-primary",
 
-  // Purple pill with a fill-expanding circle. Rendered separately below.
-  "purple-fill": "bg-[#A78BFA] text-white-primary",
-
-  // Pink pill with a fill-expanding circle — same mechanic as
-  // "purple-fill", just recolored. Rendered separately below.
-  "pink-fill": "bg-[#FE96C9] text-white-primary",
+  // Beveled editorial buttons are rendered in the shared block below.
+  "purple-fill": "",
+  "pink-fill": "",
 
   // Text link with a hover underline sweep. Rendered separately below,
   // not used here.
@@ -75,273 +72,73 @@ export default function Button({
   const [hovered, setHovered] = useState(false);
   const filterId = useId();
 
-  // Refs used only by the "purple-fill" / "pink-fill" variants (same
-  // circle-expand mechanic, just recolored). Declared unconditionally
-  // (Rules of Hooks) — simply unused for the other variants.
-  const fillLinkRef = useRef<HTMLAnchorElement>(null);
-  const fillCircleRef = useRef<HTMLSpanElement>(null);
-  const fillArrowOutRef = useRef<SVGSVGElement>(null);
-  const fillArrowInRef = useRef<SVGSVGElement>(null);
-  const fillTimelineRef = useRef<gsap.core.Timeline | null>(null);
-
-  // Refs used only by the "underline" variant.
-  const underlineBarRef = useRef<HTMLSpanElement>(null);
-  const underlineArrowOutRef = useRef<SVGSVGElement>(null);
-  const underlineArrowInRef = useRef<SVGSVGElement>(null);
-  const underlineTimelineRef = useRef<gsap.core.Timeline | null>(null);
-
-  /*
-   * ================================================================
-   * PURPLE-FILL: circle expand hover
-   * ================================================================
-   * Light-purple pill with a darker purple circle inset on the
-   * right, holding an up arrow. On hover the circle scales up from
-   * its own center until it fully covers the pill (clipped by the
-   * pill's rounded-full + overflow-hidden), so the button reads as
-   * "filling" with the circle's color. The arrow itself does a
-   * fly-out/fly-in swap: the resting arrow slides up-right and
-   * fades out while a duplicate slides in from the bottom-left and
-   * fades in, all in the same GSAP timeline as the circle so hover
-   * in/out stays perfectly synced (reverse just plays it backwards).
-   */
-  useEffect(() => {
-    if (variant !== "purple-fill" && variant !== "pink-fill") return;
-
-    const button = fillLinkRef.current;
-    const circle = fillCircleRef.current;
-    const arrowOut = fillArrowOutRef.current;
-    const arrowIn = fillArrowInRef.current;
-    if (!button || !circle || !arrowOut || !arrowIn) return;
-
-    const build = () => {
-      const { width, height } = button.getBoundingClientRect();
-      const circleSize = circle.offsetWidth;
-      const inset = 6; // matches the p-1.5 padding on the pill
-
-      // Distance from the circle's center to the pill's far corner —
-      // the circle needs at least this much radius, scaled up, to
-      // swallow the whole pill.
-      const centerX = width - inset - circleSize / 2;
-      const centerY = height / 2;
-      const reach = Math.sqrt(centerX * centerX + centerY * centerY);
-      const scale = (reach * 2.05) / circleSize;
-
-      fillTimelineRef.current?.kill();
-      gsap.set(circle, { scale: 1 });
-      gsap.set(arrowOut, { x: 0, y: 0, opacity: 1, rotate: 45 });
-      gsap.set(arrowIn, { x: -7, y: 7, opacity: 0, rotate: 45 });
-
-      fillTimelineRef.current = gsap
-        .timeline({ paused: true })
-        .to(circle, { scale, duration: 0.6, ease: "power3.out" }, 0)
-        .to(
-          arrowOut,
-          { x: 7, y: -7, opacity: 0, duration: 0.26, ease: "power2.in" },
-          0,
-        )
-        .to(
-          arrowIn,
-          { x: 0, y: 0, opacity: 1, duration: 0.26, ease: "power2.out" },
-          0.26,
-        );
+  if (variant === "purple-fill" || variant === "pink-fill") {
+    const isPink = variant === "pink-fill";
+    const widths: Record<ButtonSize, string> = {
+      sm: "140px",
+      md: "180px",
+      lg: "220px",
     };
-
-    build();
-    window.addEventListener("resize", build);
-    return () => {
-      window.removeEventListener("resize", build);
-      fillTimelineRef.current?.kill();
+    const heights: Record<ButtonSize, string> = {
+      sm: "42px",
+      md: "clamp(46px, 3.5vw, 50px)",
+      lg: "clamp(52px, 4vw, 58px)",
     };
-  }, [variant]);
-
-  /*
-   * ================================================================
-   * UNDERLINE: text link with a hover underline sweep
-   * ================================================================
-   * Plain text label, no pill. On hover a thin bar sweeps in from
-   * the left (scaleX 0 → 1, transform-origin left) in the accent
-   * color. The arrow uses the exact same fly-out/fly-in swap as
-   * "purple-fill" — out arrow flies clear before the in arrow
-   * starts, so there's no double-arrow ghost — all on one timeline
-   * so hover-out is just the same motion in reverse.
-   */
-  useEffect(() => {
-    if (variant !== "underline") return;
-
-    const bar = underlineBarRef.current;
-    const arrowOut = underlineArrowOutRef.current;
-    const arrowIn = underlineArrowInRef.current;
-    if (!bar || !arrowOut || !arrowIn) return;
-
-    underlineTimelineRef.current?.kill();
-    gsap.set(bar, { scaleX: 0 });
-    gsap.set(arrowOut, { x: 0, y: 0, opacity: 1, rotate: 45 });
-    gsap.set(arrowIn, { x: -7, y: 7, opacity: 0, rotate: 45 });
-
-    underlineTimelineRef.current = gsap
-      .timeline({ paused: true })
-      .to(bar, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 0)
-      .to(
-        arrowOut,
-        { x: 7, y: -7, opacity: 0, duration: 0.26, ease: "power2.in" },
-        0,
-      )
-      .to(
-        arrowIn,
-        { x: 0, y: 0, opacity: 1, duration: 0.26, ease: "power2.out" },
-        0.26,
-      );
-
-    return () => {
-      underlineTimelineRef.current?.kill();
-    };
-  }, [variant]);
-
-  if (variant === "purple-fill") {
-    const handleEnter = () => {
-      setHovered(true);
-      fillTimelineRef.current?.play();
-    };
-    const handleLeave = () => {
-      setHovered(false);
-      fillTimelineRef.current?.reverse();
-    };
+    const cut = size === "sm" ? "8px" : "10px";
+    const wipeColor = isPink
+      ? "var(--color-accent)"
+      : "var(--color-accent-light)";
 
     return (
       <Link
-        ref={fillLinkRef}
+        data-button-fill
         href={to}
         aria-label={children}
         data-cursor="highlight"
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
-        className="relative inline-flex h-11 items-center overflow-hidden rounded-full bg-[#A78BFA] p-1.5"
+        className={`${styles.fill} relative isolate inline-flex max-w-full shrink-0 items-center justify-center overflow-hidden font-mono font-medium tracking-[-0.035em] text-black-bg uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black-bg`}
+        style={{
+          width: "fit-content",
+          minWidth: `min(${widths[size]}, 100%)`,
+          maxWidth: "100%",
+          minHeight: heights[size],
+          padding: "14px 8px",
+          backgroundColor: isPink
+            ? "var(--color-accent-light)"
+            : "var(--color-accent)",
+          // Screenshot's cut top-left and bottom-right corners.
+          clipPath: `polygon(${cut} 0, 100% 0, 100% calc(100% - ${cut}), calc(100% - ${cut}) 100%, 0 100%, 0 ${cut})`,
+        }}
       >
-        {/* Expanding fill circle — sits below the label/arrow layer */}
+        {/* 8 full-width horizontal sheets, alternately entering from
+            the left and right, exactly like the page transition. */}
+        {Array.from({ length: 8 }, (_, index) => (
+          <span
+            key={index}
+            data-button-wipe
+            aria-hidden="true"
+            className={`${styles.sheet} pointer-events-none absolute left-0 w-full`}
+            style={
+              {
+                top: `${(index * 100) / 8}%`,
+                height: `calc(${100 / 8}% + 1px)`,
+                "--button-band": index,
+                transformOrigin:
+                  index % 2 === 0 ? "left center" : "right center",
+                backgroundColor: wipeColor,
+              } as CSSProperties
+            }
+          />
+        ))}
         <span
-          ref={fillCircleRef}
-          aria-hidden="true"
-          className="absolute top-1/2 right-1.5 z-0 h-8 w-8 -translate-y-1/2 rounded-full bg-[#6D28D9]"
-          style={{ transformOrigin: "50% 50%", willChange: "transform" }}
-        />
-
-        {/* Label */}
-        <span className="relative z-10 flex h-8 items-center pr-2 pl-4 text-[14px] font-light tracking-tight whitespace-nowrap text-white-primary uppercase">
+          className={`pointer-events-none relative z-10 min-w-0 px-3 text-center leading-[1.35] whitespace-normal ${
+            size === "sm"
+              ? "text-[11px] sm:text-[12px]"
+              : size === "lg"
+                ? "text-[clamp(13px,1.05vw,16px)]"
+                : "text-[clamp(12px,0.9vw,14px)]"
+          }`}
+        >
           {children}
-        </span>
-
-        {/* Arrow circle */}
-        <span className="relative z-10 ml-auto flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
-          {/* Outgoing arrow — flies up-right and fades out on hover */}
-          <svg
-            ref={fillArrowOutRef}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="absolute h-4 w-4 text-white-primary"
-            style={{ transformOrigin: "50% 50%" }}
-            aria-hidden="true"
-          >
-            <path d="M12 19V5M6 11l6-6 6 6" />
-          </svg>
-
-          {/* Incoming arrow — starts bottom-left, slides in and fades on hover */}
-          <svg
-            ref={fillArrowInRef}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="absolute h-4 w-4 text-white-primary opacity-0"
-            style={{ transformOrigin: "50% 50%" }}
-            aria-hidden="true"
-          >
-            <path d="M12 19V5M6 11l6-6 6 6" />
-          </svg>
-        </span>
-      </Link>
-    );
-  }
-
-  /*
-   * ================================================================
-   * PINK-FILL: circle expand hover
-   * ================================================================
-   * Identical mechanic to "purple-fill" (see above) — light pink
-   * pill (#FE96C9) with a darker pink circle (#EC4899) that expands
-   * to fill it on hover — just recolored for pink CTAs.
-   */
-  if (variant === "pink-fill") {
-    const handleEnter = () => {
-      setHovered(true);
-      fillTimelineRef.current?.play();
-    };
-    const handleLeave = () => {
-      setHovered(false);
-      fillTimelineRef.current?.reverse();
-    };
-
-    return (
-      <Link
-        ref={fillLinkRef}
-        href={to}
-        aria-label={children}
-        data-cursor="highlight"
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
-        className="relative inline-flex h-11 items-center overflow-hidden rounded-full bg-[#FE96C9] p-1.5"
-      >
-        {/* Expanding fill circle — sits below the label/arrow layer */}
-        <span
-          ref={fillCircleRef}
-          aria-hidden="true"
-          className="absolute top-1/2 right-1.5 z-0 h-8 w-8 -translate-y-1/2 rounded-full bg-[#EC4899]"
-          style={{ transformOrigin: "50% 50%", willChange: "transform" }}
-        />
-
-        {/* Label */}
-        <span className="relative z-10 flex h-8 items-center pr-2 pl-4 text-[14px] font-light tracking-tight whitespace-nowrap text-white-primary uppercase">
-          {children}
-        </span>
-
-        {/* Arrow circle */}
-        <span className="relative z-10 ml-auto flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
-          {/* Outgoing arrow — flies up-right and fades out on hover */}
-          <svg
-            ref={fillArrowOutRef}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="absolute h-4 w-4 text-white-primary"
-            style={{ transformOrigin: "50% 50%" }}
-            aria-hidden="true"
-          >
-            <path d="M12 19V5M6 11l6-6 6 6" />
-          </svg>
-
-          {/* Incoming arrow — starts bottom-left, slides in and fades on hover */}
-          <svg
-            ref={fillArrowInRef}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="absolute h-4 w-4 text-white-primary opacity-0"
-            style={{ transformOrigin: "50% 50%" }}
-            aria-hidden="true"
-          >
-            <path d="M12 19V5M6 11l6-6 6 6" />
-          </svg>
         </span>
       </Link>
     );
@@ -356,17 +153,12 @@ export default function Button({
    * the accent pink, and the arrow reuses the purple-fill fly swap.
    */
   if (variant === "underline") {
-    const handleEnter = () => underlineTimelineRef.current?.play();
-    const handleLeave = () => underlineTimelineRef.current?.reverse();
-
     return (
       <Link
         href={to}
         aria-label={children}
         data-cursor="highlight"
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
-        className="relative inline-flex items-center gap-1.5 text-white-primary"
+        className={`${styles.underline} relative inline-flex items-center gap-1.5 text-white-text`}
       >
         {/* Label + underline sweep */}
         <span className="relative inline-block">
@@ -374,24 +166,38 @@ export default function Button({
             {children}
           </span>
           <span
-            ref={underlineBarRef}
             aria-hidden="true"
-            className="absolute inset-x-0 -bottom-1 h-[2px] origin-left bg-[#EC4899]"
-            style={{ transform: "scaleX(0)" }}
-          />
+            className="absolute inset-x-0 -bottom-1.5 h-[3px] overflow-hidden"
+          >
+            {Array.from({ length: 3 }, (_, index) => (
+              <span
+                key={index}
+                data-underline-wipe
+                className={`${styles.underlineSheet} absolute left-0 w-full bg-accent`}
+                style={
+                  {
+                    top: `${(index * 100) / 3}%`,
+                    height: `calc(${100 / 3}% + 0.5px)`,
+                    "--button-band": index,
+                    transformOrigin:
+                      index % 2 === 0 ? "left center" : "right center",
+                  } as CSSProperties
+                }
+              />
+            ))}
+          </span>
         </span>
 
         {/* Arrow — same fly-out/fly-in swap as purple-fill */}
         <span className="relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden">
           <svg
-            ref={underlineArrowOutRef}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="absolute h-5 w-5 text-white-primary"
+            className={`${styles.arrowOut} absolute h-5 w-5`}
             style={{ transformOrigin: "50% 50%" }}
             aria-hidden="true"
           >
@@ -399,14 +205,13 @@ export default function Button({
           </svg>
 
           <svg
-            ref={underlineArrowInRef}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="absolute h-5 w-5 text-white-primary opacity-0"
+            className={`${styles.arrowIn} absolute h-5 w-5`}
             style={{ transformOrigin: "50% 50%" }}
             aria-hidden="true"
           >
@@ -439,10 +244,20 @@ export default function Button({
         data-cursor="highlight"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative inline-flex h-11 items-center"
-        style={{
-          contain: "layout paint",
-        }}
+        className="relative inline-flex h-[var(--btn-h)] items-center"
+        style={
+          {
+            contain: "layout paint",
+            // Single source of truth for the pill's size at any
+            // viewport width -- 36px tall/14px arrows on a small
+            // phone up to 44px tall/16px arrows on desktop, scaling
+            // continuously instead of jumping at breakpoints.
+            "--btn-h": "clamp(2.25rem, 1.85rem + 1.9vw, 2.75rem)",
+            "--btn-px": "clamp(1rem, 0.75rem + 1vw, 1.5rem)",
+            "--btn-text": "clamp(0.75rem, 0.65rem + 0.45vw, 0.875rem)",
+            "--btn-icon": "clamp(0.875rem, 0.8rem + 0.3vw, 1rem)",
+          } as React.CSSProperties
+        }
       >
         {/* ============================================================
             SVG GOO FILTER
@@ -498,14 +313,14 @@ export default function Button({
             aria-hidden="true"
             className="
               flex
-              h-11
+              h-[var(--btn-h)]
               items-center
               justify-center
               whitespace-nowrap
               rounded-full
               bg-purple-accent
-              px-6
-              text-[14px]
+              px-[var(--btn-px)]
+              text-[length:var(--btn-text)]
               font-light
               tracking-tight
               text-transparent
@@ -519,8 +334,8 @@ export default function Button({
           <span
             aria-hidden="true"
             className="
-              h-11
-              w-11
+              h-[var(--btn-h)]
+              w-[var(--btn-h)]
               shrink-0
               rounded-full
               bg-purple-accent
@@ -548,12 +363,12 @@ export default function Button({
           <span
             className="
               flex
-              h-11
+              h-[var(--btn-h)]
               items-center
               justify-center
               overflow-hidden
-              px-6
-              text-[14px]
+              px-[var(--btn-px)]
+              text-[length:var(--btn-text)]
               font-light
               tracking-tight
               whitespace-nowrap
@@ -568,8 +383,8 @@ export default function Button({
           <span
             className="
               flex
-              h-11
-              w-11
+              h-[var(--btn-h)]
+              w-[var(--btn-h)]
               shrink-0
               items-center
               justify-center
@@ -589,8 +404,8 @@ export default function Button({
               strokeLinecap="round"
               strokeLinejoin="round"
               className="
-                h-4
-                w-4
+                h-[var(--btn-icon)]
+                w-[var(--btn-icon)]
                 text-white
                 transition-transform
                 duration-[450ms]

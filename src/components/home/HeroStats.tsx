@@ -41,7 +41,7 @@ const STATS = [
 export default function HeroStats() {
   return (
     <section className="bg-black-bg">
-      <div className="container-x w-full">
+      <div className="container-x mx-auto w-full max-w-360">
         {STATS.map((stat, i) => (
           <div key={stat.label}>
             {i > 0 && (
@@ -58,10 +58,10 @@ export default function HeroStats() {
 
               <StatCounter
                 value={stat.value}
-                className="text-[96px] leading-none font-medium tracking-tight text-white"
+                className="text-[clamp(4rem,18vw,6rem)] leading-none font-medium tracking-tight text-white"
               />
 
-              <p className="max-w-56 text-base leading-snug font-normal tracking-tight text-white uppercase sm:text-lg md:text-xl">
+              <p className="body-copy max-w-56 leading-snug tracking-[-0.02em] text-white uppercase">
                 {stat.label}
               </p>
             </div>

@@ -169,17 +169,21 @@ export default function TechStack({
 
   useGSAP(() => {
     const track = trackRef.current;
-    if (!track || prefersReducedMotion) return;
+    const wrapper = wrapperRef.current;
+    if (!track || !wrapper || prefersReducedMotion) return;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let running = false;
+    let intersecting = false;
 
     loopWidthRef.current = Math.round(track.scrollWidth / CLONE_COUNT);
-    const wrap = gsap.utils.wrap(-loopWidthRef.current, 0);
+    let wrap = gsap.utils.wrap(-loopWidthRef.current, 0);
 
     // A release's velocity can't push the coast past MAX_COAST_LOOPS
     // loop-widths — see the constant's doc comment for the math.
     const maxReleaseVelocity =
       (MAX_COAST_LOOPS * loopWidthRef.current * Math.LN2) /
       COAST_HALFLIFE_SECONDS;
-    const clampReleaseVelocity = gsap.utils.clamp(
+    let clampReleaseVelocity = gsap.utils.clamp(
       -maxReleaseVelocity,
       maxReleaseVelocity,
     );
@@ -194,13 +198,6 @@ export default function TechStack({
     const clampBoost = gsap.utils.clamp(0, SCROLL_BOOST_CAP);
 
     const cards = Array.from(track.children) as HTMLElement[];
-    // Promoted to their own compositor layer up front rather than only
-    // once the first skewY tween fires: promoting on the fly (right as
-    // a scroll-driven tilt kicks in, possibly mid-drag) is exactly the
-    // kind of one-time cost that shows up as a hitch.
-    cards.forEach((card) => {
-      card.style.willChange = "transform";
-    });
     const clampSkew = gsap.utils.clamp(-MAX_TILT, MAX_TILT);
     const skewRef = { current: 0 };
     const setSkew = gsap.quickTo(cards, "skewY", {
@@ -228,6 +225,7 @@ export default function TechStack({
     let lastScrollY = window.scrollY;
     let lastTime = performance.now();
     const onScroll = () => {
+      if (!running) return;
       const now = performance.now();
       const currentY = window.scrollY;
       const deltaY = currentY - lastScrollY;
@@ -322,7 +320,6 @@ export default function TechStack({
       const renderX = wrap(xRef.current);
       gsap.set(track, { x: cruising ? Math.round(renderX) : renderX });
     };
-    gsap.ticker.add(tick);
 
     // Actually flips drag mode on. Only called once
     // DRAG_ACTIVATION_DELAY_MS has elapsed since pointerdown without an
@@ -339,7 +336,7 @@ export default function TechStack({
     };
 
     const onPointerDown = (event: PointerEvent) => {
-      if (prefersReducedMotion) return;
+      if (!running) return;
       if (event.pointerType === "mouse" && event.button !== 0) return;
 
       activePointerIdRef.current = event.pointerId;
@@ -434,7 +431,74 @@ export default function TechStack({
     track.addEventListener("pointerup", endDrag);
     track.addEventListener("pointercancel", endDrag);
 
+    const syncVisibility = () => {
+      const visible = intersecting && !document.hidden && !motion.matches;
+      if (visible === running) return;
+      running = visible;
+      wrapper.dataset.running = String(visible);
+      track.style.willChange = visible ? "transform" : "auto";
+      if (visible) {
+        lastScrollY = window.scrollY;
+        lastTime = performance.now();
+        gsap.ticker.add(tick);
+      } else {
+        gsap.ticker.remove(tick);
+        if (dragActivationTimeoutRef.current !== null) {
+          clearTimeout(dragActivationTimeoutRef.current);
+          dragActivationTimeoutRef.current = null;
+        }
+        const pointerId = activePointerIdRef.current;
+        if (pointerId !== null && track.hasPointerCapture(pointerId)) {
+          track.releasePointerCapture(pointerId);
+        }
+        activePointerIdRef.current = null;
+        isDraggingRef.current = false;
+        velocityRef.current = 0;
+        boostRef.current = 0;
+        skewRef.current = 0;
+        targetXRef.current = xRef.current;
+        track.style.cursor = "grab";
+        setSkew.tween.pause();
+        setCardScaleX.tween.pause();
+        setCardScaleY.tween.pause();
+        gsap.set(cards, { skewX: 0, scaleX: 1, scaleY: 1 });
+      }
+    };
+    wrapper.dataset.running = "false";
+    const visibility = new IntersectionObserver(([entry]) => {
+      intersecting = entry.isIntersecting;
+      syncVisibility();
+    });
+    visibility.observe(wrapper);
+    document.addEventListener("visibilitychange", syncVisibility);
+    motion.addEventListener("change", syncVisibility);
+
+    const resize = new ResizeObserver(() => {
+      const width = Math.round(track.scrollWidth / CLONE_COUNT);
+      if (!width || width === loopWidthRef.current) return;
+      loopWidthRef.current = width;
+      wrap = gsap.utils.wrap(-width, 0);
+      xRef.current = wrap(xRef.current);
+      targetXRef.current = xRef.current;
+      const limit =
+        (MAX_COAST_LOOPS * width * Math.LN2) / COAST_HALFLIFE_SECONDS;
+      clampReleaseVelocity = gsap.utils.clamp(-limit, limit);
+    });
+    resize.observe(track);
+
     return () => {
+      visibility.disconnect();
+      resize.disconnect();
+      document.removeEventListener("visibilitychange", syncVisibility);
+      motion.removeEventListener("change", syncVisibility);
+      track.style.willChange = "auto";
+      delete wrapper.dataset.running;
+      const pointerId = activePointerIdRef.current;
+      if (pointerId !== null && track.hasPointerCapture(pointerId)) {
+        track.releasePointerCapture(pointerId);
+      }
+      activePointerIdRef.current = null;
+      isDraggingRef.current = false;
       if (dragActivationTimeoutRef.current !== null) {
         clearTimeout(dragActivationTimeoutRef.current);
         dragActivationTimeoutRef.current = null;

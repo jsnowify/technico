@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import PixelRevealImage from "@/components/home/PixelRevealImage";
 
 /* ================================================================
    SERVICES AGENCY INTRO
@@ -79,7 +79,7 @@ const PILLARS: Pillar[] = [
       >
         <path
           d="M0 0V51.8827C14.3268 51.8827 25.9409 40.2686 25.9409 25.9425C25.9409 11.6161 14.3268 0.00268387 0 0ZM25.9409 0V51.8827C40.2678 51.8827 51.8821 40.2686 51.8821 25.9425C51.8821 11.6161 40.2678 0.00268387 25.9409 0Z"
-          fill="#6D28D9"
+          fill="var(--color-purple-accent)"
         />
       </svg>
     ),
@@ -96,7 +96,7 @@ const PILLARS: Pillar[] = [
       >
         <path
           d="M25.9425 0C11.6718 0 0 11.672 0 25.945C0 40.2136 11.6718 51.8827 25.9425 51.8827C40.2136 51.8827 51.8827 40.2136 51.8827 25.945C51.8827 11.672 40.2136 0 25.9425 0ZM25.9425 9.38969C35.1406 9.38969 42.4951 16.7467 42.4951 25.945C42.4951 35.1433 35.1406 42.4978 25.9425 42.4978C16.7442 42.4978 9.38765 35.1433 9.38765 25.945C9.38765 16.7467 16.7442 9.38969 25.9425 9.38969Z"
-          fill="#EC4899"
+          fill="var(--color-accent-light)"
         />
       </svg>
     ),
@@ -120,41 +120,39 @@ const PILLARS: Pillar[] = [
   },
 ];
 
-/** Shared "dog-eared" cut-corner silhouette for the four grid tiles
- * that don't render the client's exact square SVG (see file header). */
-const TILE_CLIP = {
-  clipPath: "polygon(0% 0%, 100% 0%, 100% 78%, 78% 100%, 0% 100%)",
-} as const;
-
 export default function ServicesAgencyIntro() {
   return (
     <section className="bg-black-bg">
-      <div className="container-x pt-6 pb-20 sm:pt-8 sm:pb-24 md:pt-10 md:pb-28">
-        <h2 className="mx-auto max-w-4xl text-center text-[32px] leading-[1.1] font-medium tracking-heading text-white sm:text-[40px] md:text-[44px]">
-          Digital Marketing Agency in Canada – Technico Digital Solutions
-        </h2>
+      <div className="container-x mx-auto w-full max-w-[1920px] section-y">
+        <header className="grid grid-cols-1 gap-5 border-t border-white/20 pt-5 sm:grid-cols-[minmax(130px,0.35fr)_minmax(0,1.65fr)] sm:gap-8 lg:gap-16">
+          <div className="flex items-start gap-3 font-mono text-[11px] tracking-[0.04em] text-white/50 uppercase sm:pt-1 sm:text-xs">
+            <span aria-hidden="true">/</span>
+            <span>Why Technico</span>
+          </div>
 
-        {/* Intro copy — same container-x measure as the heading and
-            the rest of the section, no extra one-off padding. */}
-        <div className="mt-12 sm:mt-14">
-          <p className="text-justify indent-6 text-[18px] leading-relaxed font-light tracking-body text-pretty text-white/90 sm:indent-8">
-            As a trusted internet marketing agency, we deliver measurable
-            results for your business. Our team of digital marketers and SEO
-            specialists believe in building strong partnerships and guaranteeing
-            your success. Imagine where your business could be six months from
-            now. Let&rsquo;s make it happen. Our{" "}
-            <Link
-              href="https://technicosolutions.com/"
-              className="text-white underline decoration-1 underline-offset-4 hover:text-white/80"
-            >
-              Digital Marketing Services Agency
-            </Link>{" "}
-            is ready to help you get your business moving.
-          </p>
-        </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:gap-12">
+            <h2 className="h2-section max-w-[21ch] leading-[1.08] font-medium tracking-heading text-white">
+              Digital marketing agency in Canada — Technico Digital Solutions.
+            </h2>
+            <p className="body-copy max-w-[52ch] leading-[1.65] tracking-[-0.02em] text-content">
+              As a trusted internet marketing agency, we deliver measurable
+              results for your business. Our team of digital marketers and SEO
+              specialists believe in building strong partnerships and
+              guaranteeing your success. Imagine where your business could be
+              six months from now. Let&rsquo;s make it happen. Our{" "}
+              <Link
+                href="https://technicosolutions.com/"
+                className="text-content underline decoration-1 underline-offset-4 hover:text-accent-light"
+              >
+                Digital Marketing Services Agency
+              </Link>{" "}
+              is ready to help you get your business moving.
+            </p>
+          </div>
+        </header>
 
         {/* Pillar + photo grid */}
-        <div className="mt-16 grid grid-cols-2 gap-4 sm:mt-20 sm:gap-5 md:grid-cols-3 md:gap-6">
+        <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden border border-white/15 bg-white/15 sm:grid-cols-2 md:grid-cols-3 lg:mt-10">
           {/* Row 1 */}
           <PillarTile pillar={PILLARS[0]} />
           <PillarTile pillar={PILLARS[1]} />
@@ -177,7 +175,12 @@ export default function ServicesAgencyIntro() {
 }
 
 function PillarTile({ pillar }: { pillar: Pillar }) {
-  const isColorTile = pillar.tile === "purple" || pillar.tile === "pink";
+  const backgroundClass =
+    pillar.tile === "purple"
+      ? "bg-purple-accent"
+      : pillar.tile === "pink"
+        ? "bg-pink-accent"
+        : "bg-white-bg";
   const textColor =
     pillar.tile === "light"
       ? pillar.title === "Transparency"
@@ -187,31 +190,8 @@ function PillarTile({ pillar }: { pillar: Pillar }) {
 
   return (
     <div
-      className={`relative aspect-[4/5] overflow-hidden rounded-[28px] sm:aspect-square ${
-        isColorTile ? "" : "bg-[#f3f4ee]"
-      }`}
-      style={isColorTile ? undefined : TILE_CLIP}
+      className={`relative aspect-[4/3] overflow-hidden sm:aspect-square ${backgroundClass}`}
     >
-      {isColorTile && (
-        <svg
-          viewBox="0 0 315 315"
-          preserveAspectRatio="none"
-          className="absolute inset-0 h-full w-full"
-          aria-hidden="true"
-        >
-          {pillar.tile === "purple" ? (
-            <path
-              d="M284.441 0C301.01 0 314.441 13.4315 314.441 30V257.701C314.441 265.059 309.54 271.346 304.337 276.549L276.55 304.337C271.347 309.54 265.06 314.441 257.702 314.441H30C13.4315 314.441 0 301.01 0 284.441V30C1.36718e-05 13.4315 13.4315 0 30 0H284.441Z"
-              fill="#6D28D9"
-            />
-          ) : (
-            <path
-              d="M284.441 0C301.01 8.27533e-06 314.441 13.4315 314.441 30V254.018C314.441 261.974 311.281 269.605 305.655 275.231L275.231 305.655C269.605 311.281 261.974 314.441 254.018 314.441H30C13.4315 314.441 3.04988e-05 301.01 0 284.441V30C0 13.4315 13.4315 0 30 0H284.441Z"
-              fill="#EC4899"
-            />
-          )}
-        </svg>
-      )}
       <div className="relative flex h-full flex-col items-center justify-center gap-5 p-6 text-center sm:gap-6 sm:p-7">
         <span aria-hidden="true" className="flex justify-center">
           {pillar.icon}
@@ -228,16 +208,11 @@ function PillarTile({ pillar }: { pillar: Pillar }) {
 
 function PhotoTile({ src, alt }: { src: string; alt: string }) {
   return (
-    <div
-      className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-white-bg sm:aspect-square"
-      style={TILE_CLIP}
-    >
-      <Image
+    <div className="relative aspect-[4/3] overflow-hidden bg-white-bg sm:aspect-square">
+      <PixelRevealImage
         src={src}
         alt={alt}
-        fill
         sizes="(min-width: 768px) 33vw, 50vw"
-        className="object-cover"
       />
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
     </div>

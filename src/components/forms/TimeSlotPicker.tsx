@@ -60,7 +60,7 @@ export default function TimeSlotPicker({
             role="radio"
             aria-checked={isSelected}
             onClick={() => onChange(isSelected ? "" : option.value)}
-            className={`${CHIP_BASE_CLASSES} w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-accent ${
+            className={`${CHIP_BASE_CLASSES} w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${
               isSelected ? CHIP_ACTIVE_CLASSES : CHIP_INACTIVE_CLASSES
             }`}
           >

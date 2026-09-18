@@ -19,18 +19,18 @@ interface BlogTableProps {
 
 export default function BlogTable({ rows }: BlogTableProps) {
   return (
-    <div className="overflow-hidden rounded-[20px] border border-white/10">
+    <div className="overflow-hidden border border-white/20">
       {rows.map((row, i) => (
         <div
           key={row.label}
-          className={`grid grid-cols-1 gap-2 bg-[#1A1B1E] p-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-6 sm:p-6 ${
-            i !== 0 ? "border-t border-white/10" : ""
+          className={`grid grid-cols-1 gap-2 bg-black-bg p-5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-6 sm:p-6 ${
+            i !== 0 ? "border-t border-white/20" : ""
           }`}
         >
-          <span className="text-sm leading-snug font-semibold text-white">
+          <span className="text-sm leading-snug font-medium text-white-text">
             {row.label}
           </span>
-          <span className="text-sm leading-relaxed text-white/60">
+          <span className="text-sm leading-relaxed text-content">
             {row.description}
           </span>
         </div>
@@ -62,18 +62,18 @@ interface BlogColumnTableProps {
 
 export function BlogColumnTable({ columns }: BlogColumnTableProps) {
   return (
-    <div className="grid grid-cols-1 overflow-hidden rounded-[20px] border border-white/10 sm:grid-cols-2">
+    <div className="grid grid-cols-1 overflow-hidden border border-white/20 sm:grid-cols-2">
       {columns.map((column, i) => (
         <div
           key={column.title}
-          className={`space-y-3 bg-[#1A1B1E] p-5 sm:p-6 ${
-            i !== 0 ? "border-t border-white/10 sm:border-t-0 sm:border-l" : ""
+          className={`space-y-3 bg-black-bg p-5 sm:p-6 ${
+            i !== 0 ? "border-t border-white/20 sm:border-t-0 sm:border-l" : ""
           }`}
         >
-          <span className="block text-sm leading-snug font-semibold text-white">
+          <span className="block text-sm leading-snug font-medium text-white-text">
             {column.title}
           </span>
-          <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-white/60">
+          <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-content">
             {column.items.map((item, j) => (
               <li key={j}>{item}</li>
             ))}
@@ -107,14 +107,14 @@ interface BlogDataTableProps {
 
 export function BlogDataTable({ headers, rows }: BlogDataTableProps) {
   return (
-    <div className="overflow-x-auto rounded-[20px] border border-white/10">
+    <div className="overflow-x-auto border border-white/20">
       <table className="w-full min-w-[480px] border-collapse text-left text-sm">
         <thead>
-          <tr className="bg-[#1A1B1E]">
+          <tr className="bg-accent-surface">
             {headers.map((header) => (
               <th
                 key={header}
-                className="p-4 leading-snug font-semibold text-white sm:p-5"
+                className="p-4 leading-snug font-medium text-white-text sm:p-5"
               >
                 {header}
               </th>
@@ -123,12 +123,9 @@ export function BlogDataTable({ headers, rows }: BlogDataTableProps) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-t border-white/10 bg-[#1A1B1E]">
+            <tr key={i} className="border-t border-white/20 bg-black-bg">
               {row.map((cell, j) => (
-                <td
-                  key={j}
-                  className="p-4 leading-relaxed text-white/60 sm:p-5"
-                >
+                <td key={j} className="p-4 leading-relaxed text-content sm:p-5">
                   {cell}
                 </td>
               ))}

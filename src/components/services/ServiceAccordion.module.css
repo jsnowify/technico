@@ -1,0 +1,78 @@
+.list {
+  min-width: 0;
+}
+.item {
+  border-bottom: 1px dashed rgb(255 255 255 / 20%);
+  transition: background-color 450ms ease;
+}
+.item:last-child {
+  border-bottom: 0;
+}
+.item[data-open="true"] {
+  background: var(--color-accent-surface);
+}
+.trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: clamp(20px, 2.6vw, 36px);
+  text-align: left;
+  font-size: clamp(20px, 1.8vw, 24px);
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.trigger:focus-visible {
+  outline: 2px solid var(--color-purple-accent);
+  outline-offset: -3px;
+}
+.mark {
+  position: relative;
+  flex: 0 0 18px;
+  height: 18px;
+  color: var(--color-purple-accent);
+}
+.mark::before,
+.mark::after {
+  position: absolute;
+  content: "";
+  inset: 8px 0 auto;
+  height: 1px;
+  background: currentColor;
+  transition: transform 550ms cubic-bezier(0.22, 0.8, 0.22, 1);
+}
+.mark::after {
+  transform: rotate(90deg);
+}
+.item[data-open="true"] .mark::after {
+  transform: rotate(0deg);
+}
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 550ms cubic-bezier(0.22, 0.8, 0.22, 1);
+}
+.item[data-open="true"] .panel {
+  grid-template-rows: 1fr;
+}
+.clip {
+  min-height: 0;
+  overflow: hidden;
+}
+.copy {
+  margin: 0;
+  padding: 0 clamp(20px, 2.6vw, 36px) clamp(24px, 2.6vw, 36px);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--color-content);
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .mark::after,
+  .item {
+    transition: none;
+  }
+}

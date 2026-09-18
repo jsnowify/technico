@@ -1,28 +1,22 @@
-import Image from "next/image";
 import Link from "next/link";
+import GridCorners from "@/components/ui/GridCorners";
+import ServiceSectionHeader from "./ServiceSectionHeader";
+import type { ServiceAccent } from "./serviceAccent";
 
 /* ================================================================
    SERVICE INTRO PANEL
    ================================================================
-   Renders the "introPanel" section on /services/[slug] (see
-   lib/content/types.ts). Eyebrow + headline sit in normal flow,
-   followed by a notched photo panel: the image fills a tall right
-   column plus a full-width band along the bottom, leaving an
-   L-shaped gap in the top-left where the paragraph copy is
-   overlaid — per the content-type comment this file used to be
-   missing entirely (this file previously contained a stray copy of
-   ServicesAgencyIntro.tsx instead of its own implementation, which
-   is why every "introPanel" section on /services/[slug] failed to
-   type-check — this restores an actual props-driven component).
+   The "introPanel" section on /services/[slug] (see
+   lib/content/types.ts): the opportunity stated once, with a
+   supporting photograph.
 
-   The notch/overlay treatment only applies from `lg` up, where
-   there's enough width for the text to sit comfortably inside the
-   cut-out corner. Below that it falls back to a plain stacked
-   layout (headline -> paragraphs -> full-width photo) so the copy
-   never gets squeezed into a tiny corner on a phone. Double-check
-   the notch proportions (45% / 55% below) against the real design
-   reference — they're a reasonable approximation of "tall right
-   column + full-width bottom band", not pulled from a mock.
+   Rebuilt in the service-detail system. The old version clipped the
+   photo into a rounded L-shaped notch and overlaid the copy in the
+   cut-out — a shape that fought the hairline grid the rest of the
+   page is built on, and that squeezed the copy into a fixed box it
+   could overflow. Now the copy and the photo are two cells of one
+   bordered panel: the copy column can grow to whatever the content
+   needs, and the photo fills its cell edge to edge at every width.
    ================================================================ */
 
 interface IntroPanelParagraph {
@@ -37,6 +31,7 @@ interface ServiceIntroPanelProps {
   headline: string;
   paragraphs: IntroPanelParagraph[];
   image: { src: string; alt: string };
+  accent?: ServiceAccent;
 }
 
 function renderParagraphText(
@@ -53,7 +48,7 @@ function renderParagraphText(
       {text.slice(0, idx)}
       <Link
         href={link.href}
-        className="text-white underline decoration-1 underline-offset-4 hover:text-white/80"
+        className="text-white-text underline decoration-1 underline-offset-4 hover:text-content"
       >
         {link.label}
       </Link>
@@ -62,84 +57,51 @@ function renderParagraphText(
   );
 }
 
-function IntroParagraphs({
-  paragraphs,
-  className = "",
-}: {
-  paragraphs: IntroPanelParagraph[];
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      {paragraphs.map((paragraph, i) => (
-        <p
-          key={i}
-          className={`text-justify text-sm leading-relaxed font-light tracking-body text-white/70 sm:text-base ${
-            i > 0 ? "mt-4" : ""
-          }`}
-        >
-          {renderParagraphText(paragraph.text, paragraph.link)}
-        </p>
-      ))}
-    </div>
-  );
-}
-
 export default function ServiceIntroPanel({
   eyebrow,
   headline,
   paragraphs,
   image,
+  accent = "purple",
 }: ServiceIntroPanelProps) {
   return (
     <section className="bg-black-bg">
-      <div className="container-x py-20 sm:py-24 md:py-28">
-        <span className="font-mono text-xs tracking-[0.16em] text-white/60 uppercase sm:text-sm">
-          {eyebrow}
-        </span>
+      <ServiceSectionHeader
+        eyebrow={eyebrow}
+        headline={headline}
+        accent={accent}
+        headlineWidth="max-w-[26ch]"
+      />
 
-        <h2 className="mt-5 max-w-3xl text-[32px] leading-[1.15] font-medium tracking-heading text-white sm:mt-6 sm:text-[40px] md:text-[44px]">
-          {headline}
-        </h2>
+      <div className="relative mt-12 grid grid-cols-1 border border-white/18 sm:mt-16 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <GridCorners accent={accent} />
 
-        {/* MOBILE / TABLET — plain stacked layout, no notch. */}
-        <div className="mt-10 lg:hidden">
-          <IntroParagraphs paragraphs={paragraphs} />
-          <div className="relative mt-8 aspect-[4/3] w-full overflow-hidden rounded-[28px] sm:aspect-[16/9]">
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              sizes="100vw"
-              className="object-cover"
-            />
-          </div>
+        <div className="flex flex-col justify-center border-b border-white/18 p-5 sm:p-7 lg:border-r lg:border-b-0 lg:p-9">
+          {paragraphs.map((paragraph, index) => (
+            <p
+              key={index}
+              className={`body-copy max-w-[58ch] leading-[1.62] text-content ${
+                index > 0 ? "mt-5" : ""
+              }`}
+            >
+              {renderParagraphText(paragraph.text, paragraph.link)}
+            </p>
+          ))}
         </div>
 
-        {/* DESKTOP — notched photo: tall right column + full-width
-            bottom band, paragraph copy overlaid in the cut-out
-            top-left gap. */}
-        <div className="relative mt-14 hidden aspect-[2/1] w-full lg:block">
-          <div
-            className="absolute inset-0 overflow-hidden rounded-[28px]"
-            style={{
-              clipPath:
-                "polygon(45% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 55%, 45% 55%)",
-            }}
-          >
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              sizes="100vw"
-              className="object-cover"
-            />
-          </div>
-
-          <IntroParagraphs
-            paragraphs={paragraphs}
-            className="absolute top-0 left-0 flex h-[55%] w-[45%] flex-col justify-center pr-8 xl:pr-10"
+        <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/9] lg:aspect-auto lg:min-h-[420px]">
+          {/* Some service placeholders use remote hosts that are not in
+              next/image's allowlist, so this remains a plain image. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image.src}
+            alt={image.alt}
+            className="absolute inset-0 h-full w-full object-cover"
           />
+          <span className="absolute top-4 left-4 bg-black-bg px-3 py-2 font-mono text-[10px] tracking-[0.06em] text-content uppercase sm:top-6 sm:left-6 sm:text-xs">
+            <span aria-hidden="true">{"// "}</span>
+            {eyebrow}
+          </span>
         </div>
       </div>
     </section>

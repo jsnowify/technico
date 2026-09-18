@@ -108,6 +108,7 @@ export default function BudgetPicker({
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-controls={`${id}-listbox`}
         className={FIELD_TRIGGER_CLASSES}
       >
         <span
@@ -124,6 +125,7 @@ export default function BudgetPicker({
       {isOpen && (
         <div className={POPOVER_PANEL_CLASSES}>
           <ul
+            id={`${id}-listbox`}
             role="listbox"
             aria-label={placeholder}
             className={OPTION_LIST_CLASSES}

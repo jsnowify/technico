@@ -1,999 +1,495 @@
 "use client";
 
 import Link from "next/link";
-import type { TransitionEvent } from "react";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-
+import { useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { SERVICES, type Service } from "@/lib/constants";
-import GeometricIcon from "@/components/ui/icons";
+import HorizontalStagger from "@/components/layout/Header/HorizontalStagger";
+import LetterSpinner from "@/components/layout/Header/LetterSpinner";
+import ServiceArtwork from "./ServiceArtwork";
 
-/* ================================================================
-   SERVICES SECTION
+/**
+ * /services — full-width editorial service gallery.
+ *
+ * Inspired by the supplied reference video: each desktop spread is pinned
+ * to the top of the viewport. As the next spread scrolls up, it covers the
+ * previous one and becomes the newly pinned service. The left visual
+ * alternates light/dark; the right copy panel remains light.
+ *
+ * CSS sticky handles the pinning (without extra ScrollTrigger spacer DOM),
+ * and each successive spread has a higher stacking level. The shared
+ * gallery bounds the sticky panels so the next page section can enter
+ * naturally after the last service.
+ *
+ * Each visual uses an interactive SVG with visibility-aware animation.
+ *
+ * Desktop: stacked/pinned spreads with a 30:80 visual-to-copy ratio.
+ * Mobile: accessible natural flow because the full image + service copy can
+ * exceed one mobile viewport; no content is hidden behind the next card.
+ * Motion: a subtle once-only inner reveal; reduced motion disables it.
+ * Global CSS theme colors only: black-bg, white-bg, black-text, white-text.
+ */
 
-   Static layout
+const INTRO_TITLE = "Turn More Online Attention Into Leads and Sales";
+const INTRO_COPY =
+  "Use the right mix of digital services to build awareness, generate demand, & support long-term growth.";
 
-   - 90px outer horizontal padding on large screens
-   - 40 / 60 left-right split
-   - 92px service typography on large screens
-   - More vertical spacing between service items
-   - No GSAP
-   - No ScrollTrigger
-
-   Hover (rows list):
-   - Default (nothing hovered): every row's text is pure white.
-   - Once any row is hovered: the hovered row stays pure white,
-     every other row dims to 40% opacity.
-
-   ReadCard (desktop):
-   - Sticky, swaps text on row hover, else on scroll position.
-   - Spinwheel badge pinned to its corner.
-
-   Expand-on-click popup — SINGLE-CARD MORPH:
-   - There is exactly ONE animating card element. It carries two
-     stacked "faces" (trigger look + modal look) that crossfade
-     into each other WHILE the card itself is being FLIP-animated
-     from the trigger's on-screen rect to its full modal rect. It
-     is not two separate elements swapping — it's one box that
-     grows and simultaneously changes what's printed on it, so it
-     reads as "the folder card became the modal" instead of "a
-     modal appeared over the folder card."
-   - The always-in-flow trigger <button> (the one sitting in the
-     sticky/grid slot) is only ever used at rest. The instant the
-     card starts expanding, that resting button is switched to
-     `invisible` (not faded — a fade would imply two competing
-     visuals). It's safe to hide it abruptly because the morphing
-     card is, pixel-for-pixel, standing in its exact spot showing
-     its exact face at that same instant, so nothing visibly pops.
-   - The trigger itself gets a small `active:scale` press-down on
-     pointerdown, purely as tactile feedback that THIS rectangle is
-     the thing about to grow — it always reverts before the click
-     handler fires, so it never pollutes the origin-rect measurement.
-   - FLIP transform is now computed with independent X/Y scale
-     (`scale(scaleX, scaleY)`), not a single width-derived scale —
-     so the box always lands pixel-perfect on the origin rect even
-     if the trigger and modal aspect ratios aren't identical. A
-     uniform scale would quietly stretch/misalign one axis, which
-     reads as the card "not really" coming from the click point.
-   - Motion is deliberately asymmetric between open and close:
-       OPEN  → a soft spring/overshoot on the transform only (the
-               box grows a touch past its final size, then settles),
-               while background-color/border-radius ease smoothly
-               with no overshoot (color values shouldn't extrapolate
-               past their target — that looks glitchy).
-       CLOSE → a brief "anticipation" pull on the transform before
-               it snaps back into the trigger's rect, like a rubber
-               band gathering before release.
-     Both are still driven by the same two cached rects, so closing
-     mid-open is a clean CSS transition retarget either way.
-   - The content crossfade is now SEQUENCED relative to the box,
-     not simultaneous with it:
-       OPEN  → the box starts growing first; the modal content only
-               starts fading in ~140ms later, once the box is
-               visibly already in motion — reads as "the rectangle
-               grew, then revealed what's inside," not "a modal
-               appeared and also there's a growing box behind it."
-       CLOSE → content fades out quickly (faster than the box
-               shrinks), so it's gone well before the box finishes
-               collapsing back into the trigger.
-   - Face crossfade timing: on open, the card mounts already
-     showing the TRIGGER face (matching the resting button, so the
-     hand-off is invisible), pinned down to the origin rect via an
-     un-transitioned transform. A beat after the transform starts
-     transitioning to identity (grow to full size), the face flips
-     to the MODAL face — the "material" of the card visibly turns
-     from the plain trigger rectangle to the modal mid-flight.
-     Closing runs the same idea in reverse, just compressed.
-   - There is no shape SVG anymore. The trigger and the modal are
-     BOTH plain rounded rectangles — the background-color and the
-     border-radius live directly on the single morphing card element
-     (cardRef) and are transitioned imperatively in lockstep with
-     the FLIP transform. This is what makes the animation "come from
-     the rectangle itself": it's the same physical box changing its
-     own paint properties over time, not two differently-shaped
-     layers crossfading on top of each other.
-   - The modal's natural ("rest") rect is measured ONCE per open
-     cycle, right after the card mounts at full size but before any
-     transform is applied, and cached. Both the open and close FLIP
-     maths reuse that cached rect instead of re-measuring the DOM
-     mid-animation — re-measuring while a transform is actively
-     interpolating would read the current *visual* (already offset)
-     box instead of the natural layout box, producing a jump. This
-     is what makes closing safe to trigger from ANY point in the
-     open animation, not just once it's finished.
-   - Because the target transform is always computed from the same
-     two fixed rects (origin + cached rest rect), closing while
-     still opening is just a normal CSS "transition retarget": the
-     browser smoothly interpolates from whatever the current
-     transform happens to be toward the new target. No "wait for
-     open to finish before you're allowed to close."
-   - A forced reflow (`void card.offsetWidth`) sits between writing
-     the "from" transform and re-enabling the transition, so the
-     browser is guaranteed to commit the starting frame before the
-     animation begins — without it, some browsers can coalesce both
-     style writes into a single frame and skip the open animation
-     entirely.
-   - The backdrop is driven the same imperative way (ref + direct
-     style writes), so its fade-in always has a real "from: 0"
-     frame instead of mounting straight at full opacity.
-   - Body scroll lock never touches scrollTop, so closing resumes
-     scroll exactly where the user left off.
-   ================================================================ */
-
-const SERVICE_ROW_ICONS = [9, 3, 21, 26, 16, 12];
-
-const HEADLINE =
-  "Turn more online attention into leads and sales. Use the right mix of digital services to build awareness, generate demand, & support long-term growth.";
-
-/* ---- timing ---- */
-const OPEN_MS = 560;
-const CLOSE_MS = 380;
-
-/* Transform gets its own, more expressive easing than the paint
-   properties (background-color / border-radius) do — overshooting
-   a transform looks springy and alive, overshooting a color value
-   looks like a rendering bug, so they're kept independent. */
-const OPEN_TRANSFORM_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)"; // soft overshoot growth
-const OPEN_PAINT_EASE = "cubic-bezier(0.16, 1, 0.3, 1)"; // smooth, no overshoot
-const CLOSE_TRANSFORM_EASE = "cubic-bezier(0.36, 0, 0.66, -0.56)"; // anticipation pull, then snap back
-const CLOSE_PAINT_EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
-
-/* Content crossfade is sequenced relative to the box, not glued to
-   it — see the big comment block above for why. */
-const OPEN_FACE_DELAY_MS = 140;
-const OPEN_FACE_MS = OPEN_MS - OPEN_FACE_DELAY_MS;
-const CLOSE_FACE_MS = 200;
-
-/* Both the trigger and the modal are plain rounded rectangles now.
-   These are the two end states the single morphing box animates
-   between — its own background-color and border-radius, not a
-   shape swap. */
-const TRIGGER_RADIUS = 24; // px, at the trigger's own (small) scale
-const MODAL_RADIUS = 40; // px, at the modal's full scale
-const TRIGGER_BG = "#6D28D9";
-const MODAL_BG = "#D9D9D9";
-
-function ClosePinwheelIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 121 121"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M0 0V60.5H60.5009L0 0ZM60.5009 60.5L121 0H60.5009V60.5ZM60.5009 60.5L121 121V60.5H60.5009ZM60.5009 60.5L0 121H60.5009V60.5Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
+interface CapabilityItem {
+  label: string;
+  detail?: string;
 }
 
-/* ================================================================
-   SPINWHEEL
-   ================================================================ */
-
-function SpinWheel() {
-  return (
-    <div
-      aria-hidden="true"
-      className="absolute -right-5 -bottom-5 h-[76px] w-[76px] md:h-[92px] md:w-[92px]"
-    >
-      <div className="h-full w-full animate-[spin_9s_linear_infinite]">
-        <svg viewBox="0 0 100 100" className="h-full w-full">
-          <defs>
-            <path
-              id="spinwheel-track"
-              d="M 50,50 m -40,0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0"
-            />
-          </defs>
-          <circle cx="50" cy="50" r="49" fill="#0A0A0C" />
-          <circle
-            cx="50"
-            cy="50"
-            r="48"
-            fill="none"
-            stroke="#ffffff"
-            strokeOpacity="0.2"
-          />
-          <text fill="#ffffff" fontSize="7.5" letterSpacing="1.5">
-            <textPath href="#spinwheel-track" startOffset="0%">
-              SCROLL TO EXPLORE • SCROLL TO EXPLORE •
-            </textPath>
-          </text>
-        </svg>
-      </div>
-
-      <span className="absolute inset-0 flex animate-[spin_9s_linear_infinite_reverse] items-center justify-center">
-        <svg
-          viewBox="0 0 24 24"
-          className="h-4 w-4 md:h-5 md:w-5"
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="2"
-        >
-          <path
-            d="M12 5v14M12 19l-5-5M12 19l5-5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-    </div>
-  );
+interface CapabilityGroup {
+  title?: string;
+  items: CapabilityItem[];
 }
 
-/* ================================================================
-   CARD FACES
-   Pure content — no sizing wrapper of their own. Whatever box they
-   sit in (the small resting trigger, or the big morphing card)
-   defines the aspect ratio; these just fill it with percentage-
-   based positioning, which is why the same markup can be reused
-   at both the trigger's ~1.405 aspect ratio and the modal's
-   ~1.404 one without looking off.
-   ================================================================ */
-
-function TriggerFaceContent({ service }: { service: Service }) {
-  return (
-    <>
-      {/* READ */}
-      <span className="absolute top-[10%] left-[7%] font-mono text-[11px] leading-none tracking-[0.06em] text-white-primary uppercase md:text-[12px]">
-        Read
-      </span>
-
-      {/* Service name */}
-      <span className="absolute inset-0 flex items-center justify-center pt-[8%] text-[20px] leading-none font-medium tracking-tight text-white-primary md:text-[24px] lg:text-[27px]">
-        {service.shortTitle}
-      </span>
-    </>
-  );
+interface DetailedService extends Service {
+  tagline: string;
+  paragraphs: string[];
+  capabilityGroups: CapabilityGroup[];
 }
 
-function ModalFaceContent({
-  service,
-  onClose,
+const SERVICE_DETAILS: DetailedService[] = [
+  {
+    ...SERVICES[0],
+    title: "Search Engine Optimization (SEO)",
+    tagline: "Drive Organic Traffic and Get Quality Leads",
+    paragraphs: [
+      "We at Technico Digital Solutions starts SEO work by looking at how your website currently performs in search, what your potential customers are searching for, and which competitors are taking visibility you could be capturing. Our team audits the site’s technical setup, existing pages, keyword targeting, content, and backlink profile to identify where improvements can have the most impact.",
+      "From there, Technico’s digital marketers build the SEO work around the searches that matter to your business. That can include improving service and location pages, fixing on-page and technical issues, creating content around relevant search queries, strengthening internal linking, and building external authority. Performance is tracked over time to see which pages and keywords are gaining visibility and where further optimisation is needed. SEO services include:",
+    ],
+    capabilityGroups: [
+      {
+        items: [
+          { label: "Keyword Research" },
+          { label: "On-Page SEO" },
+          { label: "Off-Page SEO" },
+          { label: "Content Strategy" },
+          { label: "SEO Audits" },
+        ],
+      },
+    ],
+  },
+  {
+    ...SERVICES[1],
+    title: "Website Design & Development",
+    tagline: "Create a Strong Digital Presence with a User-Centred Website",
+    paragraphs: [
+      "Technico approaches website design around what visitors need to do once they arrive, not just how the site looks. Before designing or rebuilding a website, the team looks at your services, target customers, site structure, conversion points, and the marketing channels that will be sending traffic to it.",
+      "Pages are then structured so visitors can quickly understand what the business offers, find the information they need, and take the next step. Technico combines web design and development with mobile responsiveness, site performance, SEO considerations, clear calls to action, and conversion-focused page layouts. If you’re launching a new site or updating an existing one, you can expect:",
+    ],
+    capabilityGroups: [
+      {
+        items: [
+          { label: "Custom Web Design" },
+          { label: "Responsive Development" },
+          { label: "Performance Optimization" },
+          { label: "Conversion Focus" },
+        ],
+      },
+    ],
+  },
+  {
+    ...SERVICES[2],
+    tagline: "Engage Your Audience with Compelling Content & Visuals",
+    paragraphs: [
+      "Captivate your audience with high-quality, creative content that tells your brand story and drives engagement. From graphics to blog posts, our creative services focus on building brand authority and establishing a strong connection with your target audience.",
+      "Our approach guarantees your content is not only appealing but also strategic to engage your audience and strengthen your brand presence.",
+    ],
+    capabilityGroups: [
+      {
+        title: "Content",
+        items: [
+          { label: "Copywriting" },
+          { label: "Content Writing" },
+          { label: "Content Strategy" },
+          { label: "SEO Content" },
+        ],
+      },
+      {
+        title: "Visuals",
+        items: [
+          { label: "Visual Design" },
+          { label: "Infographics" },
+          { label: "Social Media Graphics" },
+          { label: "Image Elements" },
+        ],
+      },
+    ],
+  },
+  {
+    ...SERVICES[3],
+    tagline: "Maximize ROI with Data-Driven Advertising Campaigns",
+    paragraphs: [
+      "Our marketing team plans paid campaigns around who the business needs to reach, where that audience can be reached, and what action they should take after clicking an ad. Instead of putting your ad budget into different channels and hoping something works, we will have to discuss what you want to achieve first. We will plan out the right platforms to use, audiences, keywords, campaign types, and landing pages to put your budget where it has the strongest chance of generating results.",
+      "We at Technico monitor spend, clicks, conversions, cost per lead, and other relevant performance data. Budgets and targeting can then be adjusted based on what is generating results, rather than leaving campaigns running unchanged. The process also includes testing ad creative, messaging, audiences, and landing-page combinations to identify opportunities to improve campaign performance. Media buying and advertising services include:",
+    ],
+    capabilityGroups: [
+      {
+        items: [
+          {
+            label: "PPC (Pay-Per-Click)",
+            detail:
+              "Google Ads campaigns to increase website traffic and close sales.",
+          },
+          {
+            label: "SEM (Search Engine Marketing)",
+            detail:
+              "Paid search campaigns targeting the right keywords drive qualified traffic.",
+          },
+          {
+            label: "Social Media Marketing",
+            detail:
+              "Ads on social media platforms increase brand visibility & engagement.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...SERVICES[4],
+    tagline: "Build Meaningful Connections with Your Target Market",
+    paragraphs: [
+      "Social media management at Technico goes beyond filling up your content calendar. The team looks at who you want to reach, where those people are active, what your competitors are doing, and which topics and formats are getting attention in your industry. We handle the day-to-day work behind your accounts, including content planning, copywriting, creative production, scheduling, publishing, and community management. Our marketers will then keep an eye on platform and industry trends, so content can respond to what audiences are interested in instead of following the same content plan month after month.",
+      "The numbers help guide what happens next. Technico team reviews impressions, reach, engagement, clicks, click-through rates (CTR), follower growth, website traffic, and other relevant performance data to see what is getting noticed and what is driving people to take action. Posts, formats, topics, publishing times, and calls to action can then be adjusted based on those insights. Your social media management can include:",
+    ],
+    capabilityGroups: [
+      {
+        items: [
+          {
+            label: "Strategy & Research",
+            detail:
+              "Audience research, competitor analysis, platform strategy, and trend monitoring.",
+          },
+          {
+            label: "Community Management",
+            detail:
+              "Comment monitoring, audience interaction, and ongoing account management.",
+          },
+          {
+            label: "Traffic & Conversion Tracking",
+            detail:
+              "Website traffic, user actions, and conversions generated through social channels.",
+          },
+          {
+            label: "Content & Creative",
+            detail:
+              "Content calendars, copywriting, creative design, scheduling, and publishing.",
+          },
+          {
+            label: "Performance Analytics",
+            detail:
+              "Impressions, reach, engagement, clicks, CTR, and follower growth.",
+          },
+          {
+            label: "Reporting & Optimization",
+            detail:
+              "Performance reporting, content analysis, and ongoing campaign adjustments.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...SERVICES[5],
+    tagline: "Drive Conversions with Targeted Campaigns",
+    paragraphs: [
+      "Although Technico is particularly focused on SEO as a core growth driver, we still strongly believe in the power of email marketing as a complementary channel. We do not create generic, mass-produced email campaigns that end up in spam folders or get ignored. Every email strategy we develop is tailored to the recipient, grounded in research, and designed with intent.",
+      "Technico uses email marketing to keep the conversation going after someone joins a mailing list, submits an enquiry, makes a purchase, or becomes an existing customer. Rather than sending the same message to an entire database, contacts can be grouped based on where they are in the customer journey and what they have shown interest in.",
+      "We write the emails, create the design, organise your contacts into the right groups, and set up automated follow-ups. Once the emails go out, they track opens, clicks, and conversions to see what people respond to and adjust future campaigns accordingly.",
+    ],
+    capabilityGroups: [],
+  },
+];
+
+function ServiceLearnMore({
+  href,
+  title,
+  dark,
 }: {
-  service: Service;
-  onClose: () => void;
+  href: string;
+  title: string;
+  dark: boolean;
 }) {
-  return (
-    <>
-      {/* Title — sits in the narrow top-left block */}
-      <span className="absolute top-[8%] left-[6%] max-w-[28%] text-[18px] leading-tight font-medium tracking-tight text-[#0A0A0C] md:text-[24px] lg:text-[28px]">
-        {service.title}
-      </span>
+  const [active, setActive] = useState(false);
 
-      {/* Content — full-width lower area, below the notch. Real
-          copy from lib/constants.ts's SERVICES: description first,
-          then the same bullet list shown on the /services page and
-          the homepage panel (components/home/Services.tsx), so this
-          card isn't saying anything different from the rest of the
-          site — just a more compact read of it. */}
-      <div className="absolute top-[28%] right-[6%] bottom-[7%] left-[6%] overflow-y-auto pr-2 md:top-[26%]">
-        <p className="text-[13px] leading-relaxed text-[#0A0A0C]/80 md:text-[15px] lg:text-[17px]">
-          {service.description}
-        </p>
-
-        <ul className="mt-3 space-y-1.5 md:mt-4 md:space-y-2">
-          {service.bullets.map((bullet) => (
-            <li
-              key={bullet}
-              className="text-[12px] leading-relaxed text-[#0A0A0C]/60 md:text-[14px] lg:text-[15px]"
-            >
-              <span aria-hidden="true" className="mr-1 text-[#0A0A0C]/35">
-                &gt;
-              </span>
-              {bullet}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Close — sits in the wide top-right strip */}
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close"
-        className="group absolute top-[9%] right-[5%] flex items-center gap-3 text-[#0A0A0C]"
-      >
-        <span className="font-mono text-[11px] tracking-[0.08em] uppercase opacity-70 transition-opacity group-hover:opacity-100 md:text-[13px]">
-          Close
-        </span>
-        <ClosePinwheelIcon className="h-6 w-6 transition-transform duration-300 group-hover:rotate-90 md:h-7 md:w-7" />
-      </button>
-    </>
-  );
-}
-
-/* ================================================================
-   EXPANDABLE READ CARD
-   Owns the resting trigger, the morphing card, the FLIP animation,
-   the face crossfade, and the scroll lock lifecycle.
-   ================================================================ */
-
-type ModalPhase = "closed" | "opening" | "open" | "closing";
-
-/* Independent X/Y scale — NOT a single width-derived scale — so the
-   card always lands pixel-perfect on the origin rect even if the
-   trigger and modal boxes don't share an exact aspect ratio. A
-   uniform scale would quietly stretch one axis, which is the kind
-   of tiny mismatch that makes a "morph" read as "two different
-   boxes" instead of "one box that grew." */
-function computeFlipTransform(origin: DOMRect, target: DOMRect) {
-  const scaleX = origin.width / target.width;
-  const scaleY = origin.height / target.height;
-  const dx = origin.left - target.left;
-  const dy = origin.top - target.top;
-  return `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
-}
-
-/* Locks page scroll without touching scrollTop (so releasing it
- * resumes exactly where the user left off) and WITHOUT going
- * through a React effect. This used to be a `useBodyScrollLock`
- * hook applied reactively to `expanded`, but that meant the
- * scrollbar-compensation (which changes real viewport width, and
- * this card is sized in vw) could land in the SAME commit as — but
- * AFTER — the card's own rect measurement, so the card would
- * silently resize by the scrollbar's width mid-open. That's the
- * "glitch"/collision: the modal visibly snapping a few pixels right
- * as it started growing. Calling lockScroll() synchronously, before
- * ANY rect is read, guarantees every measurement in this component
- * — origin, rest, everything — happens against the exact same,
- * already-settled viewport. */
-function lockScroll(stateRef: {
-  current: { overflow: string; paddingRight: string } | null;
-}) {
-  if (stateRef.current) return; // already locked, no-op
-  const scrollbarWidth =
-    window.innerWidth - document.documentElement.clientWidth;
-  stateRef.current = {
-    overflow: document.documentElement.style.overflow,
-    paddingRight: document.documentElement.style.paddingRight,
+  const handlePointerEnter = (event: ReactPointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType !== "touch") setActive(true);
   };
-  document.documentElement.style.overflow = "hidden";
-  if (scrollbarWidth > 0) {
-    document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
-  }
-}
 
-function unlockScroll(stateRef: {
-  current: { overflow: string; paddingRight: string } | null;
-}) {
-  if (!stateRef.current) return;
-  document.documentElement.style.overflow = stateRef.current.overflow;
-  document.documentElement.style.paddingRight = stateRef.current.paddingRight;
-  stateRef.current = null;
-}
-
-function ExpandableReadCard({ service }: { service: Service }) {
-  const [phase, setPhase] = useState<ModalPhase>("closed");
-  const [activeService, setActiveService] = useState(service);
-  // Flips true a beat into the open animation (after OPEN_FACE_DELAY_MS,
-  // once the FLIP transform transition is already visibly moving) —
-  // that's the signal to crossfade from the trigger face to the
-  // modal face. Reset to false the instant closing starts (a plain
-  // state update, not a mount trick, so it runs as a normal reverse
-  // crossfade back to the trigger face).
-  const [faceCrossfadeReady, setFaceCrossfadeReady] = useState(false);
-
-  const originRectRef = useRef<DOMRect | null>(null);
-  // The modal's natural, untransformed layout rect — measured once
-  // per open cycle, then reused for BOTH the open and close FLIP
-  // maths. Re-measuring via getBoundingClientRect() mid-transition
-  // would return the current *visual* (already-offset) box instead
-  // of the natural one, which is what makes it safe to close from
-  // any point in the open animation without a jump.
-  const restRectRef = useRef<DOMRect | null>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  // Background-color/border-radius (and the overflow clip) live on
-  // this INNER layer now, not on cardRef itself. cardRef only ever
-  // carries the FLIP transform. That split is what lets the
-  // SpinWheel badge sit inside cardRef (so it still scales/moves
-  // with the card) while sitting outside cardPaintRef (so it never
-  // gets clipped by the rounded corner it overlaps).
-  const cardPaintRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  // Pending "reveal the modal face" timer for the open sequence —
-  // tracked so it can be cancelled if closing interrupts it.
-  const faceTimeoutRef = useRef<number | null>(null);
-  const scrollLockRef = useRef<{
-    overflow: string;
-    paddingRight: string;
-  } | null>(null);
-
-  const clearFaceTimeout = useCallback(() => {
-    if (faceTimeoutRef.current !== null) {
-      window.clearTimeout(faceTimeoutRef.current);
-      faceTimeoutRef.current = null;
-    }
-  }, []);
-
-  const handleOpen = useCallback(() => {
-    const trigger = triggerRef.current;
-    if (!trigger) return;
-    // Lock FIRST — before reading anything's position — so the
-    // viewport is already in its final (post-scrollbar-removal)
-    // state for every measurement this open cycle makes.
-    lockScroll(scrollLockRef);
-    originRectRef.current = trigger.getBoundingClientRect();
-    restRectRef.current = null;
-    setActiveService(service);
-    setPhase("opening");
-  }, [service]);
-
-  // Closing is allowed from "opening" OR "open" — this is what
-  // makes clicking close/backdrop/Escape responsive even while the
-  // open animation is still mid-flight, instead of being ignored.
-  // The face-crossfade reset and pending-reveal cancel live HERE
-  // (in the handler that actually decides to close) rather than in
-  // the layout effect below — calling setState synchronously inside
-  // an effect body triggers an extra cascading render, which is
-  // exactly what react-hooks/set-state-in-effect flags. Doing it in
-  // the event handler means it's just one more state update in the
-  // same batch as setPhase, no extra render.
-  const handleClose = useCallback(() => {
-    clearFaceTimeout();
-    setFaceCrossfadeReady(false);
-    setPhase((current) =>
-      current === "opening" || current === "open" ? "closing" : current,
-    );
-  }, [clearFaceTimeout]);
-
-  useEffect(() => {
-    if (phase !== "opening" && phase !== "open") return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [phase, handleClose]);
-
-  // Safety net: if this card unmounts while its modal happens to be
-  // open (route change, parent unmount, etc.), don't leave the page
-  // permanently scroll-locked.
-  useEffect(() => {
-    return () => unlockScroll(scrollLockRef);
-  }, []);
-
-  const expanded = phase !== "closed";
-
-  useLayoutEffect(() => {
-    const card = cardRef.current;
-    const backdrop = backdropRef.current;
-    const origin = originRectRef.current;
-    if (!card || !origin) return;
-
-    if (phase === "opening") {
-      // Measure the natural rect BEFORE any transform is applied,
-      // and cache it — this is the only time it's safe to read via
-      // getBoundingClientRect().
-      const rest = card.getBoundingClientRect();
-      restRectRef.current = rest;
-
-      // Pin the card down to the trigger's exact position/size —
-      // AND its exact paint (background/radius). At this instant
-      // it's still showing the trigger face (faceCrossfadeReady is
-      // freshly false), so this frame reads as pixel-identical to
-      // the resting button it just replaced. Nothing pops, because
-      // it's the same box, not a different shape underneath.
-      const paint = cardPaintRef.current;
-      card.style.transition = "none";
-      card.style.transform = computeFlipTransform(origin, rest);
-      if (paint) {
-        paint.style.transition = "none";
-        paint.style.backgroundColor = TRIGGER_BG;
-        paint.style.borderRadius = `${TRIGGER_RADIUS}px`;
-      }
-
-      if (backdrop) {
-        backdrop.style.transition = "none";
-        backdrop.style.opacity = "0";
-      }
-
-      // Force a synchronous reflow so the browser commits the
-      // "none transition" starting frame before we flip transitions
-      // back on below. Without this, a single requestAnimationFrame
-      // isn't a hard guarantee — some browsers can coalesce both
-      // style writes into one frame and skip the open animation
-      // entirely (the modal just pops in at full size).
-      void card.offsetWidth;
-
-      const raf = requestAnimationFrame(() => {
-        card.style.transition = `transform ${OPEN_MS}ms ${OPEN_TRANSFORM_EASE}`;
-        card.style.transform = "translate(0px, 0px) scale(1, 1)";
-        if (paint) {
-          paint.style.transition = [
-            `background-color ${OPEN_MS}ms ${OPEN_PAINT_EASE}`,
-            `border-radius ${OPEN_MS}ms ${OPEN_PAINT_EASE}`,
-          ].join(", ");
-          paint.style.backgroundColor = MODAL_BG;
-          paint.style.borderRadius = `${MODAL_RADIUS}px`;
-        }
-
-        if (backdrop) {
-          backdrop.style.transition = `opacity ${OPEN_MS}ms ease-out`;
-          backdrop.style.opacity = "0.8";
-        }
-
-        // Let the box visibly start growing on its own for a beat
-        // before the content reveals — this is what sells "the
-        // rectangle grew" rather than "a modal appeared over a
-        // growing box." Cancelled below if closing interrupts it.
-        clearFaceTimeout();
-        faceTimeoutRef.current = window.setTimeout(() => {
-          setFaceCrossfadeReady(true);
-          faceTimeoutRef.current = null;
-        }, OPEN_FACE_DELAY_MS);
-      });
-      return () => {
-        cancelAnimationFrame(raf);
-        clearFaceTimeout();
-      };
-    }
-
-    if (phase === "closing") {
-      // Reuse the cached rest rect instead of re-measuring — the
-      // card may currently be mid-transform (if we're interrupting
-      // an in-progress open), so a fresh getBoundingClientRect()
-      // here would read the wrong (already-offset) box. Because the
-      // target values are the same fixed rects either way, this is
-      // a plain CSS "transition retarget": the browser smoothly
-      // interpolates from whatever transform is currently showing
-      // toward the new target — no jump, no waiting for the open
-      // animation to finish first.
-      const rest = restRectRef.current ?? card.getBoundingClientRect();
-
-      // If we're interrupting an open that hadn't revealed the
-      // modal face yet, kill that pending reveal — we're on our way
-      // out now, it should never fire.
-      clearFaceTimeout();
-
-      const paint = cardPaintRef.current;
-      card.style.transition = `transform ${CLOSE_MS}ms ${CLOSE_TRANSFORM_EASE}`;
-      card.style.transform = computeFlipTransform(origin, rest);
-      if (paint) {
-        paint.style.transition = [
-          `background-color ${CLOSE_MS}ms ${CLOSE_PAINT_EASE}`,
-          `border-radius ${CLOSE_MS}ms ${CLOSE_PAINT_EASE}`,
-        ].join(", ");
-        paint.style.backgroundColor = TRIGGER_BG;
-        paint.style.borderRadius = `${TRIGGER_RADIUS}px`;
-      }
-      // Content evaporates faster than the box collapses — it
-      // should be gone well before the rectangle finishes shrinking
-      // back into the trigger's spot. (faceCrossfadeReady was
-      // already reset to false in handleClose, before phase ever
-      // changed — not here, see the comment on handleClose.)
-
-      if (backdrop) {
-        backdrop.style.transition = `opacity ${CLOSE_MS}ms ease-in`;
-        backdrop.style.opacity = "0";
-      }
-    }
-  }, [phase, clearFaceTimeout]);
-
-  const handleTransitionEnd = useCallback(
-    (e: TransitionEvent<HTMLDivElement>) => {
-      // Guard against bubbled transitionend events — from the face
-      // crossfade divs' own opacity transitions, or the Close
-      // label's hover transition. Only the card's own transform
-      // transition should drive the phase machine.
-      if (e.target !== e.currentTarget) return;
-      if (e.propertyName !== "transform") return;
-
-      if (phase === "opening") {
-        setPhase("open");
-      } else if (phase === "closing") {
-        setPhase("closed");
-        originRectRef.current = null;
-        restRectRef.current = null;
-        clearFaceTimeout();
-        setFaceCrossfadeReady(false);
-        unlockScroll(scrollLockRef);
-        if (cardRef.current) {
-          cardRef.current.style.transition = "";
-          cardRef.current.style.transform = "";
-        }
-        if (cardPaintRef.current) {
-          cardPaintRef.current.style.transition = "";
-          cardPaintRef.current.style.backgroundColor = "";
-          cardPaintRef.current.style.borderRadius = "";
-        }
-        if (backdropRef.current) {
-          backdropRef.current.style.transition = "";
-          backdropRef.current.style.opacity = "";
-        }
-      }
-    },
-    [phase, clearFaceTimeout],
-  );
-
-  // Which face is showing, and how long the crossfade between them
-  // takes. Open and close intentionally use different durations —
-  // see the OPEN_FACE_MS / CLOSE_FACE_MS comments above.
-  const modalFaceVisible =
-    phase === "open" || (phase === "opening" && faceCrossfadeReady);
-  const faceMs = phase === "closing" ? CLOSE_FACE_MS : OPEN_FACE_MS;
+  const handlePointerLeave = (event: ReactPointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType !== "touch") setActive(false);
+  };
 
   return (
-    <>
-      {/* Resting trigger — the only place this shows up when
-          closed. Hidden abruptly (not faded) the instant the card
-          starts expanding, because the morphing card is standing in
-          its exact spot with its exact face at that same instant.
-          The small active:scale press-down is just tactile feedback
-          that THIS box is what's about to grow — it always reverts
-          before onClick fires, so it never taints the origin-rect
-          measurement taken in handleOpen. */}
-      <button
-        type="button"
-        ref={triggerRef}
-        onClick={handleOpen}
-        aria-label={`Open details for ${service.title}`}
-        aria-hidden={expanded}
-        tabIndex={expanded ? -1 : 0}
-        className={`relative block w-full max-w-[260px] text-left transition-transform duration-150 ease-out active:scale-[0.97] md:max-w-[300px] lg:max-w-[340px] ${
-          expanded ? "invisible pointer-events-none" : ""
-        }`}
-      >
-        {/* Painted, clipped layer — background + rounded corners +
-            the Read/title text. Only THIS layer clips, so the
-            SpinWheel badge below (which deliberately sits half
-            outside this box) never gets chopped by the corner. */}
-        <div
-          style={{
-            backgroundColor: TRIGGER_BG,
-            borderRadius: `${TRIGGER_RADIUS}px`,
-          }}
-          className="relative aspect-[444/316] w-full overflow-hidden"
-        >
-          <TriggerFaceContent service={service} />
-        </div>
+    <Link
+      href={href}
+      data-cursor="circle"
+      aria-label={`Learn more about ${title}`}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onPointerCancel={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onBlur={() => setActive(false)}
+      className={`group/link relative isolate mt-5 inline-flex min-h-11 items-center overflow-hidden border px-4 font-mono text-[11px] tracking-[-0.025em] uppercase transition-[color,border-color] duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 sm:mt-6 sm:text-[12px] ${
+        active
+          ? "border-purple-accent text-black-bg"
+          : dark
+            ? "border-white-text/45 text-white-text"
+            : "border-black-text/45 text-black-text"
+      } ${dark ? "focus-visible:outline-white-text" : "focus-visible:outline-black-text"}`}
+    >
+      <HorizontalStagger active={active} rows={6} />
 
-        {/* Sits outside the clipped layer above, positioned against
-            the button (which IS `relative` but has no overflow of
-            its own) — so it reads over the corner instead of being
-            sliced off at the card's edge. */}
-        <SpinWheel />
-      </button>
+      <span className="relative z-10 inline-flex items-center gap-5 leading-none">
+        <LetterSpinner text="Learn more" active={active} />
 
-      {expanded && (
-        <div
-          className="fixed inset-0 z-[100] isolate flex items-center justify-center p-6"
-          role="dialog"
-          aria-modal="true"
-        >
-          {/* Opacity driven imperatively via the ref above — not by
-              a React className toggle — so entrance always has a
-              real "from: 0" frame to transition out of. */}
-          <div
-            ref={backdropRef}
-            onClick={handleClose}
-            aria-hidden="true"
-            className="absolute inset-0 bg-[#0A0A0C]"
-          />
-
-          {/* The one and only morphing card. Its size classes are
-              always the modal's natural size — the FLIP transform
-              is what makes it visually start at the trigger's size
-              and grow from there. This outer element carries ONLY
-              the transform now — no overflow-hidden — so anything
-              deliberately positioned outside its bounds (the
-              SpinWheel) still scales and moves with it instead of
-              getting clipped.
-              `will-change: transform` + `backface-visibility: hidden`
-              push this onto its own GPU layer for the whole
-              animation, instead of the browser repainting it on the
-              main thread every frame — that's what actually reads
-              as smooth/"floating" rather than janky. */}
-          <div
-            ref={cardRef}
-            onTransitionEnd={handleTransitionEnd}
-            style={{
-              transformOrigin: "top left",
-              willChange: "transform",
-              backfaceVisibility: "hidden",
-            }}
-            className="relative aspect-[1283/914] w-[min(78vw,760px)] drop-shadow-[0_30px_60px_rgba(0,0,0,0.45)]"
-          >
-            {/* Painted, clipped layer — background + rounded
-                corners + both face contents. This is the layer
-                background-color/border-radius animate on. */}
-            <div
-              ref={cardPaintRef}
-              className="absolute inset-0 overflow-hidden"
-            >
-              <div
-                aria-hidden={modalFaceVisible}
-                style={{ transitionDuration: `${faceMs}ms` }}
-                className={`absolute inset-0 transition-opacity ease-out ${
-                  modalFaceVisible
-                    ? "pointer-events-none opacity-0"
-                    : "opacity-100"
-                }`}
-              >
-                <TriggerFaceContent service={activeService} />
-              </div>
-
-              <div
-                aria-hidden={!modalFaceVisible}
-                style={{ transitionDuration: `${faceMs}ms` }}
-                className={`absolute inset-0 transition-opacity ease-out ${
-                  modalFaceVisible
-                    ? "opacity-100"
-                    : "pointer-events-none opacity-0"
-                }`}
-              >
-                <ModalFaceContent
-                  service={activeService}
-                  onClose={handleClose}
-                />
-              </div>
-            </div>
-
-            {/* Outside the clipped layer above, so the badge reads
-                over the corner instead of being sliced off. Fades
-                with the trigger face since it only belongs to that
-                look. */}
-            <div
-              aria-hidden={modalFaceVisible}
-              style={{ transitionDuration: `${faceMs}ms` }}
-              className={`transition-opacity ease-out ${
-                modalFaceVisible
-                  ? "pointer-events-none opacity-0"
-                  : "opacity-100"
+        <span aria-hidden="true" className="relative h-4 w-5 overflow-hidden">
+          {[false, true].map((incoming) => (
+            <svg
+              key={String(incoming)}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="square"
+              strokeLinejoin="miter"
+              className={`absolute inset-0 h-4 w-5 transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                incoming
+                  ? active
+                    ? "translate-x-0"
+                    : "-translate-x-full"
+                  : active
+                    ? "translate-x-full"
+                    : "translate-x-0"
               }`}
             >
-              <SpinWheel />
-            </div>
-          </div>
+              <path d="M3 12h17M14 6l6 6-6 6" />
+            </svg>
+          ))}
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function ServiceSpread({
+  service,
+  index,
+}: {
+  service: DetailedService;
+  index: number;
+}) {
+  const number = String(index + 1).padStart(2, "0");
+  // The video alternates white / black image panels, keeping the copy
+  // background white all the way down the page.
+  const dark = index % 2 === 1;
+
+  return (
+    <article
+      data-services-row
+      aria-labelledby={`service-spread-${number}`}
+      // Every desktop spread pins at the same top edge. Later spreads must
+      // paint OVER earlier ones instead of disappearing behind them.
+      style={{ zIndex: index + 1 }}
+      className="relative grid min-w-0 grid-cols-1 border-t border-black-text/15 bg-white-bg lg:sticky lg:top-0 lg:min-h-[100svh] lg:grid-cols-[minmax(240px,30fr)_minmax(0,80fr)]"
+    >
+      <div
+        className={`relative flex min-w-0 flex-col items-center justify-between overflow-hidden px-6 pt-11 pb-8 sm:px-10 sm:pt-14 sm:pb-11 lg:min-h-[100svh] lg:border-r lg:border-black-text/15 lg:px-[clamp(24px,3vw,52px)] lg:pt-[clamp(48px,7svh,86px)] lg:pb-[clamp(32px,5svh,64px)] ${
+          dark ? "bg-black-bg text-white-text" : "bg-white-bg text-black-text"
+        }`}
+      >
+        <div
+          className={`relative z-10 flex w-full items-start justify-between gap-5 font-mono text-[10px] leading-[1.3] tracking-[0.08em] uppercase sm:text-[11px] ${
+            dark ? "text-white-text/55" : "text-black-text/55"
+          }`}
+        >
+          <span>
+            / {number} — {String(SERVICE_DETAILS.length).padStart(2, "0")}
+          </span>
+          <span className="max-w-[175px] text-right">
+            Designed for your next stage of growth.
+          </span>
         </div>
-      )}
-    </>
-  );
-}
 
-/* ================================================================
-   DESKTOP SERVICE ROW
-   ================================================================ */
+        <div className="relative z-10 mx-auto mt-10 mb-8 w-full max-w-[420px] sm:mt-14 sm:mb-11 lg:my-auto lg:py-12">
+          <ServiceArtwork title={service.title} index={index} dark={dark} />
+          <ServiceLearnMore
+            href={service.href}
+            title={service.title}
+            dark={dark}
+          />
+        </div>
 
-function ServiceRow({
-  service,
-  iconIndex,
-  index,
-  onHoverStart,
-  onHoverEnd,
-}: {
-  service: Service;
-  iconIndex: number;
-  index: number;
-  onHoverStart: (index: number) => void;
-  onHoverEnd: () => void;
-}) {
-  return (
-    <Link
-      href={service.href}
-      data-row-index={index}
-      onMouseEnter={() => onHoverStart(index)}
-      onMouseLeave={onHoverEnd}
-      onFocus={() => onHoverStart(index)}
-      onBlur={onHoverEnd}
-      className="group flex items-center gap-6 border-b border-white-primary/30 py-10 first:pt-0 last:pb-12 md:gap-8"
-    >
-      <span
-        aria-hidden="true"
-        className="flex h-10 w-10 shrink-0 items-center justify-center text-white-primary/25 transition-colors duration-300 ease-out group-hover:text-white-primary group-focus-visible:text-white-primary md:h-12 md:w-12 lg:h-14 lg:w-14 xl:h-16 xl:w-16"
-      >
-        <GeometricIcon index={iconIndex} className="h-full w-full" />
-      </span>
+        <div
+          className={`relative z-10 flex w-full items-center gap-4 font-mono text-[10px] tracking-[0.08em] uppercase sm:text-[11px] ${
+            dark ? "text-white-text/50" : "text-black-text/50"
+          }`}
+        >
+          <span>Technico digital solutions</span>
+        </div>
+      </div>
 
-      <span className="block whitespace-nowrap text-[54px] leading-[0.98] font-normal tracking-[-0.035em] text-white-primary opacity-100 transition-opacity duration-300 ease-out md:text-[64px] lg:text-[76px] xl:text-[92px] group-hover/rows:opacity-40 group-hover/rows:group-hover:opacity-100 group-hover/rows:group-focus-visible:opacity-100">
-        {service.shortTitle}
-      </span>
-    </Link>
-  );
-}
+      <div className="flex min-w-0 items-start bg-white-bg px-6 py-14 text-black-text sm:px-10 sm:py-18 lg:min-h-[100svh] lg:px-[clamp(44px,6vw,112px)] lg:py-[clamp(64px,8svh,104px)]">
+        <div data-service-copy className="mx-auto w-full max-w-[920px]">
+          <p className="mb-6 flex items-center gap-3 font-mono text-[10px] tracking-[0.05em] text-black-text/50 uppercase sm:mb-7 sm:text-[11px]">
+            <span className="h-1.5 w-1.5 bg-purple-accent" aria-hidden="true" />
+            Service / {number}
+          </p>
 
-/* ================================================================
-   MOBILE SERVICE ROW
-   ================================================================ */
+          <div className="grid min-w-0 grid-cols-1 items-end gap-x-8 gap-y-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(180px,0.5fr)]">
+            <h2
+              id={`service-spread-${number}`}
+              className="h2-section max-w-[26ch] leading-[1.08] font-medium tracking-heading text-balance"
+            >
+              {service.title}
+            </h2>
 
-function MobileServiceRow({
-  service,
-  iconIndex,
-  index,
-}: {
-  service: Service;
-  iconIndex: number;
-  index: number;
-}) {
-  return (
-    <Link
-      href={service.href}
-      data-row-index={index}
-      className="group flex items-center gap-5 border-b border-white-primary/25 py-7 first:pt-0 last:pb-8"
-    >
-      <span
-        aria-hidden="true"
-        className="flex h-9 w-9 shrink-0 items-center justify-center text-white-primary/25 transition-colors duration-300 ease-out group-hover:text-white-primary group-focus-visible:text-white-primary group-active:text-white-primary"
-      >
-        <GeometricIcon index={iconIndex} className="h-full w-full" />
-      </span>
-
-      <span className="block text-[29px] leading-[1.1] font-normal tracking-[-0.02em] text-white-primary opacity-100 transition-opacity duration-300 ease-out group-hover/rows:opacity-40 group-hover/rows:group-hover:opacity-100 group-hover/rows:group-active:opacity-100">
-        {service.shortTitle}
-      </span>
-    </Link>
-  );
-}
-
-/* ================================================================
-   SERVICES
-   ================================================================ */
-
-export default function Services() {
-  const featuredService = SERVICES[0];
-
-  const [scrollIndex, setScrollIndex] = useState(0);
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  // Was scoped to the desktop list wrapper only, so on mobile (where
-  // that wrapper is `hidden md:grid` → display:none) it never
-  // observed anything and scrollIndex just sat frozen at 0. Scoped to
-  // the whole section now so it picks up whichever set of
-  // `[data-row-index]` rows — desktop or mobile — is actually
-  // rendered/visible at the current breakpoint.
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const container = sectionRef.current;
-    if (!container) return;
-
-    const rows = Array.from(
-      container.querySelectorAll<HTMLElement>("[data-row-index]"),
-    );
-    if (rows.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = Number(entry.target.getAttribute("data-row-index"));
-            if (!Number.isNaN(idx)) setScrollIndex(idx);
-          }
-        });
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
-    );
-
-    rows.forEach((row) => observer.observe(row));
-    return () => observer.disconnect();
-  }, []);
-
-  // On mobile nothing ever sets hoverIndex (no mouse enter/focus from
-  // a touch tap), so this resolves to plain scrollIndex there —
-  // exactly the scroll-driven behavior wanted, no touch tracking.
-  const activeIndex = hoverIndex ?? scrollIndex;
-  const activeService = SERVICES[activeIndex] ?? featuredService;
-
-  return (
-    <section ref={sectionRef} className="bg-[#0A0A0C] text-white-primary">
-      {/* ==========================================================
-          INTRO
-          ========================================================== */}
-
-      <div className="container-x pt-10 sm:pt-12 md:pt-14 lg:pt-16">
-        <div className="grid grid-cols-1 md:grid-cols-[40%_60%]">
-          <div>
-            <p className="font-mono text-sm leading-none tracking-[0.12em] text-white-primary/60 uppercase">
-              [ ] Our Services
+            <p className="max-w-[34ch] font-mono text-[14px] leading-[1.4] tracking-[-0.04em] text-purple-accent sm:justify-self-end sm:text-right">
+              “{service.tagline}”
             </p>
           </div>
 
-          <div className="w-full max-w-[700px]">
-            <h2 className="h2-section indent-16 leading-[1.04] font-medium tracking-heading text-white-primary">
-              {HEADLINE}
-            </h2>
-          </div>
-        </div>
-      </div>
-
-      {/* ==========================================================
-          SERVICES AREA
-          ========================================================== */}
-
-      <div className="container-x pt-24 pb-10 sm:pt-28 sm:pb-12 md:pt-32 md:pb-14 lg:pt-36 lg:pb-16">
-        {/* DESKTOP */}
-        <div className="hidden md:grid md:grid-cols-[40%_60%]">
-          <div className="sticky top-28 self-start pt-2 lg:top-32">
-            <ExpandableReadCard service={activeService} />
-          </div>
-
-          <div className="group/rows w-full">
-            {SERVICES.map((service, index) => (
-              <ServiceRow
-                key={service.title}
-                service={service}
-                index={index}
-                iconIndex={SERVICE_ROW_ICONS[index % SERVICE_ROW_ICONS.length]}
-                onHoverStart={setHoverIndex}
-                onHoverEnd={() => setHoverIndex(null)}
-              />
+          <div className="mt-6 grid max-w-[920px] grid-cols-1 gap-x-10 gap-y-4 sm:mt-7 xl:grid-cols-2">
+            {service.paragraphs.map((paragraph, paragraphIndex) => (
+              <p
+                key={paragraph}
+                className={`max-w-[58ch] font-mono text-[14px] leading-[1.58] tracking-[-0.04em] text-black-text/70 ${
+                  service.paragraphs.length % 2 === 1 &&
+                  paragraphIndex === service.paragraphs.length - 1
+                    ? "xl:col-span-2 xl:max-w-[74ch]"
+                    : ""
+                }`}
+              >
+                {paragraph}
+              </p>
             ))}
           </div>
-        </div>
 
-        {/* MOBILE */}
-        <div className="md:hidden">
-          {/* Featured ExpandableReadCard removed here — the
-              scroll-driven floating icon below now covers "what's
-              currently active" on mobile, so a static featuredService
-              card pinned above the list was redundant with it. */}
-
-          {/* Floating icon preview — purely scroll-driven (same
-              scrollIndex/activeIndex the desktop hover state reads),
-              NOT touch/drag tracked. `sticky` on a zero-height wrapper
-              so it doesn't push the list down: it holds roughly at
-              the vertical center of the viewport while the row text
-              scrolls past behind/around it, then un-sticks naturally
-              once it reaches the bottom of this relative container
-              (last row). All service icons are stacked and crossfade
-              via opacity — same idea as HoverImageSwap's layered
-              swap, just CSS-only since these are simple SVG marks
-              rather than photos needing a clip-path reveal.
-              Clickable — links to whichever service is currently
-              active, same destination as tapping that row directly.
-              `pointer-events-none` stays on the two zero-height/
-              full-width wrappers around it (so the empty space to
-              either side of the icon still lets taps fall through to
-              the row underneath); `pointer-events-auto` is re-enabled
-              only on the Link itself, i.e. the actual visible box. */}
-          <div className="relative">
-            <div className="pointer-events-none sticky top-1/2 z-10 h-0">
-              <div className="flex -translate-y-1/2 justify-center">
-                <Link
-                  href={activeService.href}
-                  aria-label={`Open details for ${activeService.title}`}
-                  className="pointer-events-auto relative flex h-28 w-28 items-center justify-center rounded-[24px] border border-white-primary/15 bg-white-primary/10 p-6 backdrop-blur-sm transition-transform duration-150 ease-out active:scale-95"
-                >
-                  {SERVICES.map((service, i) => (
-                    <span
-                      key={service.title}
-                      aria-hidden={i !== activeIndex}
-                      className={`absolute inset-0 flex items-center justify-center p-6 text-white-primary transition-opacity duration-500 ease-out ${
-                        i === activeIndex ? "opacity-100" : "opacity-0"
-                      }`}
-                    >
-                      <GeometricIcon
-                        index={SERVICE_ROW_ICONS[i % SERVICE_ROW_ICONS.length]}
-                        className="h-full w-full"
-                      />
-                    </span>
-                  ))}
-                </Link>
+          {service.capabilityGroups.length > 0 && (
+            <div className="mt-8 sm:mt-10">
+              <p className="mb-4 font-mono text-[10px] tracking-[0.05em] text-black-text/45 uppercase sm:text-[11px]">
+                Our capabilities
+              </p>
+              <div className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
+                {service.capabilityGroups.map((group, groupIndex) => (
+                  <div
+                    key={`${service.href}-group-${groupIndex}`}
+                    className={
+                      service.capabilityGroups.length === 1
+                        ? "sm:col-span-2"
+                        : undefined
+                    }
+                  >
+                    {group.title && (
+                      <p className="mb-2 font-mono text-[10px] tracking-[0.04em] text-purple-accent uppercase">
+                        / {group.title}
+                      </p>
+                    )}
+                    <ul className="grid border-t border-black-text/60 xl:grid-cols-2 xl:gap-x-8">
+                      {group.items.map((item, itemIndex) => (
+                        <li
+                          key={`${service.href}-${groupIndex}-${item.label}`}
+                          className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 border-b border-black-text/30 py-[11px] font-mono text-[13px] leading-[1.35] tracking-[-0.04em] sm:text-[14px]"
+                        >
+                          <span className="font-medium">{item.label}</span>
+                          <span
+                            aria-hidden="true"
+                            className="row-span-2 shrink-0 font-mono text-[9px] text-black-text/35"
+                          >
+                            / {String(itemIndex + 1).padStart(2, "0")}
+                          </span>
+                          {item.detail && (
+                            <span className="max-w-[52ch] text-[12px] leading-[1.5] text-black-text/60 sm:text-[13px]">
+                              {item.detail}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             </div>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
 
-            <div className="group/rows">
-              {SERVICES.map((service, index) => (
-                <MobileServiceRow
-                  key={service.title}
-                  service={service}
-                  index={index}
-                  iconIndex={
-                    SERVICE_ROW_ICONS[index % SERVICE_ROW_ICONS.length]
-                  }
-                />
-              ))}
-            </div>
+export default function Services() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      if (prefersReducedMotion) return;
+
+      gsap.utils.toArray<HTMLElement>("[data-services-row]").forEach((row) => {
+        const image = row.querySelector<HTMLElement>("[data-service-visual]");
+        const copy = row.querySelector<HTMLElement>("[data-service-copy]");
+        if (!image || !copy) return;
+
+        // Only animate inner content. Do NOT transform the pinned article:
+        // transforms on the spread itself interfere with sticky stacking.
+        gsap.from([image, copy], {
+          y: 20,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: row,
+            start: "top 85%",
+            once: true,
+          },
+        });
+      });
+    },
+    { scope: sectionRef },
+  );
+
+  return (
+    <section
+      ref={sectionRef}
+      aria-labelledby="services-gallery-heading"
+      // Do not set overflow-hidden/auto on a sticky ancestor: that would
+      // create a new scroll container and break the viewport pinning.
+      className="bg-white-bg text-black-text"
+    >
+      <header className="container-x grid gap-10 border-t border-black-text/20 py-16 sm:py-20 lg:grid-cols-[30fr_80fr] lg:gap-0 lg:py-24">
+        <div className="flex flex-col justify-between gap-6 lg:pr-10">
+          <p className="font-mono text-[11px] tracking-[0.12em] text-black-text/60 uppercase">
+            / Technico — What we do
+          </p>
+          <h2
+            id="services-gallery-heading"
+            className="h2-section leading-[1.08] font-medium tracking-heading"
+          >
+            Services<span className="text-purple-accent">.</span>
+          </h2>
+        </div>
+        <div className="flex items-end lg:border-l lg:border-black-text/20 lg:pl-[clamp(44px,6vw,112px)]">
+          <div className="max-w-[920px]">
+            <p className="h3-section max-w-[34ch] leading-[1.15] font-medium tracking-heading text-black-text">
+              {INTRO_TITLE}
+            </p>
+            <p className="body-copy mt-4 max-w-[62ch] leading-[1.6] tracking-[-0.02em] text-black-text/65">
+              {INTRO_COPY}
+            </p>
           </div>
         </div>
+      </header>
+
+      {/* One shared sticky containing block. The section that follows this
+          gallery naturally releases all pinned service spreads. */}
+      <div data-services-gallery className="relative isolate">
+        {SERVICE_DETAILS.map((service, index) => (
+          <ServiceSpread key={service.href} service={service} index={index} />
+        ))}
       </div>
     </section>
   );

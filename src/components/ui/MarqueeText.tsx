@@ -108,86 +108,103 @@ export default function MarqueeText({
   const wordClassName =
     "text-[40px] leading-none font-medium tracking-tight text-white sm:text-[64px] md:text-[80px]";
 
-  useGSAP(() => {
-    const track = trackRef.current;
-    const track2 = trackRef2.current;
-    if (!track || !track2 || prefersReducedMotion) return;
+  useGSAP(
+    () => {
+      const track = trackRef.current;
+      const track2 = trackRef2.current;
+      if (!track || !track2 || prefersReducedMotion) return;
 
-    let period = measurePeriod(track);
-    let wrap = gsap.utils.wrap(-period, 0);
+      let period = measurePeriod(track);
+      let wrap = gsap.utils.wrap(-period, 0);
 
-    // Row 1 drifts left from 0; row 2 starts a full period behind
-    // and drifts right, so the two are always mirrored.
-    const xRef1 = { current: 0 };
-    const xRef2 = { current: -period };
+      // Row 1 drifts left from 0; row 2 starts a full period behind
+      // and drifts right, so the two are always mirrored.
+      const xRef1 = { current: 0 };
+      const xRef2 = { current: -period };
 
-    const tick = () => {
-      const dt = gsap.ticker.deltaRatio(60) / 60; // seconds this frame
-      const delta = MARQUEE_SPEED * dt;
+      const tick = () => {
+        const dt = gsap.ticker.deltaRatio(60) / 60; // seconds this frame
+        const delta = MARQUEE_SPEED * dt;
 
-      xRef1.current -= delta;
-      xRef2.current += delta;
+        xRef1.current -= delta;
+        xRef2.current += delta;
 
-      // Keep both running totals bounded over a long idle session —
-      // shifting either by a whole period never changes where it
-      // wraps to, so it's invisible to the render.
-      if (Math.abs(xRef1.current) > period * 50) {
-        xRef1.current -= Math.round(xRef1.current / period) * period;
-      }
-      if (Math.abs(xRef2.current) > period * 50) {
-        xRef2.current -= Math.round(xRef2.current / period) * period;
-      }
+        // Keep both running totals bounded over a long idle session —
+        // shifting either by a whole period never changes where it
+        // wraps to, so it's invisible to the render.
+        if (Math.abs(xRef1.current) > period * 50) {
+          xRef1.current -= Math.round(xRef1.current / period) * period;
+        }
+        if (Math.abs(xRef2.current) > period * 50) {
+          xRef2.current -= Math.round(xRef2.current / period) * period;
+        }
 
-      gsap.set(track, { x: wrap(xRef1.current) });
-      gsap.set(track2, { x: wrap(xRef2.current) });
-    };
+        gsap.set(track, { x: wrap(xRef1.current) });
+        gsap.set(track2, { x: wrap(xRef2.current) });
+      };
 
-    // Only run the ticker while the marquee is actually visible.
-    let ticking = false;
-    const start = () => {
-      if (ticking) return;
-      ticking = true;
-      gsap.ticker.add(tick);
-    };
-    const stop = () => {
-      if (!ticking) return;
-      ticking = false;
-      gsap.ticker.remove(tick);
-    };
+      // Only run the ticker while the marquee is actually visible.
+      let ticking = false;
+      let intersecting = false;
+      const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const start = () => {
+        if (ticking) return;
+        ticking = true;
+        track.style.willChange = "transform";
+        track2.style.willChange = "transform";
+        gsap.ticker.add(tick);
+      };
+      const stop = () => {
+        if (!ticking) return;
+        ticking = false;
+        track.style.willChange = "auto";
+        track2.style.willChange = "auto";
+        gsap.ticker.remove(tick);
+      };
 
-    const io = new IntersectionObserver(
-      ([entry]) => (entry.isIntersecting ? start() : stop()),
-      { rootMargin: "200px 0px" },
-    );
-    io.observe(track);
-
-    // Re-measure whenever the track's rendered width changes, so a
-    // responsive breakpoint or a window resize/orientation change
-    // can't leave the period (and therefore the wrap point) stale.
-    let resizeFrame = 0;
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(() => {
-        const next = measurePeriod(track);
-        if (!next || next === period) return;
-        period = next;
-        wrap = gsap.utils.wrap(-period, 0);
-        // Fold both running totals into the fresh bounds so the very
-        // next frame after a resize is still seamless.
-        xRef1.current = gsap.utils.wrap(-period, 0)(xRef1.current);
-        xRef2.current =
-          gsap.utils.wrap(-period, 0)(xRef2.current + period) - period;
+      const sync = () => {
+        if (intersecting && !document.hidden && !motion.matches) start();
+        else stop();
+      };
+      const io = new IntersectionObserver(([entry]) => {
+        intersecting = entry.isIntersecting;
+        sync();
       });
-    });
-    ro.observe(track);
+      io.observe(track);
+      document.addEventListener("visibilitychange", sync);
+      motion.addEventListener("change", sync);
 
-    return () => {
-      io.disconnect();
-      ro.disconnect();
-      cancelAnimationFrame(resizeFrame);
-      stop();
-    };
-  }, [text, repeat]);
+      // Re-measure whenever the track's rendered width changes, so a
+      // responsive breakpoint or a window resize/orientation change
+      // can't leave the period (and therefore the wrap point) stale.
+      let resizeFrame = 0;
+      const ro = new ResizeObserver(() => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => {
+          const next = measurePeriod(track);
+          if (!next || next === period) return;
+          period = next;
+          wrap = gsap.utils.wrap(-period, 0);
+          // Fold both running totals into the fresh bounds so the very
+          // next frame after a resize is still seamless.
+          xRef1.current = gsap.utils.wrap(-period, 0)(xRef1.current);
+          xRef2.current =
+            gsap.utils.wrap(-period, 0)(xRef2.current + period) - period;
+        });
+      });
+      ro.observe(track);
+
+      return () => {
+        io.disconnect();
+        ro.disconnect();
+        document.removeEventListener("visibilitychange", sync);
+        motion.removeEventListener("change", sync);
+        cancelAnimationFrame(resizeFrame);
+        stop();
+      };
+    },
+    { dependencies: [text, repeat], revertOnUpdate: true },
+  );
 
   const rows = (
     <>
@@ -195,7 +212,7 @@ export default function MarqueeText({
       <div
         ref={trackRef}
         aria-hidden="true"
-        className="flex w-max shrink-0 items-center gap-10 whitespace-nowrap will-change-transform sm:gap-14"
+        className="flex w-max shrink-0 items-center gap-10 whitespace-nowrap sm:gap-14"
       >
         {[0, 1].map((half) => (
           <div
@@ -215,7 +232,7 @@ export default function MarqueeText({
       <div
         ref={trackRef2}
         aria-hidden="true"
-        className="flex w-max shrink-0 items-center gap-10 whitespace-nowrap will-change-transform sm:gap-14"
+        className="flex w-max shrink-0 items-center gap-10 whitespace-nowrap sm:gap-14"
       >
         {[0, 1].map((half) => (
           <div

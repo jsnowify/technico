@@ -16,9 +16,10 @@ import Header from "@/components/layout/Header";
 import ContactSection from "@/components/layout/ContactSection";
 import Footer from "@/components/layout/Footer";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
-import BottomGlassBlur from "@/components/layout/BottomGlassBlur";
 import NoiseOverlay from "@/components/layout/NoiseOverlay";
 import GlobalCursor from "@/components/layout/GlobalCursor";
+import PreLoader from "@/components/layout/PreLoader";
+import PageTransition from "@/components/layout/PageTransition";
 import { getAllServices } from "@/lib/content/services";
 import { IS_PRODUCTION } from "@/lib/env";
 import StickyConnectCTA from "@/components/layout/StickyConnectCTA";
@@ -120,6 +121,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col font-sans">
         <div className="flex min-h-full flex-1 flex-col">
           <JsonLd data={organizationJsonLd} />
+          <PreLoader />
+          <PageTransition />
           <SmoothScrollProvider>
             <Header services={services} />
             <main className="flex-1">
@@ -128,7 +131,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </main>
             <Footer />
           </SmoothScrollProvider>
-          <BottomGlassBlur />
           <StickyConnectCTA />
           <NoiseOverlay />
           <GlobalCursor />

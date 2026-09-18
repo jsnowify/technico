@@ -79,7 +79,7 @@ export default function TextRevealBlock({
   lines,
   as: Tag = "h1",
   className = "",
-  // Bright flash color from --color-purple-accent (#6b26d9). The
+  // Bright flash color from the Home-derived purple accent. The
   // rectangle's resting/covering color needs contrast against
   // whatever section it sits on, not a fixed color — both current
   // usages (ServicesHero, ServicesMarketOverview's stats h2) sit on
@@ -87,7 +87,7 @@ export default function TextRevealBlock({
   // revealColorDark="#000000" (or similar) when using this on a
   // light-background section instead, so the cover reads as a
   // visible block rather than disappearing into the page.
-  revealColor = "#6b26d9",
+  revealColor = "var(--color-purple-accent, #a78bfa)",
   revealColorDark = "#ffffff",
   stagger = 0.12,
   colorDuration = 0.15,

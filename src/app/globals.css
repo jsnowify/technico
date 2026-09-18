@@ -20,6 +20,21 @@ body {
   background-color: var(--color-black-bg);
 }
 
+/* Keep wheel, touch, keyboard, and Lenis scrolling functional while hiding
+   the browser's visual scrollbar. PreLoader/PageTransition still control
+   their own temporary overflow locks while their overlays are active. */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -32,13 +47,27 @@ body {
   --color-white-bg: #fbfbfe;
   --color-white-primary: #ffffff;
   --color-white-text: #eae9fc;
+  --color-content: var(--color-white-text);
+  --color-content-muted: #b8b7c7;
 
-  --color-purple-secondary: #6b26d9;
-  --color-purple-accent: #6b26d9;
+  /* Home-derived violet accent system: light / main / strong. */
+  --color-accent-light: #c4b5fd;
+  --color-accent: #a78bfa;
+  --color-accent-dark: #8b5cf6;
+  /* Opaque dark-violet surface keeps white copy readable during a wipe. */
+  --color-accent-surface: color-mix(
+    in srgb,
+    var(--color-accent) 24%,
+    var(--color-black-bg)
+  );
 
-  /* Second alternating panel color for ServicesIndustriesStack — sampled
-     directly from the mock (#EC4899 / Tailwind's pink-500). */
-  --color-pink-accent: #ec4899;
+  /* Existing semantic names now inherit the same violet family. */
+  --color-purple-hero: var(--color-accent);
+  --color-purple-accent: var(--color-accent);
+  --color-purple-secondary: var(--color-accent-dark);
+
+  /* Compatibility alias: older "pink" variants now use the home palette. */
+  --color-pink-accent: var(--color-accent-light);
 }
 
 /* ================================================================
@@ -63,25 +92,29 @@ body {
    Update the values here once and every section using this class
    moves together — that's the whole point of it being global.
    ================================================================ */
+:root {
+  --container-gutter: 1.5rem;
+}
+
 .container-x {
-  padding-inline: 1.5rem; /* 24px, mobile */
+  padding-inline: var(--container-gutter); /* 24px, mobile */
 }
 
 @media (min-width: 640px) {
-  .container-x {
-    padding-inline: 2rem; /* 32px, sm */
+  :root {
+    --container-gutter: 2rem; /* 32px, sm */
   }
 }
 
 @media (min-width: 768px) {
-  .container-x {
-    padding-inline: 3rem; /* 48px, md */
+  :root {
+    --container-gutter: 3rem; /* 48px, md */
   }
 }
 
 @media (min-width: 1024px) {
-  .container-x {
-    padding-inline: 90px; /* lg and up — the "global 90px" ask */
+  :root {
+    --container-gutter: 90px; /* lg and up */
   }
 }
 
@@ -162,6 +195,38 @@ body {
 }
 
 /* ================================================================
+   HERO WORDMARK — fluid font-size, two-phase (mirrors .h1-hero)
+   ================================================================
+   Hero.tsx used to size "TECHNICO_" with an inline
+   clamp(3.5rem, 19vw, 150px). That slope was only ever tuned for the
+   >=1024px case, where .container-x narrows to a 10px gutter and the
+   wordmark effectively owns the whole row width.
+
+   Below 1024px the gutter is much wider (24/32/48px) AND the same
+   row also has to fit the "/" divider + "Explore" link beside the
+   wordmark. 19vw doesn't leave room for any of that — on a 375px
+   phone it renders "TECHNICO_" at ~71px, which alone is wider than
+   the entire viewport, forcing the whole page into horizontal
+   overflow. That's why it only ever looked right on desktop.
+
+   Phase 1 (< 1024px) uses a shallower rem+vw slope sized to the
+   narrower mobile/tablet gutters (leaving headroom for the divider +
+   link), landing at ~145px right before the 1024px handoff so there's
+   no visible jump into Phase 2.
+   Phase 2 (>= 1024px) is the original formula, untouched — this is
+   the range that already looked correct.
+   ================================================================ */
+.hero-wordmark {
+  font-size: clamp(1.375rem, -1.5rem + 16.5vw, 9.0625rem);
+}
+
+@media (min-width: 1024px) {
+  .hero-wordmark {
+    font-size: clamp(3.5rem, 19vw, 150px);
+  }
+}
+
+/* ================================================================
    SECTION TYPE SCALE — fluid font-sizes
    ================================================================
    Single source of truth for the four text sizes that repeat across
@@ -192,6 +257,27 @@ body {
   font-size: clamp(0.75rem, 0.625rem + 0.625vw, 0.875rem);
 }
 
+/* ================================================================
+   GLOBAL MONO WEIGHT
+   ================================================================
+   Every font-mono span/paragraph on the site (eyebrows, body copy,
+   buttons, blog meta, etc.) is meant to render at 300/light by
+   default — that was never actually set anywhere, so it's been
+   falling back to the browser default (400) wherever no explicit
+   font-light/font-medium/etc. utility was also applied.
+
+   Lives in `base` on purpose: Tailwind v4's utilities layer always
+   outranks base regardless of source order, so a spot that also
+   carries an explicit weight utility (e.g. MobileNav's font-mono
+   font-medium wordmark) keeps that weight untouched — this only
+   fills in the spots with no weight utility at all.
+   ================================================================ */
+@layer base {
+  .font-mono {
+    font-weight: 300;
+  }
+}
+
 /* Section heading — the big h2 each section opens with. 32px at
    375px up to 44px by 1024px, then flat — same range/values the old
    text-[32px] sm:text-[40px] md:text-[44px] step landed on, just
@@ -200,19 +286,50 @@ body {
   font-size: clamp(2rem, 1.5666rem + 1.849vw, 2.75rem);
 }
 
-/* Card / question title — the h3 inside each Overview/Strategy card
-   and each QuestionsAnswers accordion item. 20px at 320px up to 22px
-   by 640px. */
+/* Card / question title — fluid mobile size, capped at the 24px
+   medium-weight desktop spec. */
 .card-title {
-  font-size: clamp(1.25rem, 1.125rem + 0.625vw, 1.375rem);
+  font-size: clamp(1rem, 0.75rem + 1.25vw, 1.5rem);
 }
 
-/* Body copy — every paragraph at this level: section intro text,
-   card/panel descriptions, accordion answers. 15px at 320px up to
-   16px by 640px, so small phones don't get body text ever so
-   slightly wider than the space really wants. */
+/* Alias for semantic sub-headlines outside cards. */
+.h3-section {
+  font-size: clamp(1rem, 0.75rem + 1.25vw, 1.5rem);
+}
+
+/* Homepage paragraph spec: mono, fluid on compact phones, 16px from
+   tablet sizes upward. */
 .body-copy {
-  font-size: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
+  font-family: var(--font-mono);
+  font-size: clamp(0.875rem, 0.75rem + 0.625vw, 1rem);
+}
+
+/* Short landscape screens cannot contain two independently fixed
+   100svh panels plus their full content. Keep the same reading order
+   but let both hero panels return to natural document flow. */
+@media (max-height: 600px) {
+  .home-hero-stack {
+    height: auto;
+  }
+
+  .home-hero-panel,
+  .home-reveal-panel {
+    position: relative;
+    height: auto;
+  }
+}
+
+/* On short phones the signal is decorative; the headline, copy, and CTAs
+   remain visible inside the one-viewport reveal instead of being clipped. */
+@media (max-width: 767px) and (max-height: 700px) {
+  .hero-reveal-signal-column {
+    display: none;
+  }
+
+  .hero-reveal-content {
+    align-content: center;
+    padding-top: 1rem;
+  }
 }
 
 /* ================================================================

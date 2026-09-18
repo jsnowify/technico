@@ -1,6 +1,15 @@
 "use client";
-import { useState } from "react";
+
+import { useId, useState } from "react";
 import GeometricIcon from "@/components/ui/icons";
+import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
+import GridCorners from "@/components/ui/GridCorners";
+import ServiceSectionHeader from "./ServiceSectionHeader";
+import {
+  SERVICE_ACCENT,
+  SERVICE_EASE,
+  type ServiceAccent,
+} from "./serviceAccent";
 
 interface ServicePillarCardsItem {
   title: string;
@@ -13,93 +22,20 @@ interface ServicePillarCardsProps {
   intro: string;
   items: ServicePillarCardsItem[];
   closingParagraph?: string;
+  accent?: ServiceAccent;
 }
 
-/**
- * ServicePillarCards
- * -----------------------------------------------------------------
- * Eyebrow + headline (left) paired with a supporting intro paragraph
- * (right), then a row of four alternating-color cards — same
- * light/pink/purple/dark accent rotation as
- * ServicesIndustriesStack — each carrying a geometric icon, a "0X"
- * index, and a title. Cards are a single-open accordion (click to
- * reveal that card's description) with the same first-open-by-
- * default, one-at-a-time behavior as ServiceInsights' accordion. An
- * optional closing line sits centered below the grid.
- */
-const PANEL_EASE = "ease-[cubic-bezier(0.77,0,0.175,1)]";
-
-// Background, text color, and icon index rotate through these four
-// looks — light, pink, purple, dark — same as the reference design.
-const CARD_STYLES = [
-  { bg: "bg-white-bg", text: "text-black-text", icon: 0 },
-  { bg: "bg-pink-accent", text: "text-black-text", icon: 6 },
-  { bg: "bg-purple-accent", text: "text-white", icon: 13 },
-  { bg: "bg-[#1A1A1A]", text: "text-white", icon: 1 },
-];
-
-function PillarCard({
-  item,
-  index,
-  isOpen,
-  onToggle,
-}: {
-  item: ServicePillarCardsItem;
-  index: number;
-  isOpen: boolean;
-  onToggle: () => void;
-}) {
-  const style = CARD_STYLES[index % CARD_STYLES.length];
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={isOpen}
-      className={`flex h-full min-h-[320px] flex-col rounded-3xl p-7 text-left transition-colors duration-300 sm:min-h-[360px] sm:p-8 ${style.bg} ${style.text}`}
-    >
-      <GeometricIcon index={style.icon} className="h-8 w-8" />
-
-      <div className="mt-auto">
-        <span className="block text-sm font-medium opacity-60">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <h3 className="mt-2 text-xl leading-snug font-semibold tracking-tight sm:text-2xl">
-          {item.title}
-        </h3>
-
-        <div
-          className={`grid transition-[grid-template-rows,opacity] duration-700 motion-reduce:transition-none ${PANEL_EASE} ${
-            isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div
-              className={`mt-4 border-t pt-4 ${
-                style.text === "text-white"
-                  ? "border-white/20"
-                  : "border-black/10"
-              }`}
-            >
-              <p className="text-sm leading-relaxed font-light opacity-80">
-                {item.description}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
+/** One expanded pillar at a time; descriptions retain their full contrast. */
 export default function ServicePillarCards({
   eyebrow,
   headline,
   intro,
   items,
   closingParagraph,
+  accent = "purple",
 }: ServicePillarCardsProps) {
-  // First card starts open by default, same as ServiceInsights.
+  const tone = SERVICE_ACCENT[accent];
+  const id = useId();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleItem = (index: number) => {
@@ -107,39 +43,77 @@ export default function ServicePillarCards({
   };
 
   return (
-    <section className="bg-black-bg px-10 pt-[80px] pb-[80px]">
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <span aria-hidden="true" className="h-2 w-2 shrink-0 bg-white" />
-            <p className="text-sm leading-none font-light tracking-wide text-white/70 uppercase">
-              {eyebrow}
-            </p>
-          </div>
-          <h2 className="mt-6 text-[32px] leading-[1.15] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
-            {headline}
-          </h2>
-        </div>
+    <section className="bg-black-bg">
+      <ServiceSectionHeader
+        eyebrow={eyebrow}
+        headline={headline}
+        accent={accent}
+        paragraph={intro}
+      />
 
-        <p className="text-[15px] leading-relaxed font-light text-white/60 md:self-start">
-          {intro}
-        </p>
-      </div>
+      <div className="relative mt-12 grid grid-cols-1 border border-white/18 sm:mt-16 lg:grid-cols-2">
+        <GridCorners accent={accent} />
 
-      <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch">
-        {items.map((item, i) => (
-          <PillarCard
-            key={item.title}
-            item={item}
-            index={i}
-            isOpen={openIndex === i}
-            onToggle={() => toggleItem(i)}
-          />
-        ))}
+        {items.map((item, index) => {
+          const isOpen = openIndex === index;
+
+          return (
+            <button
+              key={item.title}
+              type="button"
+              onClick={() => toggleItem(index)}
+              aria-expanded={isOpen}
+              aria-controls={`${id}-pillar-${index}`}
+              data-stagger-hover
+              className={`group relative flex min-h-[200px] flex-col overflow-hidden border-b border-white/18 p-5 text-left last:border-b-0 sm:p-7 lg:[&:nth-child(odd)]:border-r lg:[&:nth-last-child(2)]:border-b-0 ${SERVICE_EASE}`}
+            >
+              <HorizontalStaggerRows />
+
+              <div className="relative flex items-start justify-between gap-4">
+                <span
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center transition-colors duration-500 ${
+                    isOpen
+                      ? `${tone.fill} text-black-bg`
+                      : `border border-white/25 text-content group-hover:border-white/50`
+                  }`}
+                >
+                  <GeometricIcon index={index} className="h-5 w-5" />
+                </span>
+                <span
+                  className={`font-mono text-xs tracking-[0.06em] ${
+                    isOpen ? tone.text : "text-content-muted"
+                  }`}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
+
+              <div className="relative mt-auto pt-8">
+                <h3 className="max-w-[16ch] text-[clamp(1.2rem,1.7vw,1.5rem)] leading-[1.15] font-medium tracking-heading text-white-text">
+                  {item.title}
+                </h3>
+
+                <div
+                  id={`${id}-pillar-${index}`}
+                  aria-hidden={!isOpen}
+                  className={`grid transition-[grid-template-rows] duration-700 motion-reduce:transition-none ${SERVICE_EASE} ${
+                    isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                  }`}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <p className="body-copy mt-4 border-t border-white/20 pt-4 leading-[1.6] text-content">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {closingParagraph && (
-        <p className="mx-auto mt-12 max-w-4xl text-center text-[15px] leading-relaxed font-light text-white/50">
+        <p className="body-copy mt-9 max-w-[76ch] leading-[1.62] text-content">
           {closingParagraph}
         </p>
       )}
