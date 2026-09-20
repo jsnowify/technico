@@ -46,7 +46,7 @@ export default function ServiceInsights({
         <ServiceAccordion
           items={items.map((item) => ({
             title: item.title,
-            body: serviceLinkedText(item.description, item.link),
+            body: renderBody(item.description, item.link),
           }))}
         />
       </div>
@@ -57,4 +57,23 @@ export default function ServiceInsights({
       )}
     </section>
   );
+}
+
+/**
+ * Accordion bodies can hold several paragraphs: separate them with a
+ * blank line ("\n\n") in the description. A description with no blank
+ * line renders exactly as before.
+ */
+function renderBody(
+  description: string,
+  link?: { label: string; href: string },
+) {
+  const paragraphs = description.split("\n\n");
+  if (paragraphs.length === 1) return serviceLinkedText(description, link);
+
+  return paragraphs.map((text, index) => (
+    <span key={index} className={index > 0 ? "mt-4 block" : "block"}>
+      {serviceLinkedText(text, link)}
+    </span>
+  ));
 }

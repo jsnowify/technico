@@ -1,35 +1,5 @@
-/* ================================================================
-   HERO STATS
-   ================================================================
-   Split out of Hero.tsx: the "2.5k+ / Project Completed", "100+ /
-   Happy Client", "5+ / Years Of Experience" stats that used to live
-   in a white bg-white-bg bar at the bottom of the hero section.
-
-   Restyled to match a reference layout (dark, editorial, per-row):
-     - A "H . 00N" mono index kicker on the left of each row.
-     - The stat's number rendered large in the middle, count-up on
-       scroll (via the shared StatCounter component — same
-       count-from-0-on-enter, reset-on-leave, replay-on-re-enter
-       behavior Hero used to do inline, now shared with
-       ServicesMarketStats.tsx instead of duplicated).
-     - The stat's label on the right, short, regular weight/font.
-     - A 0.5px hairline divider between rows (never above the first
-       or below the last) — the reference's between-row rule.
-
-   The reference layout also has a small bracketed annotation next
-   to the number ("{. OF TESTED SYSTEMS }") in addition to the
-   right-side label — that's a third piece of copy per stat the
-   original data doesn't have (Hero only ever had a value + a
-   label), so it's left out here rather than inventing new copy;
-   only the value/label pieces the section already had are kept.
-
-   Section is dark (bg-black-bg) to match the reference and to flow
-   directly out of the hero above it, rather than the previous
-   white-bg-white-bg treatment — Hero.tsx's bottom fade-to-white and
-   the `border-t border-black/5 bg-white-bg` wrapper it used are
-   gone along with the inline stats block.
-   ================================================================ */
-
+import GridCorners from "@/components/ui/GridCorners";
+import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
 import StatCounter from "@/components/services/StatCounter";
 
 const STATS = [
@@ -40,33 +10,39 @@ const STATS = [
 
 export default function HeroStats() {
   return (
-    <section className="bg-black-bg">
-      <div className="container-x mx-auto w-full max-w-360">
-        {STATS.map((stat, i) => (
-          <div key={stat.label}>
-            {i > 0 && (
-              <div
-                aria-hidden="true"
-                className="h-[0.5px] w-full bg-white/15"
-              />
-            )}
+    <section aria-label="Company results" className="bg-black-bg text-white-text">
+      <div className="container-x mx-auto w-full max-w-[1920px] py-10 sm:py-12 md:py-16">
+        <div className="relative border-y border-white/20">
+          <GridCorners />
 
-            <div className="flex flex-col gap-4 py-10 sm:grid sm:grid-cols-[80px_1fr_auto] sm:items-center sm:gap-8 sm:py-14 md:gap-14 md:py-16 lg:gap-20">
-              <span className="font-mono text-xs tracking-[0.14em] text-white/40 uppercase">
-                {`H . 00${i + 1}`}
+          {STATS.map((stat, index) => (
+            <article
+              key={stat.label}
+              data-stagger-hover
+              tabIndex={0}
+              className="group grid min-w-0 grid-cols-[52px_minmax(0,1fr)] overflow-hidden border-b border-white/15 bg-black-bg last:border-b-0 sm:grid-cols-[76px_minmax(0,1fr)_minmax(180px,0.48fr)]"
+            >
+              <HorizontalStaggerRows />
+
+              <span className="relative z-[1] flex items-center justify-center border-r border-white/15 px-2 py-6 font-mono text-[10px] tracking-[0.06em] text-content-muted uppercase sm:py-8 sm:text-xs">
+                H / {String(index + 1).padStart(2, "0")}
               </span>
 
-              <StatCounter
-                value={stat.value}
-                className="text-[clamp(4rem,18vw,6rem)] leading-none font-medium tracking-tight text-white"
-              />
+              <div className="relative z-[1] flex min-w-0 items-center px-5 py-6 sm:px-8 sm:py-8 lg:px-12">
+                <StatCounter
+                  value={stat.value}
+                  className="max-w-full text-[clamp(3.5rem,13vw,8.5rem)] leading-[0.82] font-medium tracking-[-0.075em] text-white-text"
+                />
+              </div>
 
-              <p className="body-copy max-w-56 leading-snug tracking-[-0.02em] text-white uppercase">
-                {stat.label}
-              </p>
-            </div>
-          </div>
-        ))}
+              <div className="relative z-[1] col-span-2 flex min-w-0 items-end border-t border-white/15 px-5 py-5 sm:col-span-1 sm:border-t-0 sm:border-l sm:px-7 sm:py-8 lg:px-10">
+                <p className="body-copy max-w-[20ch] leading-[1.35] tracking-[-0.025em] text-content uppercase">
+                  {stat.label}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

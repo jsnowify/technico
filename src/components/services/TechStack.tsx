@@ -1,9 +1,14 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import {
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, prefersReducedMotion, supportsFinePointer } from "@/lib/gsap";
 import { TECH_STACK, type TrustedBrand } from "@/lib/constants";
+import CursorLabel from "@/components/ui/CursorLabel";
 
 /* ================================================================
    TECH STACK
@@ -15,8 +20,10 @@ import { TECH_STACK, type TrustedBrand } from "@/lib/constants";
    copied here rather than shared because this variant renders a
    different data source (TECH_STACK instead of TRUSTED_BY), adds the
    centered "Technologies We Use To Build Your Website" heading above
-   the strip, and drops the cursor-following "Trusted by" pill, which
-   was specific to that section's copy.
+   the strip, and only renders the cursor-following pill when a
+   `tooltip` label is passed (the graphicDesignWork strip does, the
+   tech-logo strip doesn't). The pill logic is ported from
+   TrustedBy.tsx — see that file for why it fades out during a drag.
 
    LOGOS FORCED WHITE: TECH_STACK's Cloudinary sources are full-color
    brand marks, so each URL (see lib/constants.ts) carries an
@@ -133,16 +140,31 @@ export default function TechStack({
       Build Your Website
     </>
   ),
+  tooltip,
 }: {
   /** Defaults to TECH_STACK. Pass a different array (e.g.
    * GRAPHIC_DESIGN_WORK) to render this same marquee as its own
    * standalone strip instead of mixing items into the tech logos. */
   items?: TrustedBrand[];
   heading?: ReactNode;
+  /** Label for the cursor-following pill over the strip (same pill as
+   * TrustedBy.tsx). Omit for no pill — the default tech-logo strip
+   * doesn't show one. */
+  tooltip?: string;
 }) {
   const track = Array.from({ length: CLONE_COUNT }, () => items).flat();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLSpanElement>(null);
+
+  const movePillXRef = useRef<((value: number) => void) | null>(null);
+  const movePillYRef = useRef<((value: number) => void) | null>(null);
+  const setPillScaleXRef = useRef<((value: number) => void) | null>(null);
+  const setPillScaleYRef = useRef<((value: number) => void) | null>(null);
+  const setPillOpacityRef = useRef<((value: number) => void) | null>(null);
+
+  const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
+  const followCursorRafRef = useRef<number | null>(null);
 
   // Motion state. `xRef` is what's actually rendered; `targetXRef` is
   // what it's chasing this frame (see the big doc comment above for
@@ -166,6 +188,58 @@ export default function TechStack({
   const dragActivationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+
+  const setPillScale = (value: number) => {
+    setPillScaleXRef.current?.(value);
+    setPillScaleYRef.current?.(value);
+  };
+
+  const clampPillPosition = (x: number, y: number, wrapperRect: DOMRect) => {
+    const pill = pillRef.current;
+    if (!pill) return { x, y };
+
+    const halfWidth = pill.offsetWidth / 2;
+    const halfHeight = pill.offsetHeight / 2;
+
+    return {
+      x: Math.min(Math.max(x, halfWidth), wrapperRect.width - halfWidth),
+      y: Math.min(Math.max(y, halfHeight), wrapperRect.height - halfHeight),
+    };
+  };
+
+  // Brings the pill back once a drag/coast hands control back, using
+  // the last pointer position handlePointerMove recorded. A fast flick
+  // can end with the pointer outside the wrapper entirely, so this
+  // re-checks bounds rather than assuming "still hovering".
+  const restorePillNearPointer = () => {
+    const pending = pendingPointerRef.current;
+    if (
+      prefersReducedMotion ||
+      !supportsFinePointer ||
+      !pending ||
+      !wrapperRef.current ||
+      !pillRef.current
+    ) {
+      return;
+    }
+
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const withinBounds =
+      pending.x >= rect.left &&
+      pending.x <= rect.right &&
+      pending.y >= rect.top &&
+      pending.y <= rect.bottom;
+    if (!withinBounds) return;
+
+    const { x, y } = clampPillPosition(
+      pending.x - rect.left,
+      pending.y - rect.top,
+      rect,
+    );
+    gsap.set(pillRef.current, { x, y });
+    setPillScale(1);
+    setPillOpacityRef.current?.(1);
+  };
 
   useGSAP(() => {
     const track = trackRef.current;
@@ -333,6 +407,15 @@ export default function TechStack({
       // landed, a jump right at the start of the gesture.
       targetXRef.current = xRef.current;
       track.style.cursor = "grabbing";
+
+      // Drop the cursor-pill for the duration of the gesture — see
+      // TrustedBy.tsx for why. No-ops when there's no pill.
+      if (followCursorRafRef.current !== null) {
+        cancelAnimationFrame(followCursorRafRef.current);
+        followCursorRafRef.current = null;
+      }
+      setPillOpacityRef.current?.(0);
+      setPillScale(0.4);
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -424,6 +507,7 @@ export default function TechStack({
         velocityRef.current = 0;
       }
       setCardScale(1);
+      restorePillNearPointer();
     };
 
     track.addEventListener("pointerdown", onPointerDown);
@@ -516,6 +600,132 @@ export default function TechStack({
     };
   }, []);
 
+  useGSAP(() => {
+    const pill = pillRef.current;
+    if (!pill || prefersReducedMotion || !supportsFinePointer) return;
+
+    gsap.set(pill, {
+      xPercent: -50,
+      yPercent: -50,
+      scaleX: 0.4,
+      scaleY: 0.4,
+      opacity: 0,
+    });
+    pill.style.willChange = "transform";
+
+    movePillXRef.current = gsap.quickTo(pill, "x", {
+      duration: 0.5,
+      ease: "power3.out",
+    });
+    movePillYRef.current = gsap.quickTo(pill, "y", {
+      duration: 0.5,
+      ease: "power3.out",
+    });
+    setPillScaleXRef.current = gsap.quickTo(pill, "scaleX", {
+      duration: 0.55,
+      ease: "power3.out",
+    });
+    setPillScaleYRef.current = gsap.quickTo(pill, "scaleY", {
+      duration: 0.55,
+      ease: "power3.out",
+    });
+    setPillOpacityRef.current = gsap.quickTo(pill, "opacity", {
+      duration: 0.18,
+      ease: "power1.out",
+    });
+
+    return () => {
+      movePillXRef.current = null;
+      movePillYRef.current = null;
+      setPillScaleXRef.current = null;
+      setPillScaleYRef.current = null;
+      setPillOpacityRef.current = null;
+      gsap.killTweensOf(pill);
+      pill.style.willChange = "auto";
+      if (followCursorRafRef.current !== null) {
+        cancelAnimationFrame(followCursorRafRef.current);
+        followCursorRafRef.current = null;
+      }
+      pendingPointerRef.current = null;
+    };
+  }, []);
+
+  const handlePointerEnter = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (
+      prefersReducedMotion ||
+      !supportsFinePointer ||
+      event.pointerType !== "mouse" ||
+      !wrapperRef.current ||
+      !pillRef.current
+    ) {
+      return;
+    }
+
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const { x, y } = clampPillPosition(
+      event.clientX - rect.left,
+      event.clientY - rect.top,
+      rect,
+    );
+    gsap.set(pillRef.current, { x, y });
+    setPillScale(1);
+    setPillOpacityRef.current?.(1);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (
+      prefersReducedMotion ||
+      !supportsFinePointer ||
+      event.pointerType !== "mouse" ||
+      !pillRef.current
+    ) {
+      return;
+    }
+
+    pendingPointerRef.current = { x: event.clientX, y: event.clientY };
+    // Cheap to keep updated even mid-drag (restorePillNearPointer
+    // needs it), but the getBoundingClientRect()/quickTo() work below
+    // is what a live drag doesn't need competing for its frame
+    // budget — activateDrag already faded the pill out.
+    if (isDraggingRef.current || followCursorRafRef.current !== null) return;
+
+    followCursorRafRef.current = requestAnimationFrame(() => {
+      followCursorRafRef.current = null;
+
+      const pending = pendingPointerRef.current;
+      if (
+        !pending ||
+        !wrapperRef.current ||
+        !movePillXRef.current ||
+        !movePillYRef.current
+      ) {
+        return;
+      }
+
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const { x, y } = clampPillPosition(
+        pending.x - rect.left,
+        pending.y - rect.top,
+        rect,
+      );
+      movePillXRef.current(x);
+      movePillYRef.current(y);
+    });
+  };
+
+  const handlePointerLeave = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (
+      prefersReducedMotion ||
+      !supportsFinePointer ||
+      event.pointerType !== "mouse"
+    ) {
+      return;
+    }
+
+    setPillScale(0.4);
+    setPillOpacityRef.current?.(0);
+  };
+
   return (
     <section className="bg-black-bg px-6 pb-14 sm:px-8 sm:pb-16 md:px-10 md:pb-20">
       <h2 className="text-center text-[32px] leading-[1.2] font-medium tracking-tight text-white sm:text-[40px] md:text-[44px]">
@@ -524,6 +734,9 @@ export default function TechStack({
 
       <div
         ref={wrapperRef}
+        onPointerEnter={handlePointerEnter}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
         className="relative mt-14 overflow-hidden sm:mt-16 md:mt-20"
         style={{
           WebkitMaskImage:
@@ -564,6 +777,18 @@ export default function TechStack({
             </div>
           ))}
         </div>
+
+        {/* Cursor-following pill — only when a `tooltip` label is
+            passed. pointer-events-none (via CursorLabel) so it never
+            steals the hover/move events off the wrapper. */}
+        {tooltip ? (
+          <CursorLabel
+            ref={pillRef}
+            className="absolute top-0 left-0 z-10 opacity-0"
+          >
+            {tooltip}
+          </CursorLabel>
+        ) : null}
       </div>
     </section>
   );

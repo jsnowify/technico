@@ -18,66 +18,71 @@ const CONNECT_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#d9d9d9] text-black">
-      {/* WORDMARK */}
-      <div className="border-b border-black/10 px-6 pb-10 pt-16 text-center md:px-10 md:pt-20 lg:px-12">
+    <footer className="sticky bottom-0 z-0 h-[100svh] overflow-hidden bg-[#d9d9d9] text-black">
+      <div className="container-x mx-auto flex h-[100svh] w-full max-w-[1920px] flex-col pt-[clamp(80px,9svh,108px)] pb-4 sm:pb-5">
+        <div className="grid grid-cols-2 gap-x-4 border-b border-black/20 pb-4 font-mono text-[9px] tracking-[0.05em] text-black/55 uppercase sm:grid-cols-3 sm:text-xs">
+          <span>TECHNICO_</span>
+          <span className="hidden text-center sm:block">DIGITAL SOLUTIONS</span>
+          <span className="text-right">FOOTER / 00</span>
+        </div>
+
+        <div className="grid flex-1 grid-cols-1 content-center gap-4 py-4 sm:gap-8 sm:py-7 lg:grid-cols-[minmax(0,0.8fr)_minmax(280px,1.2fr)_minmax(0,0.8fr)] lg:items-center lg:gap-8">
+          <div className="min-w-0 border-t border-black/15 pt-3 lg:border-t-0 lg:pt-0">
+            <p className="mb-3 font-mono text-[10px] tracking-[0.12em] text-black/45 uppercase">
+              Navigation
+            </p>
+            <nav
+              className="flex flex-col items-start gap-1.5 sm:gap-2.5"
+              aria-label="Footer navigation"
+            >
+              {NAV_LINKS.map((item) => (
+                <NavLink
+                  key={item.href}
+                  to={item.href}
+                  label={item.label.toUpperCase()}
+                  className="text-xs font-medium hover:text-[var(--color-accent-dark)] sm:text-sm"
+                />
+              ))}
+            </nav>
+          </div>
+
+          <div className="min-w-0 border-y border-black/15 py-4 sm:py-6 lg:border-x lg:border-y-0 lg:px-8 lg:py-10">
+            <p className="mx-auto max-w-[42ch] text-xs leading-[1.6] text-black/65 sm:text-sm sm:leading-[1.65] lg:mx-0 lg:text-base">
+              Our expertise lies in leveraging the latest technology to assist
+              you in scaling your businesses, whether through generating more
+              appointments or driving increased sales.
+            </p>
+          </div>
+
+          <div className="min-w-0 lg:text-right">
+            <p className="mb-3 font-mono text-[10px] tracking-[0.12em] text-black/45 uppercase">
+              Connect
+            </p>
+            <div className="flex flex-col items-start gap-1.5 sm:gap-2.5 lg:items-end">
+              {CONNECT_LINKS.map((item) => (
+                <NavLink
+                  key={item.label}
+                  href={item.href}
+                  label={item.label.toUpperCase()}
+                  className="max-w-full text-xs font-medium break-all hover:text-[var(--color-accent-dark)] sm:text-sm"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5 border-t border-black/20 py-3 font-mono text-[9px] tracking-[0.06em] text-black/45 uppercase sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:text-[10px]">
+          <p>© {new Date().getFullYear()} Technico Solutions Inc.</p>
+          <p>All rights reserved.</p>
+        </div>
+
         <TransitionLink
           to="/"
-          className="inline-block text-[clamp(3.5rem,11vw,9rem)] font-black uppercase leading-[0.85] tracking-[-0.04em]"
+          aria-label="Technico home"
+          className="block border-t border-black/20 pt-4 text-[clamp(3.5rem,13vw,14rem)] leading-[0.92] font-black tracking-[-0.095em] uppercase focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-black"
         >
           Technico
         </TransitionLink>
-      </div>
-
-      {/* NAVIGATION / DESCRIPTION / CONNECT */}
-      <div className="grid gap-10 border-b border-black/10 px-6 py-10 text-center md:px-10 md:py-14 lg:grid-cols-3 lg:gap-6 lg:px-12 lg:text-left">
-        <div>
-          <p className="mb-5 font-mono text-[10px] uppercase tracking-[0.15em] text-black/45">
-            Navigation
-          </p>
-
-          <nav className="flex flex-col items-center gap-3 lg:items-start">
-            {NAV_LINKS.map((item) => (
-              <NavLink
-                key={item.href}
-                to={item.href}
-                label={item.label.toUpperCase()}
-                className="text-sm font-medium hover:text-[var(--color-accent)]"
-              />
-            ))}
-          </nav>
-        </div>
-
-        <div className="flex items-center justify-center lg:px-4">
-          <p className="max-w-xs text-sm leading-relaxed text-black/60">
-            Our expertise lies in leveraging the latest technology to assist you
-            in scaling your businesses, whether through generating more
-            appointments or driving increased sales.
-          </p>
-        </div>
-
-        <div>
-          <p className="mb-5 font-mono text-[10px] uppercase tracking-[0.15em] text-black/45 lg:text-right">
-            Connect
-          </p>
-
-          <div className="flex flex-col items-center gap-3 lg:items-end">
-            {CONNECT_LINKS.map((item) => (
-              <NavLink
-                key={item.label}
-                href={item.href}
-                label={item.label.toUpperCase()}
-                className="text-sm font-medium hover:text-[var(--color-accent)]"
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* LEGAL */}
-      <div className="flex flex-col gap-4 px-6 py-6 font-mono text-[10px] uppercase tracking-[0.08em] text-black/40 sm:flex-row sm:items-center sm:justify-between md:px-10 lg:px-12">
-        <p>© {new Date().getFullYear()} Technico Solutions Inc.</p>
-        <p>All rights reserved.</p>
       </div>
     </footer>
   );

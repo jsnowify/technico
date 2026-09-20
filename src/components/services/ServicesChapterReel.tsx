@@ -46,33 +46,33 @@ const CHAPTERS: ChapterData[] = [
     label: "Industries We Serve",
     headingLines: ["Industries We", "Know"],
     quote:
-      "Your digital marketing engagement should give you more than a list of services. Depending on your business's needs, Technico Digital Solutions can bring together SEO, website development, content, paid advertising, social media, and email marketing to align with your business goals. That can include:",
+      "We’ve worked across industries where the customer journey, competition, and conversion goals can look very different. That experience includes:",
     secondary:
       "This range gives our digital marketers experience with different goals — from generating local service leads and appointment requests to supporting ecommerce sales and multi-location visibility. For a local service company, that may mean being discovered when customers search for a nearby service. For a multi-location business, it can mean building visibility across several cities without losing the relevance of each individual location. For ecommerce businesses, the focus shifts toward attracting shoppers and moving them from discovery to purchase.",
     items: [
       {
         title: "Construction & Home Services",
-        desc: "Builders, renovation contractors, drywall and steel stud framing, electrical, solar, painting, fencing, decking, concrete, and other trades",
+        desc: "Builders, renovation contractors, drywall and steel stud framing, electrical, solar, painting, fencing, decking, concrete, and other trades.",
       },
       {
         title: "Healthcare & Wellness",
-        desc: "Dental clinics, physiotherapy and rehabilitation, wellness, and aesthetics",
+        desc: "Dental clinics, physiotherapy and rehabilitation, wellness, and aesthetics.",
       },
       {
         title: "Legal Services",
-        desc: "Personal injury and family law",
+        desc: "Personal injury and family law.",
       },
       {
         title: "Automotive & Transportation",
-        desc: "Car rentals, detailing, limousine, and transportation services",
+        desc: "Car rentals, detailing, limousine, and transportation services.",
       },
       {
         title: "Retail & Ecommerce",
-        desc: "Online stores and multi-location retail businesses",
+        desc: "Online stores and multi-location retail businesses.",
       },
       {
         title: "Renewable Energy & Technology",
-        desc: "Solar energy and security businesses",
+        desc: "Solar energy and security businesses.",
       },
     ],
   },
@@ -100,7 +100,9 @@ const CHAPTERS: ChapterData[] = [
     label: "What You Get",
     headingLines: ["What Do You Get, Working", "With Technico?"],
     quote:
-      "We\u2019ve worked across industries where the customer journey, competition, and conversion goals can look very different. That experience includes:",
+      "Your digital marketing engagement should give you more than a list of services. Depending on your business’s needs, Technico Digital Solutions can bring together SEO, website development, content, paid advertising, social media, and email marketing to align with your business goals. That can include:",
+    secondary:
+      "This gives the reader a much stronger “what do I actually receive?” answer than simply saying Technico offers SEO, PPC, social, etc.",
     items: [
       {
         title: "Research and Audits",
@@ -133,7 +135,7 @@ const CHAPTERS: ChapterData[] = [
     label: "One Strategy",
     headingLines: ["One Strategy, Even If You", "Need More Than One Channel"],
     quote:
-      "Technico isn\u2019t being positioned only as an SEO provider or advertising agency. Its existing services cover the wider customer journey, from helping people find a business through search and advertising to providing a website and content that support conversion, and then using social and email to continue the relationship.",
+      "The strongest differentiator available from the material we currently have is the breadth of real client situations. Technico isn\u2019t being positioned only as an SEO provider or advertising agency. Its existing services cover the wider customer journey, from helping people find a business through search and advertising to providing a website and content that support conversion, and then using social and email to continue the relationship.",
     secondary:
       "For businesses operating across several locations, that approach can also adapt to different markets rather than treating every location as identical. The result is a digital strategy built around where your customers are, how they find you, and what needs to happen next to turn that visibility into leads, bookings, or sales.",
   },

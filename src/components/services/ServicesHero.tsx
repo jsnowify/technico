@@ -371,7 +371,8 @@ export default function ServicesHero() {
         >
           <a
             href="#services-gallery-heading"
-            data-cursor="highlight"
+            data-cursor="circle"
+            data-cursor-label="Explore services"
             className="inline-flex min-h-9 shrink-0 items-center gap-3 transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black-bg sm:gap-6"
           >
             EXPLORE SERVICES <span aria-hidden="true">↓</span>

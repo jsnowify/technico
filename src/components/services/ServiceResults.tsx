@@ -40,6 +40,8 @@ function renderWithLink(text: string, link?: { label: string; href: string }) {
         href={link.href}
         target="_blank"
         rel="noopener noreferrer"
+        data-cursor="circle"
+        data-cursor-label="Explore"
         className="text-white-text underline decoration-1 underline-offset-4 hover:text-content"
       >
         {link.label}

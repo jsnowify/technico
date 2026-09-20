@@ -4,6 +4,7 @@ import BlogTable, {
   BlogDataTable,
 } from "@/components/blog/BlogTable";
 import BlogAccordion from "@/components/blog/BlogAccordion";
+import { renderInlineText } from "@/components/blog/renderInlineText";
 import Cta from "@/components/ui/CTA";
 import type { BlogBodyBlock } from "@/lib/content/types";
 
@@ -50,7 +51,7 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
           className="body-copy list-disc space-y-2 pl-5 leading-[1.7] text-content"
         >
           {block.items.map((item, j) => (
-            <li key={j}>{item}</li>
+            <li key={j}>{renderInlineText(item)}</li>
           ))}
         </ul>
       );
@@ -112,7 +113,7 @@ export function renderBlogBlock(block: BlogBodyBlock, key: number | string) {
     default:
       return (
         <p key={key} className="body-copy leading-[1.75] text-content">
-          {block.text}
+          {renderInlineText(block.text)}
         </p>
       );
   }

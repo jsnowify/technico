@@ -49,17 +49,28 @@ export default function ServicesMarketOverview() {
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:gap-12">
             <h2 className="h2-section max-w-[21ch] leading-[1.08] font-medium tracking-heading text-white">
-              Turn digital attention into qualified leads and measurable growth.
+              Join the growing number of clients who trust Technico Digital
+              Solutions.
             </h2>
 
             <p className="body-copy max-w-[54ch] leading-[1.65] tracking-[-0.02em] text-content">
-              Technico Digital Solutions provides digital marketing services for
-              businesses seeking to improve search visibility, reach qualified
-              audiences, generate leads, and convert more online interactions
-              into customers. We support healthcare, legal, automotive,
-              renewable energy, construction, electrical, home improvement, and
-              other local service industries through campaigns built around
-              measurable business goals.
+              Technico Digital Solutions provides{" "}
+              <Link
+                href="https://technicosolutions.com/services/"
+                data-cursor="circle"
+                data-cursor-label="Explore"
+                className="text-purple-secondary underline decoration-1 underline-offset-2 transition-colors duration-300 hover:text-purple-accent"
+              >
+                digital marketing services
+              </Link>{" "}
+              for businesses seeking to improve search visibility, reach
+              qualified audiences, generate leads, and convert more online
+              interactions into customers. Our digital experts support
+              businesses across healthcare and dental, legal services,
+              automotive, solar and renewable energy, construction, electrical,
+              home improvement, and other local service industries through SEO,
+              paid advertising, web design and development, content, and digital
+              campaigns built around measurable business goals.
             </p>
           </div>
         </header>
@@ -118,7 +129,8 @@ export default function ServicesMarketOverview() {
               key={channel.label}
               href={channel.href}
               aria-label={`Explore ${channel.label} services`}
-              data-cursor="highlight"
+              data-cursor="circle"
+              data-cursor-label={`Explore ${channel.label}`}
               className={`group relative aspect-[4/3] min-h-[220px] overflow-hidden bg-black-bg sm:aspect-square ${
                 index === CHANNELS.length - 1
                   ? "sm:col-span-2 lg:col-span-1"

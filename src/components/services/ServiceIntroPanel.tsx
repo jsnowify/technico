@@ -48,6 +48,8 @@ function renderParagraphText(
       {text.slice(0, idx)}
       <Link
         href={link.href}
+        data-cursor="circle"
+        data-cursor-label="Explore"
         className="text-white-text underline decoration-1 underline-offset-4 hover:text-content"
       >
         {link.label}

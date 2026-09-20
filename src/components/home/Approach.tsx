@@ -1,6 +1,44 @@
 import { APPROACH_STEPS } from "@/lib/constants";
 import PixelRevealImage from "./PixelRevealImage";
 
+/**
+ * Inline links inside a step description, keyed by the step's title.
+ * `label` must appear verbatim in that step's description text.
+ */
+const DESCRIPTION_LINKS: Record<string, { label: string; href: string }> = {
+  "Test, Run, Optimize": {
+    label: "key performance indicators",
+    href: "https://www.kpi.org/kpi-basics/",
+  },
+};
+
+function renderDescription(
+  text: string,
+  link?: { label: string; href: string },
+) {
+  if (!link) return text;
+
+  const index = text.indexOf(link.label);
+  if (index === -1) return text;
+
+  return (
+    <>
+      {text.slice(0, index)}
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="circle"
+        data-cursor-label="Explore"
+        className="text-purple-secondary underline decoration-1 underline-offset-2 transition-colors duration-300 hover:text-purple-accent"
+      >
+        {link.label}
+      </a>
+      {text.slice(index + link.label.length)}
+    </>
+  );
+}
+
 export default function Approach() {
   return (
     <section id="approach" className="bg-black-bg text-white">
@@ -18,8 +56,7 @@ export default function Approach() {
             <p className="body-copy max-w-[48ch] leading-[1.6] tracking-[-0.02em] text-content uppercase lg:pt-1">
               We give you a tailored digital marketing strategy to boost
               appointments, optimize ad performance, enhance SEO efforts, and
-              streamline client management for maximum growth and
-              profitability.
+              streamline client management for maximum growth and profitability.
             </p>
           </div>
         </header>
@@ -48,7 +85,8 @@ export default function Approach() {
                   <figcaption className="absolute inset-0 flex items-start justify-between gap-5 p-5 font-mono text-[10px] tracking-[0.08em] text-white uppercase sm:p-7 sm:text-xs lg:p-8">
                     <span>/ Process {number}</span>
                     <span className="text-right text-white/60">
-                      {step.step} — {String(APPROACH_STEPS.length).padStart(2, "0")}
+                      {step.step} —{" "}
+                      {String(APPROACH_STEPS.length).padStart(2, "0")}
                     </span>
                   </figcaption>
                 </figure>
@@ -64,7 +102,10 @@ export default function Approach() {
                   </h3>
 
                   <p className="body-copy mt-5 max-w-[62ch] leading-[1.65] tracking-[-0.02em] text-content">
-                    {step.description}
+                    {renderDescription(
+                      step.description,
+                      DESCRIPTION_LINKS[step.title],
+                    )}
                   </p>
                 </div>
               </article>

@@ -73,6 +73,8 @@ function renderHeroParagraph({
       {text.slice(0, idx)}
       <Link
         href={link.href}
+        data-cursor="circle"
+        data-cursor-label="Explore"
         className="text-content underline decoration-1 underline-offset-4 hover:text-accent-light"
       >
         {link.label}
@@ -259,6 +261,7 @@ export default async function ServiceDetailPage({
                     key={index}
                     title={section.title}
                     description={section.description}
+                    descriptionLink={section.descriptionLink}
                     cta={section.cta}
                     wide={section.wide}
                     className={
@@ -278,6 +281,7 @@ export default async function ServiceDetailPage({
                     accent={accent}
                     cta={section.cta}
                     subheading={section.subheading}
+                    closingParagraph={section.closingParagraph}
                   />
                 );
 
@@ -444,6 +448,7 @@ export default async function ServiceDetailPage({
                   <TechStack
                     key={index}
                     items={GRAPHIC_DESIGN_WORK}
+                    tooltip="Our work"
                     heading={
                       <>
                         Our Recent

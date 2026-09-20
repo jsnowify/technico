@@ -211,7 +211,7 @@ export default function Header({ services }: HeaderProps) {
         className={`${styles.header} pointer-events-none fixed inset-x-0 top-0 z-[110] isolate w-full px-[var(--container-gutter)] pt-4 lg:pt-5`}
         aria-label="Site header"
       >
-        <div className="pointer-events-auto relative mx-auto flex min-h-16 w-full max-w-[1920px] items-start lg:h-12 lg:min-h-0">
+        <div className="pointer-events-auto relative mx-auto flex h-16 w-full max-w-[1920px] items-start lg:h-12">
           <span
             aria-hidden="true"
             className="pointer-events-none absolute -left-[var(--container-gutter)] -right-[var(--container-gutter)] top-12 z-50 hidden border-t border-dashed border-[#9b9b9b]/70 lg:block"
@@ -353,15 +353,7 @@ export default function Header({ services }: HeaderProps) {
                     className="group/view-all flex min-h-12 items-center justify-between border-b border-black/25 font-mono text-[14px] font-bold uppercase tracking-[-0.045em] transition-opacity hover:opacity-60"
                   >
                     <span className={styles.serviceHeading}>+ SERVICES</span>
-                    <span className="flex items-center gap-2">
-                      VIEW ALL
-                      <span
-                        aria-hidden="true"
-                        className="transition-transform duration-500 ease-out group-hover/view-all:translate-x-1.5"
-                      >
-                        &rarr;
-                      </span>
-                    </span>
+                    <span>VIEW ALL</span>
                   </Link>
 
                   {services.map((service, index) => (
@@ -396,7 +388,7 @@ export default function Header({ services }: HeaderProps) {
             </Link>
           </div>
 
-          <div className="pointer-events-auto relative z-[120] ml-auto flex h-12 items-center bg-[var(--header-paper)] px-2 text-black lg:hidden">
+          <div className="pointer-events-auto relative z-[120] ml-auto flex h-16 w-16 items-center justify-center bg-[var(--header-paper)] text-black lg:hidden">
             <MobileMenuButton
               open={mobileOpen}
               onClick={() => {
@@ -434,7 +426,7 @@ function ServiceRow({ service, index }: { service: Service; index: number }) {
       onPointerLeave={() => setActive(false)}
       onFocus={() => setActive(true)}
       onBlur={() => setActive(false)}
-      className="group relative isolate grid min-h-[70px] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-3 overflow-hidden border-b border-black/15 px-2 py-3 font-mono uppercase last:border-b-0"
+      className="group relative isolate grid min-h-[70px] grid-cols-[32px_minmax(0,1fr)] items-center gap-x-3 overflow-hidden border-b border-black/15 px-2 py-3 font-mono uppercase last:border-b-0"
     >
       <HorizontalStagger
         active={active}
@@ -451,12 +443,6 @@ function ServiceRow({ service, index }: { service: Service; index: number }) {
         <span className="mt-1.5 block text-[12px] font-normal leading-[1.35] tracking-[-0.035em] text-black/65">
           {service.shortDescription}
         </span>
-      </span>
-      <span
-        aria-hidden="true"
-        className="relative z-10 text-xl transition-transform duration-500 ease-out group-hover:translate-x-1.5"
-      >
-        &rarr;
       </span>
     </Link>
   );

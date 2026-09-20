@@ -16,25 +16,25 @@ export default function MobileMenuButton({
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
       aria-controls="mobile-header-menu"
-      className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden"
+      className="group relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-black"
     >
       <span
-        className={`absolute h-px bg-current transition-[width,transform] duration-700 [transition-timing-function:cubic-bezier(.16,1,.3,1)] ${
+        className={`absolute h-px w-6 bg-current transition-[transform,width] duration-500 [transition-timing-function:cubic-bezier(.22,.8,.22,1)] motion-reduce:transition-none ${
           open
-            ? "w-5 translate-x-1 -translate-y-[5px]"
-            : "w-6 translate-x-0 -translate-y-[5px]"
+            ? "translate-y-0 rotate-45"
+            : "-translate-y-[6px] rotate-0"
         }`}
       />
       <span
-        className={`absolute h-px bg-current transition-[width,transform] delay-75 duration-700 [transition-timing-function:cubic-bezier(.16,1,.3,1)] ${
-          open ? "w-4 -translate-x-1" : "w-6 translate-x-0"
+        className={`absolute h-px bg-current transition-[transform,opacity,width] duration-300 [transition-timing-function:cubic-bezier(.22,.8,.22,1)] motion-reduce:transition-none ${
+          open ? "w-0 translate-x-3 opacity-0" : "w-6 translate-x-0 opacity-100"
         }`}
       />
       <span
-        className={`absolute h-px bg-current transition-[width,transform] delay-150 duration-700 [transition-timing-function:cubic-bezier(.16,1,.3,1)] ${
+        className={`absolute h-px w-6 bg-current transition-[transform,width] duration-500 [transition-timing-function:cubic-bezier(.22,.8,.22,1)] motion-reduce:transition-none ${
           open
-            ? "w-5 translate-x-1 translate-y-[5px]"
-            : "w-6 translate-x-0 translate-y-[5px]"
+            ? "translate-y-0 -rotate-45"
+            : "translate-y-[6px] rotate-0"
         }`}
       />
     </button>

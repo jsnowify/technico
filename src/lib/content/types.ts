@@ -14,8 +14,20 @@ export type BlogContentBlock =
       id: string;
       text: string;
     }
-  | { type: "paragraph"; text: string }
-  | { type: "list"; items: string[] }
+  | {
+      /**
+       * Body copy. Supports inline links written as
+       * `[anchor text](https://example.com)` — see
+       * components/blog/renderInlineText.tsx.
+       */
+      type: "paragraph";
+      text: string;
+    }
+  | {
+      /** Bullet list. Each item supports the same inline-link syntax as "paragraph". */
+      type: "list";
+      items: string[];
+    }
   | {
       /**
        * Sub-section heading (renders as h3) — for headings inside a
@@ -206,6 +218,9 @@ export type ServiceSection =
       type: "cta";
       title: string;
       description: string;
+      /** Optional inline link inside `description` — `label` must be an
+       * exact substring of `description`. See components/ui/CTA.tsx. */
+      descriptionLink?: { label: string; href: string };
       cta: { label: string; href: string };
       /** Wider two-column layout variant — see components/ui/CTA.tsx. */
       wide?: boolean;
@@ -236,8 +251,12 @@ export type ServiceSection =
         icon: number;
         title: string;
         description: string;
+        /** Optional inline link inside `description` — `label` must be an
+         * exact substring of `description`. Renders as an external link. */
+        link?: { label: string; href: string };
       }[];
-      /** Optional CTA rendered beside the headline — ignored if `paragraph` is set. */
+      /** Optional CTA rendered beside the headline. Hidden when `paragraph` is
+       * set, unless `cta` is passed explicitly — then both are shown. */
       cta?: { label: string; href: string };
       /**
        * Optional second heading + paragraph rendered directly above
@@ -251,6 +270,12 @@ export type ServiceSection =
        * introduces the items (the common case).
        */
       subheading?: { title: string; paragraph: string };
+      /**
+       * Optional paragraph rendered below the items grid — for copy
+       * that wraps up the whole list (e.g. "These channels can work
+       * separately or as part of one media buying strategy...").
+       */
+      closingParagraph?: string;
     }
   | {
       type: "conversion";
@@ -261,6 +286,10 @@ export type ServiceSection =
         text: string;
         /** Substring of `text` to underline, e.g. "Conversion Rate Optimization". */
         emphasis?: string;
+        /** Optional inline link inside `text` — `label` must be an exact
+         * substring of `text`. Renders as an external link (new tab);
+         * use instead of `emphasis`, not alongside it. */
+        link?: { label: string; href: string };
       }[];
     }
   | {
@@ -454,12 +483,25 @@ export type ServiceSection =
       type: "featuresSplit";
       eyebrow: string;
       headline: string;
-      paragraphs: string[];
+      paragraphs: (
+        | string
+        | {
+            text: string;
+            /** Optional inline link inside `text` — `label` must be an
+             * exact substring of `text`. Renders as an external link
+             * (new tab). */
+            link?: { label: string; href: string };
+          }
+      )[];
       listHeading: string;
       items: {
         text: string;
         /** Substring of `text` to underline. */
         emphasis?: string;
+        /** Optional inline link inside `text` — `label` must be an exact
+         * substring of `text`. Renders as an external link; use instead of
+         * `emphasis`. */
+        link?: { label: string; href: string };
       }[];
       /** Optional — omit to leave that space blank, as before. */
       image?: { src: string; alt: string };
@@ -477,6 +519,7 @@ export type ServiceSection =
       type: "featureCard";
       eyebrow: string;
       headline: string;
+      /** Separate paragraphs with a blank line ("\n\n"). */
       paragraph: string;
       image: { src: string; alt: string };
       cta: { label: string; href: string };
@@ -512,7 +555,16 @@ export type ServiceSection =
        * before `closingParagraph`, if present) — e.g. "Grow With
        * Your Business"'s solar/e-commerce/service-business examples.
        * No-CTA variant only in practice; keep each item to a line or two. */
-      bullets?: string[];
+      bullets?: (
+        | string
+        | {
+            text: string;
+            /** Optional inline link inside `text` — `label` must be an
+             * exact substring of `text`. Renders as an external link
+             * (new tab). */
+            link?: { label: string; href: string };
+          }
+      )[];
       /** Optional paragraph rendered after `bullets`, for copy that
        * continues past the list (e.g. a closing wrap-up sentence). */
       closingParagraph?: string;

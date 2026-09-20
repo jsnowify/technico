@@ -1,4 +1,5 @@
 import type { BlogBodyBlock, BlogContentBlock } from "@/lib/content/types";
+import { stripInlineLinks } from "./inline-links";
 
 /**
  * Words contributed by a single block, recursing into "accordion"
@@ -44,6 +45,7 @@ export function estimateReadingTime(
 ): string {
   const wordCount = blocks
     .flatMap(blockWords)
+    .map(stripInlineLinks)
     .join(" ")
     .trim()
     .split(/\s+/)

@@ -5,6 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion, supportsFinePointer } from "@/lib/gsap";
 import { TRUSTED_BY } from "@/lib/constants";
+import CursorLabel from "@/components/ui/CursorLabel";
 
 /* ================================================================
    TRUSTED BY
@@ -764,12 +765,12 @@ export default function TrustedBy() {
         {/* Cursor-following "Trusted by" pill — see doc comment above.
             pointer-events-none so it never steals the hover/move
             events it depends on off the wrapper itself. */}
-        <span
+        <CursorLabel
           ref={pillRef}
-          className="pointer-events-none absolute top-0 left-0 z-10 rounded-[3px] bg-white px-4 py-2 font-mono text-xs tracking-[0.14em] text-black-text uppercase whitespace-nowrap opacity-0"
+          className="absolute top-0 left-0 z-10 opacity-0"
         >
           Trusted by
-        </span>
+        </CursorLabel>
       </div>
     </section>
   );

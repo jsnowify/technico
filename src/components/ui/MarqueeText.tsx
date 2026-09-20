@@ -258,6 +258,7 @@ export default function MarqueeText({
             to={cta.href}
             aria-label={cta.label}
             data-cursor="circle"
+            data-cursor-label={cta.label}
             data-cursor-accent={accent}
             className="group flex w-full flex-col gap-6 sm:gap-8"
           >

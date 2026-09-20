@@ -17,10 +17,16 @@ interface ServiceHighlightsProps {
     icon: number;
     title: string;
     description: string;
+    /** Optional inline link inside `description` (external, new tab). */
+    link?: { label: string; href: string };
   }[];
   /** "pink" | "purple" — matches getServiceAccent(), same as the hero badge. */
   accent: ServiceAccent;
-  /** Optional CTA rendered beside the headline — defaults to /contact. Ignored if `paragraph` is set. */
+  /**
+   * Optional CTA rendered beside the headline — defaults to /contact.
+   * Hidden when `paragraph` is set, unless `cta` is passed explicitly,
+   * in which case the paragraph and the button are shown together.
+   */
   cta?: { label: string; href: string };
   /**
    * Optional second heading + paragraph rendered directly above the
@@ -28,6 +34,12 @@ interface ServiceHighlightsProps {
    * lib/content/types.ts for when to use this.
    */
   subheading?: { title: string; paragraph: string };
+  /**
+   * Optional paragraph rendered below the items grid — see
+   * ServiceSection["highlights"]["closingParagraph"] in
+   * lib/content/types.ts.
+   */
+  closingParagraph?: string;
 }
 
 /** Numbered capability rows; spacing is owned by ServiceSectionFrame. */
@@ -37,10 +49,13 @@ export default function ServiceHighlights({
   paragraph,
   items,
   accent,
-  cta = { label: "Get Custom SEO", href: "/contact" },
+  cta,
   subheading,
+  closingParagraph,
 }: ServiceHighlightsProps) {
   const tone = SERVICE_ACCENT[accent];
+  const showCta = !paragraph || Boolean(cta);
+  const ctaProps = cta ?? { label: "Get Custom SEO", href: "/contact" };
 
   return (
     <section className="bg-black-bg">
@@ -50,11 +65,11 @@ export default function ServiceHighlights({
         accent={accent}
         paragraph={paragraph}
         aside={
-          paragraph ? undefined : (
-            <Button to={cta.href} variant={tone.button} size="md">
-              {cta.label}
+          showCta ? (
+            <Button to={ctaProps.href} variant={tone.button} size="md">
+              {ctaProps.label}
             </Button>
-          )
+          ) : undefined
         }
       />
 
@@ -92,11 +107,43 @@ export default function ServiceHighlights({
               />
             </div>
             <p className="body-copy col-span-2 max-w-[64ch] text-content sm:col-span-1 sm:col-start-2 lg:col-start-auto">
-              {item.description}
+              {renderDescription(item.description, item.link)}
             </p>
           </article>
         ))}
       </div>
+
+      {closingParagraph && (
+        <p className="body-copy mt-8 max-w-[64ch] leading-[1.62] text-content sm:mt-10">
+          {closingParagraph}
+        </p>
+      )}
     </section>
+  );
+}
+
+function renderDescription(
+  description: string,
+  link?: { label: string; href: string },
+) {
+  if (!link) return description;
+  const index = description.indexOf(link.label);
+  if (index === -1) return description;
+
+  return (
+    <>
+      {description.slice(0, index)}
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="circle"
+        data-cursor-label="Explore"
+        className="underline underline-offset-4 hover:text-accent-light"
+      >
+        {link.label}
+      </a>
+      {description.slice(index + link.label.length)}
+    </>
   );
 }

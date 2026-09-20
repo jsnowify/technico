@@ -3,18 +3,24 @@ import Button from "@/components/ui/Button";
 import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
 import GridCorners from "@/components/ui/GridCorners";
 import ServiceSectionHeader from "./ServiceSectionHeader";
+import { serviceLinkedText } from "./serviceLinkedText";
 import { SERVICE_ACCENT, type ServiceAccent } from "./serviceAccent";
 
 interface FeatureListItem {
   text: string;
   /** Substring of `text` to render underlined — omit for a plain line. */
   emphasis?: string;
+  /** Substring of `text` to render as an external link (new tab). */
+  link?: { label: string; href: string };
 }
 
 interface ServiceFeatureListProps {
   eyebrow: string;
   headline: string;
-  paragraphs: string[];
+  paragraphs: (
+    | string
+    | { text: string; link?: { label: string; href: string } }
+  )[];
   listHeading: string;
   items: FeatureListItem[];
   /** "pink" | "purple" — matches getServiceAccent(), same as the hero badge. */
@@ -67,7 +73,9 @@ export default function ServiceFeatureList({
                   index > 0 ? "mt-5" : ""
                 }`}
               >
-                {paragraph}
+                {typeof paragraph === "string"
+                  ? paragraph
+                  : serviceLinkedText(paragraph.text, paragraph.link)}
               </p>
             ))}
 
@@ -128,19 +136,35 @@ export default function ServiceFeatureList({
   );
 }
 
-function renderItemText({ text, emphasis }: FeatureListItem) {
-  if (!emphasis) return text;
+function renderItemText({ text, emphasis, link }: FeatureListItem) {
+  const match = link?.label ?? emphasis;
+  if (!match) return text;
 
-  const idx = text.indexOf(emphasis);
+  const idx = text.indexOf(match);
   if (idx === -1) return text;
+
+  const marked = link ? (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-cursor="circle"
+      data-cursor-label="Explore"
+      className="text-white-text underline decoration-1 underline-offset-4 hover:text-accent-light"
+    >
+      {match}
+    </a>
+  ) : (
+    <span className="text-white-text underline decoration-1 underline-offset-4">
+      {match}
+    </span>
+  );
 
   return (
     <>
       {text.slice(0, idx)}
-      <span className="text-white-text underline decoration-1 underline-offset-4">
-        {emphasis}
-      </span>
-      {text.slice(idx + emphasis.length)}
+      {marked}
+      {text.slice(idx + match.length)}
     </>
   );
 }

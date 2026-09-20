@@ -7,6 +7,7 @@ import type { ServiceAccent } from "./serviceAccent";
 interface ServiceConversionFeature {
   text: string;
   emphasis?: string;
+  link?: { label: string; href: string };
 }
 interface ServiceConversionProps {
   headline: string;
@@ -66,15 +67,32 @@ export default function ServiceConversion({
   );
 }
 
-function renderFeatureText({ text, emphasis }: ServiceConversionFeature) {
-  if (!emphasis) return text;
-  const index = text.indexOf(emphasis);
+function renderFeatureText({ text, emphasis, link }: ServiceConversionFeature) {
+  const match = link?.label ?? emphasis;
+  if (!match) return text;
+  const index = text.indexOf(match);
   if (index === -1) return text;
+
+  const marked = link ? (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-cursor="circle"
+      data-cursor-label="Explore"
+      className="underline underline-offset-4 hover:text-accent-light"
+    >
+      {match}
+    </a>
+  ) : (
+    <span className="underline underline-offset-4">{match}</span>
+  );
+
   return (
     <>
       {text.slice(0, index)}
-      <span className="underline underline-offset-4">{emphasis}</span>
-      {text.slice(index + emphasis.length)}
+      {marked}
+      {text.slice(index + match.length)}
     </>
   );
 }

@@ -22,7 +22,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "“I don't need a digital marketing company to promote my business. I can simply post online and get customers.”",
+        text: "“I don't need a [digital marketing company](https://technicosolutions.com/) to promote my business. I can simply post online and get customers.”",
       },
       {
         type: "paragraph",
@@ -57,7 +57,7 @@ const posts: BlogPost[] = [
       {
         type: "list",
         items: [
-          "Boosting online visibility and growing organic brand awareness",
+          "Boosting [online visibility](https://crystallize.com/answers/business-talk/what-is-online-visibility) and growing organic brand awareness",
           "Generating leads through online marketing funnels",
           "Conducting market research and analyzing competitors' digital presence",
         ],
@@ -85,7 +85,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Unlike traditional marketing, digital channels such as social media, search engine marketing, and email enable businesses to engage with customers where they spend most of their time.",
+        text: "Unlike [traditional marketing](https://books.openedition.org/pucl/1647?lang=en), digital channels such as social media, search engine marketing, and email enable businesses to engage with customers where they spend most of their time.",
       },
       {
         type: "paragraph",
@@ -208,7 +208,7 @@ const posts: BlogPost[] = [
         type: "list",
         items: [
           "$1,000 – $3,000/mo: Ideal for local businesses looking to establish their footprint. This covers basic on-page SEO, localized Google Business Profile optimization, and fundamental social media scheduling.",
-          "$4,000 – $12,000/mo: For established small-to-medium businesses (SMBs) in Vancouver. This includes advanced technical SEO, high-intent Pay-Per-Click (PPC) ad management, active social media video shoots (Reels/TikToks), and custom landing page optimization.",
+          "$4,000 – $12,000/mo: For established small-to-medium businesses (SMBs) in Vancouver. This includes [advanced technical SEO](https://technicosolutions.com/how-to-use-seo-services-to-get-leads-while-you-sleep/), high-intent Pay-Per-Click (PPC) ad management, active social media video shoots (Reels/TikToks), and custom landing page optimization.",
           "$15,000+/mo: For large corporations or multi-location brands requiring custom database integrations, heavy content production schedules, mass programmatic advertising, and dedicated account management teams.",
         ],
       },
@@ -277,7 +277,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "How do you get leads with SEO services? It's a question every business runs into, whether you're in B2B, eCommerce, local services, or manufacturing. You want to spend your time improving your product, serving customers, and tightening operations. Digital marketing strategies end up as an afterthought.",
+        text: "How do you get leads with [SEO services](https://technicosolutions.com/services/search-engine-optimization/)? It's a question every business runs into, whether you're in B2B, [eCommerce](https://technicosolutions.com/how-ecommerce-marketing-agencies-increase-revenue-for-online-stores/), local services, or manufacturing. You want to spend your time improving your product, serving customers, and tightening operations. Digital marketing strategies end up as an afterthought.",
       },
       {
         type: "paragraph",
@@ -313,7 +313,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "You want to work with SEO specialists who understand how search engines work, keyword research, competitor analysis, technical audits, and more.",
+        text: "You want to work with SEO specialists who understand how [search engines](https://www.elastic.co/what-is/search-engine) work, keyword research, competitor analysis, technical audits, and more.",
       },
       {
         type: "paragraph",
@@ -335,7 +335,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "For many small businesses, SEO is one of the most cost-effective digital marketing investments because it continues generating qualified traffic long after content is published. Unlike paid advertising, which stops producing results once the budget runs out, a well-executed SEO strategy can deliver leads consistently over time with ongoing optimization.",
+        text: "For many small businesses, SEO is one of the most cost-effective digital marketing investments because it continues generating qualified traffic long after content is published. Unlike paid advertising, which stops producing results once the budget runs out, a well-executed [SEO strategy](https://technicosolutions.com/how-a-website-development-company-can-boost-your-seo-and-traffic/) can deliver leads consistently over time with ongoing optimization.",
       },
       {
         type: "heading",
@@ -445,7 +445,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Technico Digital Solutions, a Canada digital marketing agency, helps local businesses and B2B companies attract high-quality, ready-to-convert leads through proven SEO services. With structured website optimization and clear execution, your online presence works around the clock, so you can focus on delivering what you do best.",
+        text: "Technico Digital Solutions, a [Canada digital marketing agency](https://technicosolutions.com/), helps local businesses and B2B companies attract high-quality, ready-to-convert leads through proven SEO services. With structured website optimization and clear execution, your online presence works around the clock, so you can focus on delivering what you do best.",
       },
       {
         type: "faq",
@@ -593,7 +593,7 @@ const posts: BlogPost[] = [
       { type: "subheading", text: "Development Teams Think Beyond Launch Day" },
       {
         type: "paragraph",
-        text: "Strong results depend on more than launch week. A skilled development team plans for growth, tracking, and updates. Expert website developers integrate Google Analytics and Google Search Console during setup. That data reveals how website visitors behave and which pages attract qualified leads.",
+        text: "Strong results depend on more than launch week. A skilled development team plans for growth, tracking, and updates. Expert website developers integrate Google Analytics and [Google Search Console](https://backlinko.com/google-search-console) during setup. That data reveals how website visitors behave and which pages attract qualified leads.",
       },
       {
         type: "paragraph",
@@ -619,7 +619,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "If your site feels stuck, a quiet shift behind the scenes can make the difference. Technico Digital Solutions, a digital marketing services agency, offers a free consultation that looks at structure, performance, and growth potential. Sometimes a few focused changes open the door to steady traffic and real results. Explore web development solutions today!",
+        text: "If your site feels stuck, a quiet shift behind the scenes can make the difference. Technico Digital Solutions, a [digital marketing services agency](https://technicosolutions.com/), offers a free consultation that looks at structure, performance, and growth potential. Sometimes a few focused changes open the door to steady traffic and real results. Explore web development solutions today!",
       },
       {
         type: "faq",
@@ -635,11 +635,19 @@ const posts: BlogPost[] = [
             question: "What are the three types of web development?",
             answer:
               "The three main types of web development are front-end, back-end, and full-stack development. Front-end focuses on the parts of a website users interact with, back-end handles server-side functionality and databases, and full-stack combines both, so developers can manage the complete website experience from design to server operations.",
+            link: {
+              label: "types of web development",
+              href: "https://builtin.com/software-engineering-perspectives/web-development#:~:text=The%20three%20main%20types%20of,development%20and%20full%2Dstack%20development",
+            },
           },
           {
             question: "What are the two main types of websites?",
             answer:
               "The two main types of websites are static and interactive. Static websites primarily display information without user interaction, while interactive (or dynamic) websites enable engagement between visitors and the site owner. Interactive sites, common in the Web 2.0 era, allow features like forms, comments, and dynamic content.",
+            link: {
+              label: "static and interactive",
+              href: "https://www.wix.com/blog/static-vs-dynamic-website",
+            },
           },
         ],
       },
@@ -663,7 +671,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "Your image matters when it comes to increasing sales and building brand loyalty. But you can't simply put something out there and call it a day. You need professionals who can do it for you. You need a graphic design company that can help you with your brand identity.",
+        text: "Your image matters when it comes to increasing sales and building brand loyalty. But you can't simply put something out there and call it a day. You need professionals who can do it for you. You need a [graphic design company](https://technicosolutions.com/services/creative-design-and-content/) that can help you with your brand identity.",
       },
       {
         type: "paragraph",
@@ -748,7 +756,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Their work spans a wide range of applications, including print marketing, digital campaign creatives, packaging design, long-form content, signage, apparel, trade show materials, and sales collateral. Each project is approached with a balance of creativity and strategy.",
+        text: "Their work spans a wide range of applications, including [print marketing](https://www.marketingtutor.net/print-advertising/), digital campaign creatives, packaging design, long-form content, signage, apparel, trade show materials, and sales collateral. Each project is approached with a balance of creativity and strategy.",
       },
       {
         type: "paragraph",
@@ -821,7 +829,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Let our digital marketing company, Technico Digital Solutions, provide this service. You can also explore our other offerings to build your dream website, improve user engagement, or get a complete website redesign. Our digital experts take care of everything for you while maintaining a collaborative approach throughout the entire process. You remain involved in shaping the outcome you envision for your business.",
+        text: "Let our [digital marketing company](https://technicosolutions.com/), Technico Digital Solutions, provide this service. You can also explore our other offerings to build your dream website, improve user engagement, or get a complete website redesign. Our digital experts take care of everything for you while maintaining a collaborative approach throughout the entire process. You remain involved in shaping the outcome you envision for your business.",
       },
       {
         type: "faq",
@@ -842,6 +850,10 @@ const posts: BlogPost[] = [
             question: "Does a graphic designer also improve web design?",
             answer:
               "Yes, a graphic designer can improve web design because they apply core visual principles like layout, colour, typography, and hierarchy that make websites more visually appealing and consistent. However, web design also focuses on usability, responsiveness, and user experience, which go beyond static visuals. In a digital marketing company, both graphic designers and web designers work together to create a website that is visually strong and functionally effective.",
+            link: {
+              label: "static visuals",
+              href: "https://www.numberanalytics.com/blog/ultimate-guide-static-visualization-information-design",
+            },
           },
         ],
       },
@@ -870,7 +882,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Ecommerce marketing agencies exist to fix exactly that and bring technical depth, strategic bandwidth, and channel expertise that most in-house teams simply don't have. The best thing? These strategies are built specifically for the mechanics of selling online.",
+        text: "[Ecommerce marketing agencies](https://technicosolutions.com/) exist to fix exactly that and bring technical depth, strategic bandwidth, and channel expertise that most in-house teams simply don't have. The best thing? These strategies are built specifically for the mechanics of selling online.",
       },
       {
         type: "paragraph",
@@ -883,7 +895,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "An e-commerce marketing agency is a specialized firm that handles the full scope of digital marketing for online stores. That's different from a generalist digital marketing agency, which commonly covers brand awareness across industries.",
+        text: "An e-commerce marketing agency is a specialized firm that handles the full scope of [digital marketing for online stores](https://technicosolutions.com/the-role-of-a-digital-marketing-company-in-growing-small-businesses/). That's different from a generalist digital marketing agency, which commonly covers brand awareness across industries.",
       },
       {
         type: "paragraph",
@@ -987,7 +999,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "According to Cart Abandonment Statistics 2026, 70\u201378% of shopping carts are abandoned (up to 85% on mobile). The top reason is unexpected shipping costs (48%). SMS recovers 10\u201315% of carts, compared to 3\u20135% for email. Using both SMS and email together delivers the best recovery results.",
+        text: "According to [Cart Abandonment Statistics 2026](https://upsella.com/blog/statistics/cart-abandonment-statistics-2026), 70\u201378% of shopping carts are abandoned (up to 85% on mobile). The top reason is unexpected shipping costs (48%). SMS recovers 10\u201315% of carts, compared to 3\u20135% for email. Using both SMS and email together delivers the best recovery results.",
       },
       {
         type: "paragraph",
@@ -1004,7 +1016,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "These flows run 24/7 without manual intervention. For many online businesses, email alone accounts for 25\u201340% of total revenue when set up correctly.",
+        text: "These flows run 24/7 without manual intervention. For many online businesses, email alone accounts for [25\u201340% of total revenue](https://mktgrhythm.com/blog/how-much-revenue-should-you-be-generating-through-email) when set up correctly.",
       },
       {
         type: "subheading",
@@ -1079,7 +1091,7 @@ const posts: BlogPost[] = [
         items: [
           "SEO informs which landing pages get paid traffic",
           "Email data shapes paid retargeting audiences",
-          "CRO insights feed back into ad creative and landing page copy",
+          "[CRO](https://digitalmarketinginstitute.com/blog/what-is-conversion-rate-optimization-cro) insights feed back into ad creative and landing page copy",
           "Customer relationships are nurtured from the first click through repeat purchase",
         ],
       },
@@ -1158,7 +1170,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "Professional social media services aren't a luxury reserved for big brands with massive marketing budgets. They're what separates businesses that grow from those that stay stuck. And the numbers back that up: a 2025 Environics Research study of 2,162 Canadians found that 89% use social media at least weekly (up from 87% in 2023). Your customers are there. The question is whether your brand shows up well enough to matter. So, here's how to tell if you've already crossed the line from \u201cwe're managing it\u201d to \u201cwe actually need help.\u201d",
+        text: "Professional [social media services](https://technicosolutions.com/services/social-media-management/) aren't a luxury reserved for big brands with massive marketing budgets. They're what separates businesses that grow from those that stay stuck. And the numbers back that up: a 2025 Environics Research study of 2,162 Canadians found that [89% use social media](https://environics.ca/insights/articles/2025-social-media-trends-in-canada/) at least weekly (up from 87% in 2023). Your customers are there. The question is whether your brand shows up well enough to matter. So, here's how to tell if you've already crossed the line from \u201cwe're managing it\u201d to \u201cwe actually need help.\u201d",
       },
       {
         type: "subheading",
@@ -1217,7 +1229,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "According to a digital marketing statistics in Canada report by Made in CA, 94% of small businesses in Canada use social media for marketing at least monthly, but only 52% do so daily. That gap points to one thing: most businesses are dabbling, and not executing a real social media strategy. Dabbling doesn't drive revenue growth.",
+        text: "According to a [digital marketing statistics in Canada](https://madeinca.ca/digital-marketing-canada-statistics/) report by Made in CA, 94% of small businesses in Canada use social media for marketing at least monthly, but only 52% do so daily. That gap points to one thing: most businesses are dabbling, and not executing a real social media strategy. Dabbling doesn't drive revenue growth.",
       },
       { type: "paragraph", text: "Here's what a missing strategy costs you:" },
       {
@@ -1306,7 +1318,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "A Regus (the global provider of flexible workplace solutions) survey found that only 34% of Canadian firms are successfully using social networking to win new customers (up just 6% from the prior year). That means you're competing in a space where most businesses aren't doing it well, and a professional approach gives you a real edge.",
+        text: "A Regus (the global provider of flexible workplace solutions) survey found that only [34% of Canadian firms](https://www.e-channelnews.com/40-percent-of-canadian-businesses-using-social-media-social-networks-to-win-new-business/) are successfully using social networking to win new customers (up just 6% from the prior year). That means you're competing in a space where most businesses aren't doing it well, and a professional approach gives you a real edge.",
       },
       {
         type: "paragraph",
@@ -1354,7 +1366,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Only 39% of Canadian business owners have any kind of online presence, despite 47% acknowledging that social media will help grow their business. That gap between belief and action is exactly where brands lose to competitors who did the work.",
+        text: "Only [39% of Canadian business owners](https://canadiansme.ca/why-social-media-is-a-must-for-canadian-small-businesses/) have any kind of online presence, despite 47% acknowledging that social media will help grow their business. That gap between belief and action is exactly where brands lose to competitors who did the work.",
       },
       {
         type: "paragraph",
@@ -1441,7 +1453,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Technico Digital Solutions works with businesses ready to grow. From social media strategy and content creation to paid social and full-service digital marketing agency support, our team builds personalized service models around your specific business goals. If you're ready to see what significant improvements in reach, engagement, and lead generation look like, reach out to us, and we'll discuss that.",
+        text: "Technico Digital Solutions works with businesses ready to grow. From social media strategy and content creation to paid social and full-service [digital marketing agency](https://technicosolutions.com/) support, our team builds personalized service models around your specific business goals. If you're ready to see what significant improvements in reach, engagement, and lead generation look like, reach out to us, and we'll discuss that.",
       },
       {
         type: "faq",
@@ -1493,7 +1505,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "With the average email marketing campaign delivering $36 to $42 for every $1 spent, the comeback is real. However, the secret to standing out isn't just sending more mail; it is the transition to AI-powered, hyper-personalized campaigns.",
+        text: "With the average [email marketing](https://technicosolutions.com/services/email-marketing/) campaign delivering $36 to $42 for every $1 spent, the comeback is real. However, the secret to standing out isn't just sending more mail; it is the transition to AI-powered, hyper-personalized campaigns.",
       },
       {
         type: "heading",
@@ -1518,7 +1530,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "When you transition to a dedicated email marketing strategy, you shift from renting an audience to owning your asset. The data consistently shows that email outperforms other digital channels in high-intent conversion moments:",
+        text: "When you transition to a dedicated email marketing strategy, you shift from renting an audience to owning your asset. The data consistently shows that email outperforms [other digital channels](https://technicosolutions.com/signs-your-business-needs-professional-social-media-services-asap/) in high-intent conversion moments:",
       },
       {
         type: "list",
@@ -1630,7 +1642,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "To turn these insights into measurable business growth, having an experienced partner to scale your broader digital marketing efforts is essential. Technico Digital Solution, a digital marketing agency, specializes in building and executing highly effective marketing strategies tailored to your specific brand goals.",
+        text: "To turn these insights into measurable business growth, having an experienced partner to scale your broader digital marketing efforts is essential. Technico Digital Solution, a [digital marketing agency](https://technicosolutions.com/), specializes in building and executing highly effective marketing strategies tailored to your specific brand goals.",
       },
       {
         type: "faq",
@@ -1647,7 +1659,10 @@ const posts: BlogPost[] = [
               "How does Canada's Anti-Spam Legislation (CASL) affect AI-generated email campaigns?",
             answer:
               "Canadian businesses, and any brands emailing Canadian citizens, must comply with CASL, similar to the US CAN-SPAM Act, but it is a much stricter, opt-in law. Under CASL, you must secure explicit consent from recipients before sending any commercial messages; you cannot use AI to bypass this or auto-subscribe users. If you use AI tools to scale your digital marketing efforts, your templates must still strictly contain your registered legal business name, a valid physical mailing address, and a functional unsubscribe mechanism, and process opt-outs within 10 business days.",
-            emphasis: "CASL",
+            link: {
+              label: "comply with CASL",
+              href: "https://crtc.gc.ca/eng/internet/anti/reg.htm",
+            },
           },
           {
             question: "Can email marketing help to encourage repeat purchases?",
@@ -1675,7 +1690,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "Business growth in 2027 still comes down to the same truth: digital marketers who focus on search visibility, useful content, first-party data and AI-assisted workflows continue to outperform those chasing every new trend. New tools arrive every month, yet the businesses seeing steady results are the ones improving proven methods instead of replacing them.",
+        text: "Business growth in 2027 still comes down to the same truth: [digital marketers](https://technicosolutions.com/) who focus on search visibility, useful content, first-party data and AI-assisted workflows continue to outperform those chasing every new trend. New tools arrive every month, yet the businesses seeing steady results are the ones improving proven methods instead of replacing them.",
       },
       {
         type: "paragraph",
@@ -1696,11 +1711,11 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "The same point as “AI won't replace marketers, marketers who use AI will replace marketers who don't,” by Paul Roetzer, founder & CEO of Marketing AI Institute, in episode 91 of The Artificial Intelligence Show.",
+        text: "The same point as “AI won't replace marketers, marketers who use AI will replace marketers who don't,” by Paul Roetzer, founder & CEO of Marketing AI Institute, in [episode 91 of The Artificial Intelligence Show](https://www.marketingaiinstitute.com/blog/the-ai-show-episode-91).",
       },
       {
         type: "paragraph",
-        text: "Artificial intelligence has become part of everyday modern digital marketing, though it hasn't replaced strategy or creativity. According to the Digital Marketing Institute, marketers are using AI to speed up research, produce first drafts, analyze customer data and personalize customer experiences. Human oversight still separates average campaigns from exceptional ones.",
+        text: "Artificial intelligence has become part of everyday modern digital marketing, though it hasn't replaced strategy or creativity. According to the Digital Marketing Institute, [marketers are using AI](https://digitalmarketinginstitute.com/blog/digital-marketing-trends-2026) to speed up research, produce first drafts, analyze customer data and personalize customer experiences. Human oversight still separates average campaigns from exceptional ones.",
       },
       {
         type: "paragraph",
@@ -1735,7 +1750,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "In a global survey of 980 B2B marketers, 61% said search engine marketing and pay-per-click produced the best results among paid channels used for content marketing (B2B Content Marketing Benchmarks, Budgets, and Trends).",
+        text: "In a global survey of 980 B2B marketers, 61% said search engine marketing and pay-per-click produced the best results among paid channels used for content marketing ([B2B Content Marketing Benchmarks, Budgets, and Trends](https://contentmarketinginstitute.com/b2b-research/b2b-content-marketing-trends-research-2025)).",
       },
       {
         type: "paragraph",
@@ -1821,7 +1836,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Connect multiple digital marketing channels into one consistent customer experience. Someone may discover your business through online advertising, read an educational article, join your mailing list through email marketing, watch a product video, and contact your team days later.",
+        text: "Connect multiple digital marketing channels into one consistent customer experience. Someone may discover your business through online advertising, read an educational article, join your mailing list through [email marketing](https://technicosolutions.com/how-ai-improves-email-marketing/), watch a product video, and contact your team days later.",
       },
       {
         type: "paragraph",
@@ -2036,7 +2051,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "Professional SEO services include much more than adding keywords to a website. They cover Search Engine Optimization (SEO) audits, technical SEO, on-page optimization, keyword research, content strategy, internal linking, local SEO, link building, and ongoing performance tracking. The goal is to improve a website's visibility in traditional search results while also strengthening its ability to appear in AI-powered search experiences.",
+        text: "Professional [SEO services](https://technicosolutions.com/services/search-engine-optimization/) include much more than adding keywords to a website. They cover Search Engine Optimization (SEO) audits, technical SEO, on-page optimization, keyword research, content strategy, internal linking, local SEO, link building, and ongoing performance tracking. The goal is to improve a website's visibility in traditional search results while also strengthening its ability to appear in AI-powered search experiences.",
       },
       {
         type: "heading",
@@ -2076,7 +2091,7 @@ const posts: BlogPost[] = [
           "Mobile optimization",
           "Site structure",
           "XML sitemap",
-          "Robots.txt",
+          "[Robots.txt](https://developers.google.com/search/docs/crawling-indexing/robots/intro)",
           "Fixing broken links and redirects",
           "Canonical tags",
           "HTTPS and security",
@@ -2332,7 +2347,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "SEO services from a digital marketing services agency like Technico Digital Solutions are designed around your business, target audience, and competition. Our team can help turn your website into a stronger source of relevant traffic, leads, and sales.",
+        text: "SEO services from a [digital marketing services agency](https://technicosolutions.com/) like Technico Digital Solutions are designed around your business, target audience, and competition. Our team can help turn your website into a stronger source of relevant traffic, leads, and sales.",
       },
       {
         type: "faq",
@@ -2348,6 +2363,10 @@ const posts: BlogPost[] = [
             question: "How is SEO performance measured?",
             answer:
               "SEO performance is measured by tracking organic visibility, traffic, user engagement, and conversions. Common metrics include search impressions, clicks, click-through rate (CTR), keyword rankings, organic sessions, engagement rate, and conversions. Google Search Console can be used to monitor search impressions, clicks, CTR, and keyword positions, while Google Analytics 4 helps measure organic sessions, user engagement, and conversions. The most important metrics depend on the business goal. For example, a business focused on generating leads may place more importance on organic traffic and conversions, while a new website may focus more on improving rankings and search visibility.",
+            link: {
+              label: "generating leads",
+              href: "https://technicosolutions.com/how-to-use-seo-services-to-get-leads-while-you-sleep/",
+            },
           },
           {
             question: "Does a higher search ranking lead to more sales?",
@@ -2385,7 +2404,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "This is why businesses need well-planned performance marketing strategies from a local digital marketing company in Vancouver. These strategies should align messaging, channels, content, Search Engine Optimization, advertising, and customer experience with the needs and expectations of the target audience.",
+        text: "This is why businesses need well-planned performance marketing strategies from a local [digital marketing company](https://technicosolutions.com/) in Vancouver. These strategies should align messaging, channels, content, Search Engine Optimization, advertising, and customer experience with the needs and expectations of the target audience.",
       },
       {
         type: "heading",
@@ -2759,7 +2778,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "These concerns can make a DIY approach understandable, particularly for small businesses working with limited budgets and resources. However, managing digital marketing independently does not guarantee that campaigns will achieve their intended results. Businesses may lack the time, expertise, or experience needed to develop an effective strategy, measure performance, and adjust campaigns when they are not producing results.",
+        text: "These concerns can make a DIY approach understandable, particularly for [small businesses](https://technicosolutions.com/the-role-of-a-digital-marketing-company-in-growing-small-businesses/) working with limited budgets and resources. However, managing digital marketing independently does not guarantee that campaigns will achieve their intended results. Businesses may lack the time, expertise, or experience needed to develop an effective strategy, measure performance, and adjust campaigns when they are not producing results.",
       },
       {
         type: "paragraph",
@@ -2775,6 +2794,10 @@ const posts: BlogPost[] = [
               "How do businesses know if their marketing strategy is working?",
             answer:
               "Businesses can determine if their marketing strategy is working by tracking key performance indicators (KPIs) such as website traffic, leads, conversion rates, sales, customer engagement, and return on marketing investment. Comparing these results against specific marketing goals helps businesses identify which campaigns are generating results and which areas need improvement.",
+            link: {
+              label: "key performance indicators",
+              href: "https://asana.com/resources/key-performance-indicator-kpi",
+            },
           },
           {
             question:
@@ -2813,7 +2836,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "So, when you search for \u201Cdigital marketing near me\u201D in Vancouver, don't just compare prices. Evaluate how each agency plans to grow your business, which marketing channels they recommend, and how they measure ROI. Choose a digital marketing agency like Technico Industries that develops strategies tailored to your business goals.",
+        text: "So, when you search for \u201C[digital marketing near me](https://technicosolutions.com/)\u201D in Vancouver, don't just compare prices. Evaluate how each agency plans to grow your business, which marketing channels they recommend, and how they measure ROI. Choose a digital marketing agency like Technico Industries that develops strategies tailored to your business goals.",
       },
       {
         type: "heading",
@@ -2834,7 +2857,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "To calculate your ROI accurately, include all marketing expenses, not just advertising costs. Your total investment should cover agency fees, ad spend, marketing software subscriptions, and content production costs such as copywriting, graphic design, or video creation. Net profit should reflect the profit earned from customers acquired through your marketing campaigns after deducting the cost of delivering your products or services.",
+        text: "To calculate your ROI accurately, include all marketing expenses, not just advertising costs. Your total investment should cover agency fees, ad spend, marketing software subscriptions, and content production costs such as copywriting, [graphic design](https://technicosolutions.com/top-6-graphic-design-companies-in-vancouver-for-small-businesses/), or video creation. Net profit should reflect the profit earned from customers acquired through your marketing campaigns after deducting the cost of delivering your products or services.",
       },
       {
         type: "subheading",
@@ -2964,7 +2987,7 @@ const posts: BlogPost[] = [
       {
         type: "list",
         items: [
-          "SEO: SEO takes longer because search engines need time to crawl and index pages, evaluate website authority, and recognize improvements in content and backlinks. Local SEO can also require time to build reviews, citations, and Google Business Profile visibility.",
+          "SEO: SEO takes longer because search engines need time to crawl and index pages, evaluate website authority, and recognize improvements in content and backlinks. Local SEO can also require time to build reviews, citations, and [Google Business Profile](https://business.google.com/ca-en/business-profile/) visibility.",
           "Paid Advertising: PPC can produce leads quickly once campaigns are launched, but a full service digital agency still needs to test keywords, ad copy, audiences, landing pages, and budgets to improve performance. The goal isn't simply to generate clicks but to make the ad spend profitable.",
           "Email Marketing: Businesses with an established and engaged contact list can see responses within hours or days. Email becomes more effective over time as a digital marketing expert uses segmentation, automation, and performance data to target customers with more relevant offers.",
           "Content Marketing: Blogs and other content take several months to gain traction. As more useful content is published and optimized, it can build search visibility and continue generating traffic without paying for every visitor.",
@@ -3022,12 +3045,12 @@ const posts: BlogPost[] = [
       {
         type: "list",
         items: [
-          "Technico Digital Solutions Inc \u2013 https://technicosolutions.com/",
-          "Salt Water Digital Marketing \u2013 https://www.saltwaterdigital.com/",
-          "Brand Camp Digital \u2013 https://www.brandcampdigital.com/",
-          "Tiny Planet Digital \u2013 https://tinyplanet.digital/",
-          "Keepers Digital \u2013 https://keepersdigital.com/en-ca/",
-          "Pulse \u2013 https://pulsemarketing.io/",
+          "Technico Digital Solutions Inc \u2013 [https://technicosolutions.com/](https://technicosolutions.com/)",
+          "Salt Water Digital Marketing \u2013 [https://www.saltwaterdigital.com/](https://www.saltwaterdigital.com/)",
+          "Brand Camp Digital \u2013 [https://www.brandcampdigital.com/](https://www.brandcampdigital.com/)",
+          "Tiny Planet Digital \u2013 [https://tinyplanet.digital/](https://tinyplanet.digital/)",
+          "Keepers Digital \u2013 [https://keepersdigital.com/en-ca/](https://keepersdigital.com/en-ca/)",
+          "Pulse \u2013 [https://pulsemarketing.io/](https://pulsemarketing.io/)",
         ],
       },
       {
@@ -3064,7 +3087,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "For Vancouver businesses, such as small businesses from diverse industries, having the right digital partner can make it easier to manage every part of your online presence.",
+        text: "For Vancouver businesses, such as [small businesses](https://technicosolutions.com/the-role-of-a-digital-marketing-company-in-growing-small-businesses/) from diverse industries, having the right digital partner can make it easier to manage every part of your online presence.",
       },
       {
         type: "paragraph",
@@ -3114,7 +3137,7 @@ const posts: BlogPost[] = [
     content: [
       {
         type: "paragraph",
-        text: "Ranking number one in search results still matters, but it is no longer the only measure of SEO success. Search engine optimization (SEO) now focuses on visibility, relevance, and attracting qualified visitors across search engine results pages (SERPs). Strong search engine rankings can increase clicks and credibility, but factors such as search intent, featured results, AI-generated answers, and conversion potential also influence how valuable a top position is.",
+        text: "Ranking number one in search results still matters, but it is no longer the only measure of [SEO](https://technicosolutions.com/services/search-engine-optimization/) success. Search engine optimization (SEO) now focuses on visibility, relevance, and attracting qualified visitors across search engine results pages (SERPs). Strong search engine rankings can increase clicks and credibility, but factors such as search intent, featured results, AI-generated answers, and conversion potential also influence how valuable a top position is.",
       },
       {
         type: "heading",
@@ -3242,7 +3265,7 @@ const posts: BlogPost[] = [
             content: [
               {
                 type: "paragraph",
-                text: "Keyword research still plays an important role, but a digital marketing company needs to look beyond search volume and ranking difficulty. SEO tools such as Google Keyword Planner can help identify search terms and potential demand, while Google Search Console can show the queries that are actually generating impressions and clicks for a website. For example, instead of targeting only a broad keyword such as “car detailing,” a business could examine related searches such as:",
+                text: "Keyword research still plays an important role, but a [digital marketing company](https://technicosolutions.com/) needs to look beyond search volume and ranking difficulty. SEO tools such as Google Keyword Planner can help identify search terms and potential demand, while Google Search Console can show the queries that are actually generating impressions and clicks for a website. For example, instead of targeting only a broad keyword such as “car detailing,” a business could examine related searches such as:",
               },
               {
                 type: "list",
@@ -3285,7 +3308,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "A stronger strategy focuses on earning visibility wherever your audience is searching. This means creating useful content around relevant keywords, matching search intent, building topical authority, and applying effective SEO techniques like internal and external links and off-page SEO that help major search engines understand and trust your content.",
+        text: "A [stronger strategy](https://technicosolutions.com/what-is-included-in-professional-seo-services/) focuses on earning visibility wherever your audience is searching. This means creating useful content around relevant keywords, matching search intent, building topical authority, and applying effective SEO techniques like internal and external links and off-page SEO that help major search engines understand and trust your content.",
       },
       {
         type: "accordion",
@@ -3445,7 +3468,7 @@ const posts: BlogPost[] = [
             content: [
               {
                 type: "paragraph",
-                text: "Search visibility is increasingly extending beyond traditional Google rankings. Effective SEO strategy includes AI-generative engine optimization. This can complement Search Engine Optimization by making content easier for AI-powered search systems to understand, extract, and potentially reference.",
+                text: "Search visibility is increasingly extending beyond traditional [Google rankings](https://www.google.com/intl/en_us/search/howsearchworks/how-search-works/ranking-results/). Effective SEO strategy includes AI-generative engine optimization. This can complement Search Engine Optimization by making content easier for AI-powered search systems to understand, extract, and potentially reference.",
               },
               {
                 type: "paragraph",
@@ -3540,7 +3563,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "That is why an SEO agency looks beyond keyword positions when measuring success. Rankings are useful, but metrics such as organic conversions, qualified traffic, cost per acquisition, branded searches, and visibility across an entire topic can tell you far more about whether SEO is contributing to business growth.",
+        text: "That is why an [SEO agency](https://technicosolutions.com/services/search-engine-optimization/) looks beyond keyword positions when measuring success. Rankings are useful, but metrics such as organic conversions, qualified traffic, cost per acquisition, branded searches, and visibility across an entire topic can tell you far more about whether SEO is contributing to business growth.",
       },
       {
         type: "paragraph",
@@ -3715,7 +3738,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "A digital marketing agency such as Technico Digital Solutions knows that none of this means rank tracking should be thrown out entirely. It means it shouldn’t be the only scoreboard on the wall. A more complete picture includes a handful of other measurements, each answering a question that position alone can’t.",
+        text: "A [digital marketing agency](https://technicosolutions.com/) such as Technico Digital Solutions knows that none of this means rank tracking should be thrown out entirely. It means it shouldn’t be the only scoreboard on the wall. A more complete picture includes a handful of other measurements, each answering a question that position alone can’t.",
       },
       {
         type: "list",
@@ -3755,7 +3778,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "At Technico Digital Solutions, we build SEO projects and strategies around what happens after someone finds your business. Our approach to SEO improvements connects keyword targeting, content, and organic visibility to measurable outcomes, including qualified traffic, calls, quote requests, leads, and online sales. Your SEO performance is evaluated by the business value it creates, not simply by how many keywords reach position #1.",
+        text: "At Technico Digital Solutions, we build SEO [projects and strategies](https://technicosolutions.com/what-is-included-in-professional-seo-services) around what happens after someone finds your business. Our approach to SEO improvements connects keyword targeting, content, and organic visibility to measurable outcomes, including qualified traffic, calls, quote requests, leads, and online sales. Your SEO performance is evaluated by the business value it creates, not simply by how many keywords reach position #1.",
       },
       {
         type: "faq",

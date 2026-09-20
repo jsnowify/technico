@@ -184,16 +184,28 @@ export const SERVICES_FAQS: FaqItem[] = [
     question: "How does digital marketing bring measurable results?",
     answer:
       "Digital agencies like Technico Digital Solutions track key performance indicators (KPIs) such as website traffic, lead generation, and conversion rates. We use data-driven strategies to optimize campaigns to make sure the efforts align with your business objectives. By regularly monitoring these KPIs, we adjust tactics for continuous improvement and measurable success.",
+    link: {
+      label: "website traffic",
+      href: "https://www.wix.com/encyclopedia/definition/website-traffic",
+    },
   },
   {
     question: "Are digital marketing services ideal for start-up businesses?",
     answer:
       "Yes, marketing services are perfect for startup businesses looking to generate leads and gain more business. If you’re a small startup or a medium-sized business, our services help increase visibility, attract customers, and drive growth. With our strong digital strategy, you can compete effectively and expand faster.",
+    link: {
+      label: "generate leads",
+      href: "https://digitalmarketinginstitute.com/blog/how-to-generate-high-quality-leads",
+    },
   },
   {
     question: "Why is digital marketing important for brand recognition?",
     answer:
       "Digital marketing (aka online marketing) is vital for brand recognition because it helps your brand reach a wider audience through multiple digital channels. By using targeted campaigns, content creation, and social media strategies, digital marketing increases visibility, engages potential customers, and strengthens brand presence.",
+    link: {
+      label: "online marketing",
+      href: "https://www.coursera.org/articles/online-marketing",
+    },
   },
 ];
 
@@ -625,27 +637,27 @@ export interface QualifyingQuestion {
 export const QUALIFYING_QUESTIONS: QualifyingQuestion[] = [
   {
     question:
-      "Are You A Business Seeking Rapid, Consistent, And Repeatable Profit Growth?",
+      "Are you a business seeking rapid, consistent, and repeatable profit growth?",
     answer:
-      "Search Engine Optimization And Targeted Digital Marketing Are Proven Drivers Of Scalable Revenue. Now, It's Easier To Convert Visibility Into Measurable Results.",
+      "Search engine optimization and targeted digital marketing are proven drivers of scalable revenue. Now, it's easier to convert visibility into measurable results.",
   },
   {
     question:
-      "Do You Aim To Dominate Your Local Market, Compete With Larger Corporations, Or Establish A National Or International Brand Presence?",
+      "Do you aim to dominate your local market, compete with larger corporations, or establish a national or international brand presence?",
     answer:
-      "Local SEO, Authority-Building Content, And Multi-Channel Campaigns Are What Close The Gap Between Small Businesses And Industry Leaders, Regardless Of Budget.",
+      "Local SEO, authority-building content, and multi-channel campaigns are what close the gap between small businesses and industry leaders, regardless of budget.",
   },
   {
     question:
-      "Do You Want To Expand Your Customer Base And Attract New Clients?",
+      "Do you want to expand your customer base and attract new clients?",
     answer:
-      "The Most Effective Way To Do That Today Is Through Search-Optimized Content, Paid Ads, And Conversion-Focused Landing Pages That Work Around The Clock.",
+      "The most effective way to do that today is through search-optimized content, paid ads, and conversion-focused landing pages that work around the clock.",
   },
   {
     question:
-      "Are You Looking To Establish A Reliable And Sustainable Business Generation Funnel To Ensure Continuous Growth And Success?",
+      "Are you looking to establish a reliable and sustainable business generation funnel to ensure continuous growth and success?",
     answer:
-      "A Well-Structured Digital Marketing Funnel That Combines SEO, Lead Nurturing, And Retargeting Turns One-Time Visitors Into Long-Term Clients.",
+      "A well-structured digital marketing funnel that combines SEO, lead nurturing, and retargeting turns one-time visitors into long-term clients.",
   },
 ];
 

@@ -12,6 +12,8 @@ export function serviceLinkedText(
         href={link.href}
         target="_blank"
         rel="noopener noreferrer"
+        data-cursor="circle"
+        data-cursor-label="Explore"
         className="underline underline-offset-4 transition-colors hover:text-purple-accent"
       >
         {link.label}

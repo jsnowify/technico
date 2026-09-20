@@ -50,9 +50,16 @@ export default function ServiceFeatureCard({
             <h2 className="max-w-[18ch] font-medium tracking-heading whitespace-pre-line text-white-text">
               {headline}
             </h2>
-            <p className="body-copy mt-5 max-w-[64ch] leading-[1.62] text-content">
-              {paragraph}
-            </p>
+            {paragraph.split("\n\n").map((text, index) => (
+              <p
+                key={index}
+                className={`body-copy max-w-[64ch] leading-[1.62] text-content ${
+                  index === 0 ? "mt-5" : "mt-4"
+                }`}
+              >
+                {text}
+              </p>
+            ))}
             <div className="mt-7">
               <Button to={cta.href} variant={tone.button} size="md">
                 {cta.label}

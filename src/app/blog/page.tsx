@@ -2,9 +2,8 @@ import { buildMetadata } from "@/lib/seo";
 import { getAllPosts } from "@/lib/content/blog";
 import { estimateReadingTime } from "@/lib/utils/reading-time";
 import BlogCategoryGrid from "@/components/blog/BlogCategoryGrid";
-import EditorialHeader from "@/components/ui/EditorialHeader";
-import GridCorners from "@/components/ui/GridCorners";
-import PixelRevealImage from "@/components/home/PixelRevealImage";
+import BlogIndexHero from "@/components/blog/BlogIndexHero";
+import BlogIndexHeroReveal from "@/components/blog/BlogIndexHeroReveal";
 
 export const metadata = buildMetadata({
   title: "Blog",
@@ -24,28 +23,20 @@ export default async function BlogIndexPage() {
 
   return (
     <div className="bg-black-bg">
-      <div className="container-x mx-auto w-full max-w-[1920px] pt-28 pb-20 sm:pt-32 lg:pt-36 lg:pb-28">
-        <EditorialHeader
-          label="Blog"
-          headingLevel="h1"
-          title="Explore our blog"
-        />
-        <figure className="relative mt-10 aspect-[4/3] overflow-hidden border border-white/20 sm:mt-14 sm:aspect-[16/7]">
-          <GridCorners />
-          <PixelRevealImage
-            src="https://res.cloudinary.com/dp9bjis3z/image/upload/v1789361404/temporary-placeholder/blog_k83lrr.jpg"
-            alt=""
-            sizes="(min-width: 1920px) 1740px, 100vw"
-          />
-          <figcaption className="absolute inset-x-0 bottom-0 flex justify-between bg-black-bg/85 p-4 font-mono text-[10px] tracking-[0.06em] text-content uppercase backdrop-blur-sm sm:p-5 sm:text-xs">
-            <span>{"// Insights"}</span>
-            <span>Journal / 00</span>
-          </figcaption>
-        </figure>
-        <div className="mt-16 sm:mt-20">
-          <BlogCategoryGrid posts={cards} />
+      <div className="home-hero-stack relative isolate h-[200svh] bg-black-bg">
+        <div className="home-hero-panel absolute inset-x-0 top-0 z-10 h-[100svh]">
+          <BlogIndexHero />
+        </div>
+        <div className="home-reveal-panel sticky top-0 z-0 h-[100svh]">
+          <BlogIndexHeroReveal />
         </div>
       </div>
+
+      <section id="blog-journal" className="bg-black-bg py-16 sm:py-20 lg:py-24">
+        <div className="container-x mx-auto w-full max-w-[1920px]">
+          <BlogCategoryGrid posts={cards} />
+        </div>
+      </section>
     </div>
   );
 }

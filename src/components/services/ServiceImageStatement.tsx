@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import GridCorners from "@/components/ui/GridCorners";
 import ServiceSectionHeader from "./ServiceSectionHeader";
+import { serviceLinkedText } from "./serviceLinkedText";
 import { SERVICE_ACCENT, type ServiceAccent } from "./serviceAccent";
 
 interface ServiceImageStatementProps {
@@ -27,7 +28,10 @@ interface ServiceImageStatementProps {
   paragraph: string;
   /** Optional list rendered after `paragraph` — e.g. "Grow With Your
    * Business"'s solar / e-commerce / service-business examples. */
-  bullets?: string[];
+  bullets?: (
+    | string
+    | { text: string; link?: { label: string; href: string } }
+  )[];
   /** Optional paragraph rendered after `bullets`. */
   closingParagraph?: string;
   accent?: ServiceAccent;
@@ -82,7 +86,11 @@ export default function ServiceImageStatement({
                 aria-hidden="true"
                 className={`mt-2 h-px w-6 shrink-0 ${tone.rule}`}
               />
-              <span className="max-w-[58ch]">{item}</span>
+              <span className="max-w-[58ch]">
+                {typeof item === "string"
+                  ? item
+                  : serviceLinkedText(item.text, item.link)}
+              </span>
             </li>
           ))}
         </ul>

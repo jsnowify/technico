@@ -9,6 +9,42 @@ import SlidingText from "@/components/motion/SlidingText";
 import PixelRevealImage from "./PixelRevealImage";
 
 /**
+ * Inline links inside a service description, keyed by the service's href.
+ * `label` must appear verbatim in that service's description text.
+ */
+const DESCRIPTION_LINKS: Record<string, { label: string; href: string }> = {
+  "/services/creative-design-and-content": {
+    label: "target market",
+    href: "https://www.investopedia.com/terms/t/target-market.asp",
+  },
+};
+
+function renderDescription(service: Service) {
+  const link = DESCRIPTION_LINKS[service.href];
+  if (!link) return service.description;
+
+  const index = service.description.indexOf(link.label);
+  if (index === -1) return service.description;
+
+  return (
+    <>
+      {service.description.slice(0, index)}
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="circle"
+        data-cursor-label="Explore"
+        className="underline underline-offset-4 transition-colors hover:text-purple-accent"
+      >
+        {link.label}
+      </a>
+      {service.description.slice(index + link.label.length)}
+    </>
+  );
+}
+
+/**
  * Each card sticks below the exposed headings above it, on ALL viewports.
  * The height and the sticky offset read from the same CSS variable, so the
  * mobile header spacing cannot drift from the desktop stacking animation.
@@ -44,7 +80,7 @@ function ServiceSheet({ service, index }: { service: Service; index: number }) {
 
         <div className="contents md:flex md:min-w-0 md:flex-col md:items-start md:pr-8 lg:pr-12">
           <p className="body-copy col-span-2 max-w-[410px] leading-[1.45] tracking-[-0.03em] text-black-text uppercase md:col-span-1 md:indent-12 md:leading-[1.35] md:[text-align:justify]">
-            {service.description}
+            {renderDescription(service)}
           </p>
 
           <ul className="col-span-2 max-w-[420px] space-y-0.5 md:col-span-1 md:mt-13">

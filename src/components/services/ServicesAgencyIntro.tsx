@@ -142,9 +142,11 @@ export default function ServicesAgencyIntro() {
               six months from now. Let&rsquo;s make it happen. Our{" "}
               <Link
                 href="https://technicosolutions.com/"
+                data-cursor="circle"
+                data-cursor-label="Explore"
                 className="text-content underline decoration-1 underline-offset-4 hover:text-accent-light"
               >
-                Digital Marketing Services Agency
+                digital marketing services agency
               </Link>{" "}
               is ready to help you get your business moving.
             </p>

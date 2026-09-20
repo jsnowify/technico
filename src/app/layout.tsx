@@ -125,7 +125,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <PageTransition />
           <SmoothScrollProvider>
             <Header services={services} />
-            <main className="flex-1">
+            <main className="relative z-10 flex-1 bg-black-bg">
               {children}
               <ContactSection />
             </main>

@@ -12,6 +12,8 @@ const STRATEGY_TEXT = (
     Technico Digital Solutions is a{" "}
     <Link
       href="https://technicosolutions.com/"
+      data-cursor="circle"
+      data-cursor-label="Explore"
       className="text-purple-secondary underline decoration-1 underline-offset-2 transition-colors duration-300 hover:text-purple-accent"
     >
       digital marketing agency
@@ -94,9 +96,7 @@ export default function Overview() {
             />
             <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-5 font-mono text-[10px] tracking-[0.06em] text-white uppercase sm:p-7 sm:text-xs lg:p-8">
               <span>/ Growth infrastructure</span>
-              <span className="text-right text-white/55">
-                Image slot / 01
-              </span>
+              <span className="text-right text-white/55">Image slot / 01</span>
             </figcaption>
           </figure>
 

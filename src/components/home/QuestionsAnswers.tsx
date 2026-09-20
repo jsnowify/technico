@@ -57,7 +57,8 @@ function SolutionCard({
     <Link
       href={href}
       aria-label={`Explore our ${label} service`}
-      data-cursor="highlight"
+      data-cursor="circle"
+      data-cursor-label="Explore service"
       onPointerEnter={(event) => {
         if (event.pointerType !== "touch") setActive(true);
       }}

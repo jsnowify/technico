@@ -99,18 +99,12 @@ export default function Qualify() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(260px,0.75fr)] lg:gap-12">
             <h2 className="h2-section max-w-[22ch] leading-[1.08] font-medium tracking-heading text-white">
               Outshine your competition and secure top rankings on search engine
-              result pages{" "}
-              <span className="text-purple-secondary underline decoration-1 underline-offset-2">
-                (SERPs)
-              </span>
+              result pages (SERPs)
             </h2>
             <p className="body-copy max-w-[48ch] leading-[1.6] tracking-[-0.02em] text-content uppercase lg:pt-1">
               If any of these questions resonate with your business goals, then
-              book a strategy call to explore our{" "}
-              <span className="text-purple-secondary underline decoration-1 underline-offset-2">
-                digital marketing solutions
-              </span>
-              , designed specifically to support your needs, budget, and
+              book a strategy call to explore our digital marketing solutions,
+              designed specifically to support your needs, budget, and
               aspirations.
             </p>
           </div>

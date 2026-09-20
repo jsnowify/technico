@@ -37,6 +37,8 @@ function renderAnswer(
       href={link.href}
       target="_blank"
       rel="noopener noreferrer"
+      data-cursor="circle"
+      data-cursor-label="Explore"
       className="underline underline-offset-4 hover:text-accent-light"
     >
       {match}

@@ -4,6 +4,7 @@ import { useRef, useSyncExternalStore } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import { FEEDBACK, type FeedbackItem } from "@/lib/constants";
+import CursorLabel from "@/components/ui/CursorLabel";
 import PixelRevealImage from "./PixelRevealImage";
 
 const LOOP_ITEMS = [...FEEDBACK, ...FEEDBACK];
@@ -148,16 +149,7 @@ export default function Feedback() {
           opacity: 0,
         });
 
-        const moveX = gsap.quickTo(pill, "x", {
-          duration: 0.42,
-          ease: "power3.out",
-        });
-        const moveY = gsap.quickTo(pill, "y", {
-          duration: 0.42,
-          ease: "power3.out",
-        });
-
-        const positionPill = (event: PointerEvent, immediate = false) => {
+        const positionPill = (event: PointerEvent) => {
           const bounds = wrapper.getBoundingClientRect();
           const halfWidth = pill.offsetWidth / 2;
           const halfHeight = pill.offsetHeight / 2;
@@ -169,11 +161,9 @@ export default function Feedback() {
             Math.max(event.clientY - bounds.top, halfHeight),
             bounds.height - halfHeight,
           );
-          if (immediate) gsap.set(pill, { x, y });
-          else {
-            moveX(x);
-            moveY(y);
-          }
+          // Cursor position is deliberately 1:1. Only the tooltip's
+          // enter/exit scale is eased; its movement never trails behind.
+          gsap.set(pill, { x, y });
         };
 
         const handlePointerMove = (event: PointerEvent) => {
@@ -212,7 +202,7 @@ export default function Feedback() {
           const handleCardEnter = (event: PointerEvent) => {
             pillName.textContent = `${possessive(card.dataset.feedbackName ?? "Client")} story`;
             pill.style.willChange = "transform, opacity";
-            positionPill(event, true);
+            positionPill(event);
             gsap.killTweensOf(marquee);
             gsap.to(marquee, {
               timeScale: HOVER_SPEED,
@@ -372,13 +362,12 @@ export default function Feedback() {
             ))}
           </div>
 
-          <span
+          <CursorLabel
             ref={pillRef}
-            aria-hidden="true"
-            className="pointer-events-none absolute top-0 left-0 z-10 flex items-center border border-black-bg/20 bg-accent px-5 py-3 font-mono text-xs tracking-[-0.025em] text-black-bg uppercase whitespace-nowrap opacity-0"
+            className="absolute top-0 left-0 z-10 opacity-0"
           >
-            <span ref={pillNameRef} className="font-medium" />
-          </span>
+            <span ref={pillNameRef}>Client story</span>
+          </CursorLabel>
         </div>
       )}
 

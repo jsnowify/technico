@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import GridCorners from "@/components/ui/GridCorners";
 import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
@@ -11,16 +12,40 @@ interface CtaLink {
 interface CtaProps {
   title?: ReactNode;
   description?: string;
+  /** Optional inline link inside `description` — `label` must be an exact substring. */
+  descriptionLink?: CtaLink;
   cta?: CtaLink;
   className?: string;
   wide?: boolean;
   eyebrow?: string;
 }
 
+function renderDescription(description: string, link?: CtaLink) {
+  if (!link) return description;
+  const index = description.indexOf(link.label);
+  if (index === -1) return description;
+
+  return (
+    <>
+      {description.slice(0, index)}
+      <Link
+        href={link.href}
+        data-cursor="circle"
+        data-cursor-label="Explore"
+        className="underline underline-offset-4 hover:text-accent-light"
+      >
+        {link.label}
+      </Link>
+      {description.slice(index + link.label.length)}
+    </>
+  );
+}
+
 /** Shared editorial CTA: one connected grid and one purposeful hover motion. */
 export default function Cta({
   title = "We go the extra mile to help you",
   description = "Fulfill your business plans with targeted digital marketing strategies. Partner with us today and see competitive results.",
+  descriptionLink,
   cta = { label: "Book A Call", href: "#" },
   className = "",
   wide = false,
@@ -53,7 +78,7 @@ export default function Cta({
                 wide ? "max-w-[76ch]" : "max-w-[56ch]"
               }`}
             >
-              {description}
+              {renderDescription(description, descriptionLink)}
             </p>
             <div className="mt-8 flex w-full max-w-full justify-center sm:mt-10">
               <Button to={cta.href} variant="purple-fill" size="lg">

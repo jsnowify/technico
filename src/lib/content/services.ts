@@ -92,6 +92,10 @@ const services: Service[] = [
         paragraphs: [
           {
             text: "Get found locally. Grow your business nationally. Struggling to turn website traffic into actual sales? Technico Digital Solutions provides search engine optimization services in Canada to help your business get found by the right people and turn search visibility into quality leads.",
+            link: {
+              label: "search engine optimization services",
+              href: "https://technicosolutions.com/services/search-engine-optimization/",
+            },
           },
           {
             text: "Our SEO services include keyword research, technical SEO, on-page and off-page SEO, link building, local SEO, international SEO, and ongoing optimization. We use these strategies to improve how search engines understand, rank, and surface your website for searches that matter to your business. Instead of chasing traffic for the sake of traffic, our SEO strategists focus on building visibility, authority, and engagement with your target market.",
@@ -109,54 +113,61 @@ const services: Service[] = [
         type: "highlights",
         eyebrow: "Custom SEO",
         headline: "Custom SEO Services That Align With Your Business Goals",
+        paragraph:
+          "Let our Search Engine Optimization (SEO) services help your business climb the search engine results pages (SERPs) and reach your target audience.",
+        cta: { label: "Get Custom SEO", href: "/contact" },
         items: [
           {
             icon: 0,
             title: "Keyword Research",
             description:
-              "Keyword Research Identifies The Search Terms Your Target Market Uses To Find Products, Services, And Information Related To Your Business. From There, We Strategically Optimize Your Web Pages With Targeted Keywords To Improve Your Rankings And Make Sure Your Content Resonates With The Right Audience.",
+              "Keyword research identifies the search terms your target market uses to find products, services, and information related to your business. From there, we strategically optimize your web pages with targeted keywords to improve your rankings and make sure your content resonates with the right audience.",
           },
           {
             icon: 1,
             title: "Link Building",
             description:
-              "Link Building Helps Strengthen Your Website's Authority By Earning Quality Backlinks From Relevant And Trusted Websites. Our Link-Building Strategy Focuses On Securing Quality Backlinks From Trusted Websites In Your Industry, These Links Will Boost Your Authority And Help Your Business Rank Higher On Search Results, By Using White-Hat SEO Techniques, Your Rankings Grow Naturally And Sustainably.",
+              "Link building helps strengthen your website’s authority by earning quality backlinks from relevant and trusted websites. Our link-building strategy focuses on securing quality backlinks from trusted websites in your industry. These links will boost your authority and help your business rank higher on search results. By using white-hat SEO techniques, your rankings grow naturally and sustainably.",
           },
           {
             icon: 2,
             title: "Technical SEO",
             description:
-              "Technical SEO Improves How Search Engines Crawl, Index, And Understand Your Website. Our Technical SEO Services Include Site Audits, Fixing Technical Errors, And Addressing Issues That Slow Down Your Website. By Improving Your Site's Performance, We Make It Easier For Search Engines To Crawl Your Content And Increase Your Brand Visibility Across Search Engines.",
+              "Technical SEO improves how search engines crawl, index, and understand your website. Our technical SEO services include site audits, fixing technical errors, and addressing issues that slow down your website. By improving your site’s performance, we make it easier for search engines to crawl your content and increase your brand visibility across search engines.",
           },
           {
             icon: 3,
             title: "Local SEO",
             description:
-              "Local SEO Helps Your Business Appear In Search Results When Potential Customers Look For Services In Your Area. We Optimize Your Google Business Profile And Other Local Search Signals To Improve Your Visibility For Nearby Searches, Attract High-Intent Traffic, And Grow Your Local Presence.",
+              "Local SEO helps your business appear in search results when potential customers look for services in your area. We optimize your Google Business Profile and other local search signals to improve your visibility for nearby searches, attract high-intent traffic, and grow your local presence.",
           },
           {
             icon: 4,
             title: "International SEO",
             description:
-              "International SEO Helps Search Engines Serve The Right Version Of Your Website To Users In Different Countries, Regions, And Languages. We Optimize Your Website For International Search Visibility So You Can Expand Your Reach Across Markets Without Losing Focus On The Customers Most Relevant To Your Business.",
+              "International SEO helps search engines serve the right version of your website to users in different countries, regions, and languages. We optimize your website for international search visibility so you can expand your reach across markets without losing focus on the customers most relevant to your business.",
           },
           {
             icon: 5,
             title: "On-Page SEO",
             description:
-              "On-Page SEO Optimizes Individual Web Pages So Search Engines Can Better Understand Their Content And Users Can Find Relevant Information. We Fine-Tune Elements Such As Page Content, Title Tags, Meta Descriptions, And Other On-Page Signals To Improve Your Website's Relevance And Visibility In Search Results.",
+              "On-page SEO optimizes individual web pages so search engines can better understand their content and users can find relevant information. We fine-tune elements such as page content, title tags, meta descriptions, and other on-page signals to improve your website’s relevance and visibility in search results.",
           },
           {
             icon: 6,
             title: "Off-Page SEO",
             description:
-              "Off-Page SEO Builds Your Website's Authority And Reputation Through Signals Beyond Your Own Website. This Can Include Link Building, Digital Mentions, Reputation Management, And Other Strategies That Strengthen Your Website's Credibility And Support Higher Search Rankings.",
+              "Off-page SEO builds your website’s authority and reputation through signals beyond your own website. This can include link building, digital mentions, reputation management, and other strategies that strengthen your website’s credibility and support higher search rankings.",
           },
           {
             icon: 7,
             title: "White Hat SEO",
             description:
-              "White Hat SEO Uses Search Optimization Techniques That Follow Search Engine Guidelines And Focus On Sustainable Organic Growth. We Avoid Keyword Stuffing And Black-Hat Tactics And Focus Instead On Useful Content, Relevant Optimization, And Strategies Intended To Build Lasting Search Visibility.",
+              "White hat SEO uses search optimization techniques that follow search engine guidelines and focus on sustainable organic growth. We avoid keyword stuffing and black-hat tactics and focus instead on useful content, relevant optimization, and strategies intended to build lasting search visibility.",
+            link: {
+              label: "White hat SEO",
+              href: "https://ahrefs.com/blog/white-hat-seo/",
+            },
           },
         ],
       },
@@ -175,7 +186,10 @@ const services: Service[] = [
           { text: "Clear, Compelling CTAs To Lead Them To Conversion." },
           {
             text: "Conversion Rate Optimization (CRO) Tactics To Boost ROI.",
-            emphasis: "Conversion Rate Optimization",
+            link: {
+              label: "Conversion Rate Optimization",
+              href: "https://digitalmarketinginstitute.com/blog/what-is-conversion-rate-optimization-cro",
+            },
           },
         ],
       },
@@ -290,6 +304,10 @@ const services: Service[] = [
           "Technico Digital Solutions — Bringing Your Business to New Heights",
         description:
           "Let our proven SEO strategy help you achieve the SEO results you're aiming for and take your business to the next level. By partnering with Technico Digital Solutions, the trusted digital marketing agency in Canada, we can unlock your business's maximum potential and drive more visitors, improve your search engine rankings, and ultimately boost your revenue growth.",
+        descriptionLink: {
+          label: "digital marketing agency in Canada",
+          href: "https://technicosolutions.com/",
+        },
         cta: { label: "Contact Us Today", href: "/contact" },
         wide: true,
         spacing: "tight-bottom",
@@ -303,7 +321,10 @@ const services: Service[] = [
             question: "Is It Worth Paying Someone To Do SEO?",
             answer:
               "Yes, Paying For Professional SEO Services Is Definitely Worth It. Search Engine Marketing (SEM) Requires Expertise To Achieve Good, Long-Term Results. A Dedicated SEO Expert Creates A Strategy That Improves Your Website's Ranking, Drives Quality Traffic, And Increases Conversions. Professional Services Guarantee You're Not Leaving Your Business Success To Chance.",
-            emphasis: "Search Engine Marketing",
+            link: {
+              label: "Search Engine Marketing",
+              href: "https://www.techtarget.com/searchcontentmanagement/definition/Search-engine-marketing-SEM",
+            },
           },
           {
             question: "Can ChatGPT Do SEO?",
@@ -355,6 +376,10 @@ const services: Service[] = [
         paragraphs: [
           {
             text: "Your website should do more than sit online. We turn your website into a moving business tool. Technico Digital Solutions is a website design and development company in Canada that builds custom, responsive websites for businesses. Our website design and development services combine user-focused design, development, website performance, SEO, and integrations to create sites that look professional, work across devices, and support your business goals.",
+            link: {
+              label: "website design and development services",
+              href: "https://technicosolutions.com/services/website-design-and-development/",
+            },
           },
           {
             text: "We bring strategy, technology, and creativity together to build an online presence that attracts the right visitors and supports conversions. From launching a new website to updating an existing one, our team focuses on creating a site that works for your business and your customers.",
@@ -448,16 +473,17 @@ const services: Service[] = [
       {
         type: "featuresSplit",
         eyebrow: "Website Features",
-        headline: "Get The Website Features Your Business Needs",
+        headline: "Get the Website Features Your Business Needs",
         paragraphs: [
-          "Your website should do more than look good. It should work for your business. You don't need to understand technical terms like databases, CRM integrations, SSO, or web-based programs before starting a website project. Yet ultimately, you need your website to help you do, whether that's taking payments, managing bookings, collecting enquiries, giving members secure access, connecting with your CRM, or creating tools your team can use behind the scenes. Marketing strategists at Technico can recommend, and build the right website features around how your business operates and how your customers use your site.",
+          "Your website should do more than look good. It should work for your business.",
+          "You don’t need to understand technical terms like databases, CRM integrations, SSO, or web-based programs before starting a website project. Tell us what you need your website to help you do, whether that’s taking payments, managing bookings, collecting enquiries, giving members secure access, connecting with your CRM, or creating tools your team can use behind the scenes. Marketing strategists at Technico can recommend and build the right website features around how your business operates and how your customers use your site.",
         ],
         // TODO: placeholder — swap for a real photo once one's picked.
         image: {
           src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788771108/temporary-placeholder/temporary_igtmhz.jpg",
           alt: "",
         },
-        listHeading: "Database-Driven Custom Solutions Include",
+        listHeading: "Database-driven custom solutions include:",
         items: [
           { text: "Mobile and user-friendly, responsive website" },
           {
@@ -466,7 +492,10 @@ const services: Service[] = [
           { text: "Shopping carts, e-commerce, and payment integration" },
           {
             text: "Single Sign-On (SSO) and password-protected content",
-            emphasis: "Single Sign-On (SSO)",
+            link: {
+              label: "Single Sign-On",
+              href: "https://heimdalsecurity.com/blog/what-is-sso-single-sign-on-explained/",
+            },
           },
           { text: "Online polls and surveys" },
           { text: "Tools for digital marketing services" },
@@ -483,7 +512,7 @@ const services: Service[] = [
         eyebrow: "Responsive . Design",
         headline: "Responsive Web\nDesign Services",
         paragraph:
-          "Web Design And SEO Are Closely Connected Because The Way A Website Is Built And Presented Can Affect How Easily People Use It And How Well Search Engines Access Its Content. Responsive Design Helps Your Website Work Across Mobile, Tablet, And Desktop Devices, While Clear Navigation And Page Structure Make It Easier For Visitors To Find What They Need. Our Web Designers Also Consider Factors That Can Influence Search Performance, Including Page Speed, Core Web Vitals, Mobile Usability, Crawlability, And Content Structure. Custom Web Design Does Not Improve Rankings On Its Own, But A Well-Built Website Can Create A Stronger Technical And User-Experience Foundation For SEO.",
+          "Web design and SEO are closely connected because the way a website is built and presented can affect how easily people use it and how well search engines access its content. Responsive design helps your website work across mobile, tablet, and desktop devices, while clear navigation and page structure make it easier for visitors to find what they need.\n\nOur web designers also consider factors that can influence search performance, including page speed, Core Web Vitals, mobile usability, crawlability, and content structure. Custom web design does not improve rankings on its own, but a well-built website can create a stronger technical and user-experience foundation for SEO.",
         // TODO: placeholder — swap for the real phone-mockup + sketch-pages photo.
         image: {
           src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788771108/temporary-placeholder/temporary_igtmhz.jpg",
@@ -491,14 +520,14 @@ const services: Service[] = [
         },
         cta: { label: "Let's Connect", href: "/contact" },
         checklist: [
-          "Responsive For Desktop, Tablet, & Mobile",
-          "Clear Navigation And Page Structure",
-          "Fast-Loading Pages And Performance Improvements",
-          "Mobile Usability",
+          "Responsive for desktop, tablet, & mobile",
+          "Clear navigation and page structure",
+          "Fast-loading pages and performance improvements",
+          "Mobile usability",
           "Core Web Vitals",
-          "Search-Friendly Content Structure",
-          "Visual Consistency Across The Website",
-          "Layouts That Support SEO & Content",
+          "Search-friendly content structure",
+          "Visual consistency across the website",
+          "Layouts that support SEO & Content",
         ],
       },
       {
@@ -596,17 +625,17 @@ const services: Service[] = [
         type: "introPanel",
         eyebrow: "Technico",
         headline:
-          "Technico Digital Solutions For Data-Driven And Professional Web Design And Development",
+          "Technico Digital Solutions For Data-Driven and Professional Web Design and Development",
         paragraphs: [
           {
-            text: "Web Design And Development Is A Marketing Strategy You Need To Create A Trusted Website That Your Customers Will Enjoy. Website Design And Development Is Not Just About Aesthetics; It Also Includes Factors Like Loading Speed, Menu Design, Accessibility, And Overall User Experience.",
+            text: "Web design and development is a marketing strategy you need to create a trusted website that your customers will enjoy. Website design and development is not just about aesthetics; it also includes factors like loading speed, menu design, accessibility, and overall user experience.",
           },
           {
-            text: "While Some Platforms Allow You To Customize A Website Easily, They Don't Cover Everything Your Business Needs. That's Why It's Necessary To Hire Professional Website Developers And Designers. Partner With Technico Digital Solutions, A Digital Marketing Company, To Build A Website That Looks Great, Performs Flawlessly, And Drives Results.",
-            // TODO: confirm destination — defaulted to the services
-            // list since none of the 6 services is specifically
-            // "digital marketing".
-            link: { label: "Digital Marketing Company", href: "/services" },
+            text: "While some platforms allow you to customize a website easily, they don’t cover everything your business needs. That’s why it’s necessary to hire professional website developers and designers. Partner with Technico Digital Solutions, a digital marketing company, to build a website that looks great, performs flawlessly, and drives results.",
+            link: {
+              label: "digital marketing company",
+              href: "https://technicosolutions.com/",
+            },
           },
         ],
         // TODO: placeholder — swap for the real cube-grid photo once
@@ -624,10 +653,9 @@ const services: Service[] = [
         items: [
           {
             question:
-              "Why Is Website Design And Online Marketing Important For My Business?",
+              "Why is website design and online marketing important for my business?",
             answer:
-              "Acts As A Company's Online Storefront To Showcase Professionalism, Values, And Brand Identity. A Company's Website Serves As The Initial Point Of Contact With Prospective Clients. As A Result, It Is Essential In Forming Their Opinions And Affecting Their Choices. A Stanford University Study Found That 75% Of Users Base Their Opinion Of A Company's Credibility Solely On Its Website Design.",
-            emphasis: "Stanford University",
+              "Acts as a company’s online storefront to showcase professionalism, values, and brand identity. A company’s website serves as the initial point of contact with prospective clients. As a result, it is essential in forming their opinions and affecting their choices. A Stanford University study found that 75% of users base their opinion of a company’s credibility solely on its website design.",
           },
           {
             question:
@@ -731,7 +759,7 @@ const services: Service[] = [
         description:
           "Visual Design Can Shape How People Judge A Business Online Before They Spend Much Time Reading Its Content. In Stanford's Web Credibility Research, 46.1% Of Comments About Website Credibility Referred To The Site's Design, Including Its Layout, Typography, Images, White Space, And Colour Scheme. People Form Visual Impressions Of Websites Remarkably Quickly. Another Research Published By Google Found That A Website's Visual Complexity Can Influence Aesthetic Judgments Within The First 50 Milliseconds Of Viewing It. Our Designers Create Visuals Around Your Brand, Audience, And Marketing Channel So The Creative Remains Consistent While Still Serving The Purpose Of Each Campaign.",
         descriptionLink: {
-          label: "Stanford's",
+          label: "Stanford's Web Credibility Research",
           href: "https://credibility.stanford.edu/pdf/How_Do_People_Evaluate_a_Web_Site%27s_Credibility_v37.pdf",
         },
         items: [
@@ -937,6 +965,10 @@ const services: Service[] = [
           },
           {
             text: "Our digital marketing services agency integrates design, content, and web development to create a cohesive online presence that drives impressive results. With direct access to our specialists, you get clear communication, a strategic approach, and faster execution at every stage. If you're revamping your website or launching a new campaign, we're here to help you stand out. Get in touch with us today, and let's transform your brand's digital presence.",
+            link: {
+              label: "digital marketing services agency",
+              href: "https://technicosolutions.com/",
+            },
           },
         ],
         // TODO: placeholder — swap for the real cube-grid photo once
@@ -1014,15 +1046,18 @@ const services: Service[] = [
       {
         type: "hero",
         eyebrow: "Media Buying & Digital Advertising",
-        headline: "Your Partner In Media Buying And Digital Growth",
+        headline: "Strategic Media Buying For Businesses Across Vancouver",
         paragraphs: [
           { text: "Target Smarter. Spend Wiser. Grow Faster." },
           {
-            text: "Technico Digital Solutions, A Digital Advertising Company, Understands Exactly What Your Business Needs — From Media Buying To Cutting-Edge Online Marketing. As A Full-Service Marketing Agency, We Handle Every Aspect Of Your Marketing Strategy. So Sit Back, Relax, And Watch Your Business Grow With Technico Digital Solutions.",
+            text: "As a digital advertising company, we at Technico help you plan and manage media buying across paid search, PPC, and social media. Your campaign goals and target audience guide where your ads appear, who they reach, and how your advertising budget is allocated.",
             link: {
-              label: "Digital Advertising Company",
+              label: "digital advertising company",
               href: "https://technicosolutions.com/services/media-buying-and-digital-advertising/",
             },
+          },
+          {
+            text: "From campaign setup and audience targeting to ad placement, budget allocation, monitoring, and ongoing optimization, our digital marketers keep a close eye on where your money is going and what it’s producing. Put your advertising budget where it has the strongest opportunity to reach the right people and generate results. Let the Technico team help you make every campaign count.",
           },
         ],
       },
@@ -1040,76 +1075,98 @@ const services: Service[] = [
       {
         type: "highlights",
         eyebrow: "Digital Marketing Services",
-        headline: "Our Digital Marketing Services For Business Growth",
+        headline: "Put Your Ad Budget Where It Works Hardest",
         paragraph:
-          "A Digital Marketing Agency Doesn't Simply Post Online Without Research And Careful Planning. What Our Digital Marketing Company Does Is Offer Multiple Solutions, As Not All Fit Every Type Of Business. Here's What You Can Find At Technico Digital Solutions.",
-        subheading: {
-          title: "Digital Marketing Services",
-          paragraph:
-            "The Online World Is Saturated, And It May Seem Like There's No Hope Of Getting Your Business Noticed, But With The Right Strategy, It's Possible. Our Internet Marketing Agency Works To Create Multiple Strategies To Determine What's Best For Your Business.",
-        },
+          "Media buying is the process of selecting and purchasing advertising placements across relevant channels to reach a defined audience within a specific budget. It includes media planning, platform selection, audience targeting, ad placement, budget allocation, campaign monitoring, and ongoing optimization. Technico Digital Solutions manages this process across paid search, PPC, and social media advertising. We help you decide where your ads should run, how your budget should be distributed, which audiences to target, and how campaigns should be adjusted based on performance.",
+
         items: [
           {
             icon: 0,
             title: "Search Engine Marketing (SEM)",
             description:
-              "Boost Your Brand On Search Engines Through Data-Driven Strategies. Our Campaigns Combine Paid Search And Search Engine Optimization Techniques To Help Your Business Appear Where Your Customers Are.",
+              "SEM puts your business in front of people actively searching for products or services like yours. Technico plans and manages paid search campaigns around relevant keywords, search intent, audience location, ad messaging, and budget. Platforms & Tools: Google Ads, Microsoft Advertising, Google Keyword Planner, Google Analytics 4",
           },
           {
             icon: 1,
             title: "Pay-Per-Click Advertising (PPC)",
             description:
-              "Reach The Right Audience At The Right Time With Targeted PPC And Google Ads Campaigns. We Create And Manage Strategies That Maximize Clicks, Conversions, And ROI, So Every Dollar You Spend Brings Measurable Results.",
+              "PPC is an advertising model where you pay when someone clicks your ad. Technico manages PPC campaigns by setting budgets, choosing targeting criteria, monitoring cost per click and conversions, testing ads, and adjusting bids based on campaign performance. Platforms & Tools: Google Ads, Microsoft Advertising, Google Analytics 4, Google Tag Manager",
           },
           {
             icon: 2,
-            title: "Social Media Marketing (SMM)",
+            title: "Paid Social Advertising",
             description:
-              "Engage, Connect, And Grow Your Audience Through Social Media Campaigns. From Creative Content To Paid Promotions, We Help Your Brand Stand Out On Platforms Like Facebook, Instagram, LinkedIn, And More.",
+              "Paid social advertising places sponsored content in front of selected audiences on social media platforms. We use audience targeting based on factors such as location, interests, demographics, behaviour, and customer data to reach relevant users. Platforms & Tools: Meta Ads Manager, LinkedIn Campaign Manager, TikTok Ads Manager, Google Analytics 4",
           },
         ],
+        closingParagraph:
+          "These channels can work separately or as part of one media buying strategy. SEM uses paid search campaigns to reach people already searching for relevant products or services, while paid social helps you reach and re-engage targeted audiences across social platforms. PPC, on the other hand, describes the payment model where you pay when someone clicks your ad. PPC can be used across search, display, social media, and other digital advertising channels.",
       },
       {
         type: "highlights",
         eyebrow: "Media Buying Services",
-        headline:
-          "Media Buying Services That Put Your Brand In Front Of The Right Audience",
+        headline: "How We Manage Your Media Buying",
         paragraph:
-          "Your Brand Message Reaches The Right Audience Through The Most Effective Channels. We Analyze Market Trends, Negotiate The Best Ad Placements, And Optimize Campaigns To Deliver Maximum Exposure And ROI.",
+          "Media buying involves more than purchasing ad space. At Technico Digital Solutions, we plan where your advertising budget should go, identify the audiences and channels worth targeting, manage digital media purchases and placements, and monitor campaign performance. Each decision is based on your audience, budget, campaign goals, and the results your ads generate.",
         items: [
           {
             icon: 3,
-            title: "Purchasing High-End Digital Media",
+            title: "Media Planning & Strategy",
             description:
-              "Make The Most Of Your Digital Advertising Efforts And Achieve Results By Using Our Digital Media Buying Services To Efficiently Target Your Audience Across Multiple Online Platforms.",
+              "Your media plan defines how your advertising budget will be used based on your goals, target market, and campaign priorities. It identifies which channels to use, how much budget to allocate, and how to structure your campaigns before advertising begins.",
           },
           {
             icon: 4,
-            title: "Unorthodox Advertising",
+            title: "Audience & Channel Targeting",
             description:
-              "Unconventional Marketing Services Spark Conversation About Your Brand. We Explore Innovative Marketing Techniques That Capture Attention And Engage Your Audience.",
+              "Your ads target specific audiences across the channels most relevant to your campaign. Targeting can consider search intent, location, demographics, interests, behaviours, and existing customer audiences, depending on the advertising platform.",
           },
           {
             icon: 5,
-            title: "Media Planning And Management",
+            title: "Digital Media Buying",
             description:
-              "Create Specialized Media Strategies Based On Your Target Market, Budget, And Business Goals. Our Team Manages Placements And Optimizes Campaigns For Maximum Reach And Impact.",
+              "We allocate your advertising budget across the digital platforms and campaigns included in your media plan. Bids, spending, and budget distribution are managed based on campaign priorities and performance, so more of your investment can be directed toward opportunities producing stronger results.",
           },
           {
             icon: 6,
-            title: "Placements Of Digital Ads",
+            title: "Ad Placement & Campaign Management",
             description:
-              "Make The Most Of Your Digital Advertising Efforts By Placing Your Ads In Strategic Locations. To Reach Your Target Audience Online, Our Team Will Determine The Best Placements And Channels.",
+              "Your ads are placed across selected platforms, placements, and audience segments based on your media strategy. Once campaigns are live, we monitor clicks, conversions, costs, and audience response so we can adjust targeting, placements, bids, and budgets as performance data comes in.",
+          },
+        ],
+        closingParagraph:
+          "Campaign measurement guides where your advertising budget goes next. If one audience, channel, keyword, placement, or campaign delivers stronger results at an acceptable cost, you can direct more budget toward it. You can adjust underperforming campaigns by changing targeting, bids, placements, creative, landing pages, or budget allocation.",
+      },
+      {
+        type: "insights",
+        // TODO: placeholder — swap for the real photo once one's picked.
+        image: {
+          src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788771108/temporary-placeholder/temporary_igtmhz.jpg",
+          alt: "",
+        },
+        headline:
+          "Delivering High-Performance Marketing To Multiple Industries",
+        intro:
+          "Getting to the top of organic search results can take time, especially when your business competes for keywords already targeted by established websites. The difficulty varies by industry, location, keyword, and the strength of the businesses already ranking. That is where paid media can help fill the gap while your organic visibility develops.",
+        items: [
+          {
+            title: "When Paid Search Can Make Sense Alongside SEO",
+            description:
+              "SEO and paid advertising serve different purposes. SEO builds organic visibility over time, while paid search can put your business in front of people searching for your services as soon as a campaign is running. For competitive searches, using both can give your business immediate paid visibility while you work toward stronger organic rankings.\n\nFor example, a law firm entering a competitive market could use PPC to appear for selected legal searches while building out service pages and organic authority. A solar company could run paid campaigns around high-intent installation searches, while a car detailing business could target people searching within specific service areas.",
+          },
+          {
+            title: "How PPC Costs Work",
+            description:
+              "With PPC advertising, you pay when someone clicks your ad rather than simply paying to appear in search results. The amount you pay for each click is not fixed. Cost-per-click estimates can range from a few dollars to considerably more depending on the keyword, industry, location, audience, competition, and commercial value of the search.\n\nLet’s say, if a keyword has an estimated $10 cost per click and your campaign receives 100 paid clicks, the click cost would be roughly $1,000 before management fees or other campaign costs. The actual amount can be higher or lower because advertisers compete through real-time ad auctions.\n\nThe cheapest click isn’t necessarily the goal. A $15 click that generates a qualified customer can be more valuable than a $3 click from someone unlikely to buy. Campaign performance should therefore be evaluated using conversions, cost per lead, customer acquisition cost, and return on ad spend, not CPC alone.",
           },
         ],
       },
       {
         type: "featuresSplit",
         eyebrow: "Industries We Serve",
-        headline:
-          "Delivering High-Performance Marketing To Multiple Industries",
+        headline: "Your Industry Changes The Media Buying Strategy",
         paragraphs: [
-          "Regardless Of The Sector, Our Team Uses Innovative Solutions And Data-Driven Insights To Increase Growth, Engagement, And Visibility.",
+          "Advertising competition isn’t equal across industries. Legal services, medical services, home services, automotive businesses, construction companies, renewable energy providers, and hospitality businesses can face very different search competition, CPCs, customer values, and buying cycles. That is why your media plan should consider your industry, target location, keyword competition, estimated CPC, search intent, conversion value, and available budget before deciding where your advertising dollars should go.",
         ],
         listHeading: "Industries We Work With",
         items: [
@@ -1132,28 +1189,33 @@ const services: Service[] = [
       {
         type: "imageStatement",
         eyebrow: "Digital Advertising Funnels",
-        headline:
-          "Take Control Of Every Channel With Effective Digital Advertising",
+        headline: "Building Paid Campaigns Around Leads, Not Just Clicks",
         // TODO: placeholder — swap for the real photo once one's picked.
         image: {
           src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788771108/temporary-placeholder/temporary_igtmhz.jpg",
           alt: "",
         },
         paragraph:
-          "Don't Waste Money On Ineffective Advertisements. We Create High-Performing Advertising Funnels That Automatically Generate Leads, Nurture Prospects, And Close Deals On Google, Meta, LinkedIn, And Other Platforms. By Building Strong Client Relationships, Our Tried-And-True System Has Helped Clients Committed To Growth Achieve Consistent Revenue.",
+          "Advertising works best when every dollar has a purpose and every campaign has a clear objective. Your media buying strategy determines how you use that budget within the campaign. You can adjust bids, shift spending between campaigns, and allocate more or less budget to different audiences, channels, and ad placements based on performance. The goal isn’t simply to buy more clicks; it’s to decide where, when, and how your advertising budget should be spent to reach the intended audience efficiently. Don’t waste money on ineffective advertisements. We create high-performing advertising funnels that automatically generate leads, nurture prospects, and close deals on Google, Meta, LinkedIn, and other platforms. By building strong client relationships, our tried-and-true system has helped clients committed to growth achieve consistent revenue.",
         bullets: [
-          "Create A Complete Sales Funnel, From Click To Customer, Rather Than Just Running Advertisements.",
-          "Pre-Qualify Prospects To Increase The Effectiveness And Efficiency Of Your Lead Generation.",
-          "Made To Make The Transition From Stranger To Buyer As Smooth As Possible.",
-          "You'll Be Fully Aware Of What's Generating Income And What's Working.",
+          {
+            text: "Create a complete sales funnel, from click to customer, rather than just running advertisements.",
+            link: {
+              label: "sales funnel",
+              href: "https://builtin.com/articles/sales-funnel",
+            },
+          },
+          "Pre-qualify prospects to increase the effectiveness and efficiency of your lead generation.",
+          "Made to make the transition from stranger to buyer as smooth as possible.",
+          "You’ll be fully aware of what’s generating income and what’s working.",
         ],
       },
       {
         type: "cta",
         title:
-          "Don't Spend Money On Ads Without Knowing Which Campaigns Actually Work",
+          "Don’t spend money on ads without knowing which campaigns actually work.",
         description:
-          "Partner With Technico Digital Solutions To Identify And Implement The Most Effective Campaigns For Your Website Or Business.",
+          "Partner with Technico Digital Solutions to identify and implement the most effective campaigns for your website or business.",
         cta: { label: "Grow Your Business Strategically", href: "/contact" },
         spacing: "tight-bottom",
       },
@@ -1163,10 +1225,14 @@ const services: Service[] = [
         headline: "The #1 Digital Advertising Company For Your Business",
         paragraphs: [
           {
-            text: "Technico Digital Solutions Is Home To An Experienced Team Of Media Buying And Digital Advertising Professionals. You'll Be Leaving Your Business In Good Hands — Every Dollar You Spend Comes Back Twice With Real Leads And Real Customers.",
+            text: "Technico Digital Solutions is home to an experienced team of media buying and digital advertising professionals. You’ll be leaving your business in good hands. Every dollar you spend comes back twice with real leads and real customers. Grow with our digital marketing agency Canada.",
+            link: {
+              label: "digital marketing agency Canada",
+              href: "https://technicosolutions.com/",
+            },
           },
           {
-            text: "We Also Offer Web Development, Web Design, Email Marketing, Social Media Marketing, And Social Media Management To Support The Rest Of Your Digital Presence.",
+            text: "For other services, we also offer web development, web design, email marketing, social media marketing, social media management, and strategies to improve search engine rankings and social media engagement.",
           },
         ],
         // TODO: placeholder — swap for the real photo once one's
@@ -1185,19 +1251,29 @@ const services: Service[] = [
             question:
               "Should I Work With A Local Digital Advertising Company For My Business?",
             answer:
-              "Yes, hiring a local digital advertising company understands the local market, audience, and competition. Working with a local team also makes communication easier and faster. They can provide personalized strategies to help you achieve your business goals and generate more leads and sales.",
+              "Yes, working with a local digital advertising company and a digital marketing agency gives you a clear advantage because they understand your local market, audience, and competition. A local team also makes communication easier and faster. They can create personalized strategies across digital platforms to increase website traffic, generate more qualified leads, and drive sales while aligning with your business goals.",
           },
           {
             question: "Should Small Businesses Hire A Marketing Agency?",
             answer:
-              "Yes, small businesses can benefit greatly from hiring a marketing agency. Agencies bring expertise, tools, and strategies that may be difficult to manage in-house. Even on a limited budget, a marketing agency can provide solutions to grow your business effectively.",
+              "Yes, small businesses can benefit greatly from hiring a marketing agency. Agencies bring expertise, tools, and strategies that may be difficult to manage in-house. Even on a limited budget, they can provide solutions to grow your business effectively.",
           },
           {
             question:
               "How Long Does It Take To See Results After Hiring A Digital Advertising Company?",
             answer:
-              "Results are not instantaneous, and success takes time. Significant progress usually happens within three to six months. Paid ads (PPC) can bring quick visibility, but those results stop once you stop paying. SEO, on the other hand, builds long-term authority by helping your website rank organically.",
+              "Results are not instantaneous, and success takes time. Most successful campaigns start showing meaningful progress within three to six months. Paid ads (PPC) can deliver quick brand visibility, but those results stop once you stop paying. SEO and integrated campaigns, on the other hand, build long-term authority by increasing organic traffic and helping your website rank organically.",
             emphasis: "PPC",
+          },
+          {
+            question: "What is the difference between SEM and PPC?",
+            answer:
+              "Search engine marketing (SEM) focuses on increasing your visibility in search results through paid advertising. Pay-per-click (PPC) is an advertising model where you pay when someone clicks your ad. PPC is commonly used for paid search campaigns, while it can also apply to ads on other digital platforms.",
+          },
+          {
+            question: "How do you measure paid advertising performance? ",
+            answer:
+              "Paid advertising performance is measured against your campaign goals using metrics such as impressions, clicks, click-through rate (CTR), cost per click (CPC), conversions, and cost per conversion or lead. When revenue tracking is available, return on ad spend (ROAS) can also help show how effectively your advertising budget is generating revenue.",
           },
         ],
       },
@@ -1257,19 +1333,19 @@ const services: Service[] = [
         listHeading: "What A Dedicated Strategy Delivers",
         items: [
           {
-            text: "A Dedicated Social Media Management Team Keeps Your Brand Active, Consistent, And Relevant Across All Major Social Media Networks.",
+            text: "A dedicated social media management team keeps your brand active, consistent, and relevant across all major social media networks.",
           },
           {
-            text: "A Social Media Management Expert Helps Your Business Connect With The Right Audience And Build Meaningful Relationships Online.",
+            text: "Social media management expert helps your business connect with the right audience and build meaningful relationships online.",
           },
           {
-            text: "A Strong Social Media Management Strategy Guarantees Every Post, Comment, And Campaign Supports Your Marketing Goals.",
+            text: "A strong social media management strategy guarantees every post, comment, and campaign supports your marketing goals.",
           },
           {
-            text: "Managing Multiple Social Media Platforms Can Be Time-Consuming; We Manage Social Media For You So You Can Focus On Running Your Business.",
+            text: "Managing multiple social media platforms can be time-consuming; we manage social media for you so you can focus on running your business.",
           },
           {
-            text: "Consistent Engagement Boosts Brand Awareness, Generates Leads, And Strengthens Your Online Reputation.",
+            text: "Consistent engagement boosts brand awareness, generates leads, and strengthens your online reputation.",
           },
         ],
         // TODO: placeholder — swap for a real photo once one's picked.
@@ -1288,16 +1364,16 @@ const services: Service[] = [
         listHeading: "How We Monitor And Optimize",
         items: [
           {
-            text: "Use Social Media Listening To Craft Strategies That Drive More Traffic To Your Website.",
+            text: "Use social media listening to craft strategies that drive more traffic to your website.",
           },
           {
-            text: "Boost Traffic, Generate Leads, And Drive New Sales To Grow The Brand Online Naturally.",
+            text: "Boost traffic, generate leads, and drive new sales to grow the brand online naturally.",
           },
           {
-            text: "Monitor Your Channels To Optimize Campaigns, Refine Messaging, And Engage Your Audience.",
+            text: "Monitor your channels to optimize campaigns, refine messaging, and engage your audience.",
           },
           {
-            text: "Turn Insights Into Actionable Strategies That Maximize ROI And Strengthen Your Online Presence.",
+            text: "Turn insights into actionable strategies that maximize ROI and strengthen your online presence.",
           },
         ],
         // TODO: placeholder — swap for a real photo once one's picked.
@@ -1315,22 +1391,26 @@ const services: Service[] = [
         },
         headline: "You Deserve An Expert To Manage Your Social Media Accounts",
         intro:
-          "Don't Settle For Less, And Don't Try To Do It All Yourself. You Need A Social Media Management Team That Can Help You Manage Multiple Social Media Channels. Here's What You Should Ask An Agency:",
+          "Don’t settle for less, and don’t try to do it all yourself. You need a social media management team that can help you manage multiple social media channels. Here’s what you should ask an agency.",
         items: [
           {
             title: "Are You Effectively Measuring Social Media ROI?",
             description:
-              "We Continuously Monitor Traffic, Engagement, And Conversions From All Of Your Channels Using Live Reporting. Our Strategies Assign A Specific Value To Each Conversion. This Gives Our Clients An Understanding Of Their Return On Investment.",
+              "We continuously monitor traffic, engagement, and conversions from all of your channels using live reporting. Our strategies assign a specific value to each conversion. This gives our clients an understanding of their return on investment.",
           },
           {
             title: "Do They Have Full Transparency?",
             description:
-              "Clients Can Review Our Service Quality Through Our Excellent Feedback And High Ratings. We Maintain A Strong Reputation On Google. This Reflects Our Commitment To Transparency And Reliability. Our Services Keep Businesses One Step Ahead Of The Competition.",
+              "Clients can review our service quality through our excellent feedback and high ratings. We maintain a strong reputation on Google. This reflects our commitment to transparency and reliability. Our services keep businesses one step ahead of the competition.",
+            link: {
+              label: "strong reputation on Google",
+              href: "https://www.localfalcon.com/blog/how-google-reputation-management-improves-your-rankings-and-how-to-do-it",
+            },
           },
           {
             title: "Can You Handle An Average Agency?",
             description:
-              "We Go Beyond The Typical Agency Approach To Deliver Exceptional Results For Our Clients. Our Strategies, Expertise, And Dedication Make Sure Businesses Achieve Measurable Growth.",
+              "We go beyond the typical agency approach to deliver exceptional results for our clients. Our strategies, expertise, and dedication make sure businesses achieve measurable growth.",
           },
         ],
       },
@@ -1366,6 +1446,10 @@ const services: Service[] = [
             question: "What Is Your Process To Social Media Management?",
             answer:
               "Social Media Brand Management Involves Maintaining And Enhancing Your Brand's Reputation On Social Media Platforms. Our Service Includes Using Consistent Messaging, Monitoring Your Online Presence, And Engaging With Your Audience To Increase Brand Awareness And Loyalty.",
+            link: {
+              label: "Brand Management",
+              href: "https://limbd.org/brand-management-definition-importance-elements-principles-benefits-examples-tips-for-effective-brand-management/",
+            },
           },
           {
             question:
@@ -1397,7 +1481,14 @@ const services: Service[] = [
           "Simplify Your Outreach With Scalable Email Marketing Services",
         paragraphs: [
           {
-            text: "Every Message Matters. We Make Yours Stand Out In The Inbox. Your Business Deserves Consistent Engagement That Actually Leads To Sales. Yet Sending Out Random Emails Without A Clear Plan Wastes Effort And Resources. That's Where Our Best Email Marketing Services Come In. Technico Solutions Helps You Create Meaningful Connections With Your Audience Through Campaigns That Inform, Convert, And Retain.",
+            text: "Every Message Matters. We Make Yours Stand Out In The Inbox.",
+          },
+          {
+            text: "Your Business Deserves Consistent Engagement That Actually Leads To Sales. Yet Sending Out Random Emails Without A Clear Plan Wastes Effort And Resources. That's Where Our Best Email Marketing Services Come In. Technico Solutions Helps You Create Meaningful Connections With Your Audience Through Campaigns That Inform, Convert, And Retain.",
+            link: {
+              label: "Email Marketing Services",
+              href: "https://technicosolutions.com/services/email-marketing/",
+            },
           },
           {
             text: "Our Digital Experts Combine Strategy, Creativity, And Technology To Manage Your Email Marketing Efforts From Start To Finish. You Gain Access To Powerful Email Marketing Tools And Automation Features That Make Every Message Purposeful And Easy To Manage.",
@@ -1418,17 +1509,23 @@ const services: Service[] = [
         headline: "Your Competitive Edge With Our Email Marketing Solutions",
         paragraphs: [
           "Your Customers Check Their Inboxes Daily. A Well-Timed Email Can Drive Them Straight To Your Website. We Help You Reach Them Through Highly Targeted Campaigns Built On Real Data And Customer Insight.",
-          "Every Campaign Is Monitored And Optimized For Open Rates, Click-Throughs, And Conversions. You Get Measurable Outcomes And Full Control Over Your Marketing Strategy.",
+          {
+            text: "Every Campaign Is Monitored And Optimized For Open Rates, Click-Throughs, And Conversions. You Get Measurable Outcomes And Full Control Over Your Marketing Strategy.",
+            link: {
+              label: "Click-Throughs",
+              href: "https://www.getresponse.com/help/click-through.html",
+            },
+          },
         ],
         listHeading: "We Use",
         items: [
           {
-            text: "Advanced Marketing Automation Tools That Save Time & Increase Engagement",
+            text: "Advanced marketing automation tools that save time & increase engagement",
           },
-          { text: "Drag And Drop Editors For Easy Campaign Creation" },
-          { text: "Pre-Designed Email Templates That Adapt To Your Brand" },
+          { text: "Drag and drop editors for easy campaign creation" },
+          { text: "Pre-designed email templates that adapt to your brand" },
           {
-            text: "Detailed Reporting Resources For Accurate Tracking & Analysis",
+            text: "Detailed reporting resources for accurate tracking & analysis",
           },
         ],
         // TODO: placeholder — swap for a real photo once one's picked.
@@ -1442,7 +1539,7 @@ const services: Service[] = [
         eyebrow: "Email Marketing Process",
         headline: "Laying The Foundation For A Successful Email Campaign",
         paragraph:
-          "Let Our Digital Marketers Plan A Strong Email Marketing Strategy By Understanding Your Audience And Defining Your Business Goals. Our Process Guarantees Every Email Serves A Purpose And Every Send Moves You Closer To Your Goals.",
+          "Let our digital marketers plan a strong email marketing strategy by understanding your audience and defining your business goals. Our process guarantees every email serves a purpose and every send moves you closer to your goals.",
         steps: [
           {
             title: "Planning & Segmentation",
@@ -1529,10 +1626,21 @@ const services: Service[] = [
       {
         type: "introPanel",
         eyebrow: "Technico Digital Solutions",
-        headline: "Your Partner For Strategic Email Marketing",
+        headline:
+          "Technico Digital Solutions - Your Partner for Strategic Email Marketing",
         paragraphs: [
           {
-            text: "Email Remains One Of The Most Effective Digital Marketing Tools For Reaching And Converting Leads. Our Email Marketing Capabilities And Automation Workflows Give Your Business A Smarter, More Consistent Way To Connect With Your Target Audience And Existing Customers. From Planning To Performance Tracking, Digital Marketing Experts At Technico Digital Solutions Give You All The Features And Solutions Needed For Measurable Growth. Simplify Your Marketing. Build Stronger Customer Relationships. Let Our Digital Marketing Company Create Email Campaigns That Work For Your Business.",
+            text: "Email remains one of the most effective digital marketing tools for reaching and converting leads. Our email marketing capabilities and automation workflows give your business a smarter, more consistent way to connect with your target audience and existing customers.",
+          },
+          {
+            text: "From planning to performance tracking, digital marketing experts at Technico Digital Solutions give you all the features and solutions needed for measurable growth.",
+          },
+          {
+            text: "Simplify your marketing. Build stronger customer relationships. Let our digital marketing company create email campaigns that work for your business.",
+            link: {
+              label: "digital marketing company",
+              href: "https://technicosolutions.com/",
+            },
           },
         ],
         // TODO: placeholder — swap for a real photo once one's picked.
@@ -1558,17 +1666,21 @@ const services: Service[] = [
             question:
               "Will Ecommerce Businesses Benefit From Email Marketing Campaigns?",
             answer:
-              "Through Personalized Messages, Exclusive Offers, And Product Recommendations, Businesses Can Keep Shoppers Engaged And Encourage Repeat Purchases. With The Right Email Marketing Services, E-Commerce Brands Can Nurture Relationships, Boost Conversion Rates, And Turn Occasional Buyers Into Loyal Customers.",
+              "Through personalized messages, exclusive offers, and product recommendations, businesses can keep shoppers engaged and encourage repeat purchases. With the right email marketing services, e-commerce brands can nurture relationships, boost conversion rates, and turn occasional buyers into loyal customers.",
           },
           {
             question: "How Do Email Marketing Services Work?",
             answer:
-              "Email Marketing Works By Helping Your Business Connect Directly With Your Market Through Targeted And Personalized Emails. Using A Great Email Marketing Platform, Our Marketers Create Campaigns, Segment Contact Lists, And Automate Messages To Reach The Right People At The Right Time. These Emails, Such As Newsletters, Promotions, Or Updates, Aim To Build Trust, Strengthen Relationships, And Inspire Specific Actions Like Making Purchases Or Engaging With The Brand Consistently.",
+              "Email marketing works by helping your business connect directly with your market through targeted and personalized emails. Using a great email marketing platform, our marketers create campaigns, segment contact lists, and automate messages to reach the right people at the right time. These emails, such as newsletters, promotions, or updates, aim to build trust, strengthen relationships, and inspire specific actions like making purchases or engaging with the brand consistently.",
+            link: {
+              label: "segment contact lists",
+              href: "https://help.sap.com/docs/SAP_EMARSYS/f8e2fafeea804018a954a8857d9dfff3/fdf57f2974c110148cf38fca9cd1c9ef.html",
+            },
           },
           {
             question: "What Are The Limits Of Free Email Marketing Services?",
             answer:
-              "Free Marketing Services Come With Limits, Like Restricted Contact Lists, Capped Monthly Sends, Basic Templates, And Minimal Automation Options. These Constraints Make It Hard To Scale Or Track Meaningful Results. So, Hiring Professional Email Marketing Services Guarantees Advanced Targeting, Analytics, And Personalization. It's The Smarter Path For Businesses Ready To Grow Customer Reach Effectively.",
+              "Free marketing services come with limits, like restricted contact lists, capped monthly sends, basic templates, and minimal automation options. These constraints make it hard to scale or track meaningful results. So, hiring professional email marketing services guarantees advanced targeting, analytics, and personalization. It’s the smarter path for businesses ready to grow customer reach effectively.",
           },
         ],
       },
