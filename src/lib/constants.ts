@@ -16,7 +16,7 @@ import type { FaqItem } from "@/components/ui/FAQ";
 export const SITE_NAME = "Technico Digital Solutions Inc.";
 export const SITE_URL = "https://technicosolutions.com";
 export const SITE_DESCRIPTION =
-  "Digital solutions — web development, design, and technology consulting.";
+  "A digital marketing agency in Canada paving the path for business success through effective marketing services. Free consultation.";
 export const DEFAULT_OG_IMAGE = "/og-image.jpg";
 export const TWITTER_HANDLE = "@technicosolutions";
 
