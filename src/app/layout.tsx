@@ -20,7 +20,7 @@ import GlobalCursor from "@/components/layout/GlobalCursor";
 import PreLoader from "@/components/layout/PreLoader";
 import PageTransition from "@/components/layout/PageTransition";
 import { getAllServices } from "@/lib/content/services";
-import { IS_PRODUCTION } from "@/lib/env";
+import { IS_INDEXABLE } from "@/lib/env";
 import StickyConnectCTA from "@/components/layout/StickyConnectCTA";
 
 const geistSans = Geist({
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   // Do not index preview/staging; robots.txt must allow crawlers to read
   // this noindex tag. Password-protect nonpublic staging independently.
-  robots: IS_PRODUCTION
+  robots: IS_INDEXABLE
     ? {
         index: true,
         follow: true,

@@ -5,7 +5,7 @@ import {
   DEFAULT_OG_IMAGE,
   TWITTER_HANDLE,
 } from "@/lib/constants";
-import { IS_PRODUCTION } from "@/lib/env";
+import { IS_INDEXABLE } from "@/lib/env";
 
 /**
  * Builds a page's Metadata object with canonical URL, OpenGraph, and Twitter
@@ -48,11 +48,11 @@ export function buildMetadata({
     ...(customRobots
       ? {
           robots: {
-            index: IS_PRODUCTION && index !== false,
-            follow: IS_PRODUCTION && follow !== false,
+            index: IS_INDEXABLE && index !== false,
+            follow: IS_INDEXABLE && follow !== false,
             googleBot: {
-              index: IS_PRODUCTION && index !== false,
-              follow: IS_PRODUCTION && follow !== false,
+              index: IS_INDEXABLE && index !== false,
+              follow: IS_INDEXABLE && follow !== false,
             },
           },
         }
