@@ -151,10 +151,23 @@ export type BlogContentBlock =
  */
 export type BlogBodyBlock = Exclude<BlogContentBlock, { type: "faq" }>;
 
+/** Page-level SEO fields, ready for a future CMS/editor interface.
+ * Changing these does not change the visible article/service copy.
+ * Non-self canonicals and noindex entries are excluded from the sitemap. */
+export type SeoFields = {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  image?: string;
+  index?: boolean;
+  follow?: boolean;
+};
+
 export type BlogPost = {
   slug: string;
   title: string;
   excerpt: string;
+  seo?: SeoFields;
   /**
    * Single primary topic this post belongs to — powers the category
    * tabs on the blog index (see BlogCategoryGrid.tsx), e.g.
@@ -618,6 +631,7 @@ export type Service = {
   /** Pull-quote line shown in the expanded accordion panel on /services. */
   quote?: string;
   shortDescription: string;
+  seo?: SeoFields;
   description: string[];
   /** Deliverable/service chips shown in the expanded accordion panel. */
   tags?: string[];
@@ -632,3 +646,9 @@ export type Service = {
    */
   sections?: ServiceSection[];
 };
+
+/** Only these fields cross the root Server -> Client Header boundary. */
+export type ServiceNavItem = Pick<
+  Service,
+  "slug" | "title" | "shortDescription"
+>;

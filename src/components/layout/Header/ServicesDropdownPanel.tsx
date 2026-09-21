@@ -2,12 +2,12 @@
 
 import type { RefObject } from "react";
 import Link from "next/link";
-import type { Service } from "@/lib/content/types";
+import type { ServiceNavItem } from "@/lib/content/types";
 import { DROPDOWN_RADIUS } from "./header.config";
 
 interface ServicesDropdownPanelProps {
   panelRef: RefObject<HTMLDivElement | null>;
-  services: Service[];
+  services: ServiceNavItem[];
   onPointerEnter: () => void;
   onPointerLeave: () => void;
 }

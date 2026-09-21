@@ -46,7 +46,7 @@ export default function Cta({
   title = "We go the extra mile to help you",
   description = "Fulfill your business plans with targeted digital marketing strategies. Partner with us today and see competitive results.",
   descriptionLink,
-  cta = { label: "Book A Call", href: "#" },
+  cta = { label: "Book A Call", href: "/contact" },
   className = "",
   wide = false,
   eyebrow = "LET'S TALK",

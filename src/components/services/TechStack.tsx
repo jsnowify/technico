@@ -135,9 +135,9 @@ export default function TechStack({
   items = TECH_STACK,
   heading = (
     <>
-      Technologies We Use To
+      Technologies we use to
       <br />
-      Build Your Website
+      build your website
     </>
   ),
   tooltip,

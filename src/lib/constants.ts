@@ -5,10 +5,8 @@
  *  - app/robots.ts
  *  - components/seo/JsonLd.tsx usage across pages
  *
- * NOTE: I previously found two different domains hardcoded in this project
- * (lib/seo.ts used technicosolutions.com, sitemap.ts used
- * technicodigitalsolutions.com). Update SITE_URL below to your real domain —
- * everything else derives from this file so it can't drift again.
+ * Confirm SITE_URL with the website owner and existing URL inventory before
+ * launch. Metadata, sitemap, robots, and JSON-LD use this same canonical host.
  */
 
 import type { FaqItem } from "@/components/ui/FAQ";
@@ -17,16 +15,14 @@ export const SITE_NAME = "Technico Digital Solutions Inc.";
 export const SITE_URL = "https://technicosolutions.com";
 export const SITE_DESCRIPTION =
   "A digital marketing agency in Canada paving the path for business success through effective marketing services. Free consultation.";
-export const DEFAULT_OG_IMAGE = "/og-image.jpg";
+// Implemented by app/opengraph-image.tsx, unlike the absent /og-image.jpg.
+export const DEFAULT_OG_IMAGE = "/opengraph-image";
 export const TWITTER_HANDLE = "@technicosolutions";
 
 /**
- * NAP (name/address/phone) contact details — kept here alongside
- * SITE_NAME/SITE_URL so every place that needs to display or link
- * to them (Organization JSON-LD in app/layout.tsx, Footer.tsx, the
- * contact page) reads the exact same values. Consistent NAP across
- * the site and structured data is itself an SEO/local-search signal,
- * so this shouldn't drift the way SITE_URL previously did.
+ * Contact details shared by Organization JSON-LD, the footer and contact
+ * links. The physical address below is unverified and MUST NOT be emitted
+ * as structured data until the actual details are supplied.
  *
  * *_HREF versions are pre-formatted for tel:/mailto: — no spaces or
  * stray characters, since a malformed href silently breaks
@@ -40,11 +36,8 @@ export const SITE_EMAIL = "info@technicosolutions.com";
 export const SITE_EMAIL_HREF = "mailto:info@technicosolutions.com";
 
 /**
- * TODO: replace with your real registered business address. This is
- * a placeholder — do not deploy with fake address data, since
- * incorrect NAP (name/address/phone) in structured data can get a
- * listing flagged or suppressed. Used by the LocalBusiness JSON-LD
- * in app/layout.tsx.
+ * NOT USED by metadata or JSON-LD until the real address is verified.
+ * Never publish these placeholders as LocalBusiness address data.
  */
 export const SITE_ADDRESS = {
   streetAddress: "REPLACE_WITH_STREET_ADDRESS",
@@ -55,9 +48,8 @@ export const SITE_ADDRESS = {
 };
 
 /**
- * Regions called out in client testimonials (see FEEDBACK below) —
- * used as `areaServed` in the LocalBusiness JSON-LD so structured
- * data reflects where clients actually are, not just the HQ city.
+ * Regions called out in client testimonials (see FEEDBACK below).
+ * Verify service coverage before using these in LocalBusiness JSON-LD.
  */
 export const SERVICE_AREAS = [
   "Vancouver, BC",
@@ -77,6 +69,7 @@ export const NAV_LINKS = [
 export const SOCIAL_LINKS = {
   twitter: "https://twitter.com/technicosolutions",
   linkedin: "https://www.linkedin.com/company/technicosolutions",
+  facebook: "https://www.facebook.com/technicodigitalsolutionsinc",
 } as const;
 
 /**
@@ -254,7 +247,7 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    title: "SEO (Search Engine Optimization)",
+    title: "SEO (search engine optimization)",
     shortTitle: "SEO",
     description:
       "Let’s get your business found online. Our SEO work improves your search visibility through data, structure, and creative content. Every strategy we build aims to drive organic traffic, attract qualified leads, and improve long-term rankings. Our SEO process includes:",
@@ -268,7 +261,7 @@ export const SERVICES: Service[] = [
     href: "/services/search-engine-optimization",
   },
   {
-    title: "Website Development & Design",
+    title: "Website development & design",
     shortTitle: "Web Development",
     description:
       "Make your website fast, functional, and easy to use. Every project starts with a plan that matches your brand and supports your digital goals. Each page loads quickly, guides users naturally, and helps convert visitors into customers. With our web services, expect:",
@@ -282,7 +275,7 @@ export const SERVICES: Service[] = [
     href: "/services/website-design-and-development",
   },
   {
-    title: "Creative Design & Content Services",
+    title: "Creative design & content services",
     shortTitle: "Creative Design",
     description:
       "We combine visual creativity with strategic content planning. Every piece we create solidifies your brand and connects with your target market. From ad visuals to website copy, we keep your tone consistent and your message clear. Our creative digital marketing services cover:",
@@ -296,7 +289,7 @@ export const SERVICES: Service[] = [
     href: "/services/creative-design-and-content",
   },
   {
-    title: "Media Buying & Digital Advertising",
+    title: "Media buying & digital advertising",
     shortTitle: "Advertising",
     description:
       "We plan, manage, and optimize campaigns that bring impressive results. Our team uses data-backed strategies to make every ad dollar count. From keyword targeting to audience segmentation, each decision is made with performance in mind. Our focus areas include:",
@@ -309,7 +302,7 @@ export const SERVICES: Service[] = [
     href: "/services/advertising",
   },
   {
-    title: "Social Media Management",
+    title: "Social media management",
     shortTitle: "Social Media",
     description:
       "We create, manage, and maintain a consistent brand identity across all your social platforms. Each post, story, and caption is based on a clear content plan that supports your business goals. Every piece of content adds value and strengthens your social media presence. Our approach covers:",
@@ -323,7 +316,7 @@ export const SERVICES: Service[] = [
     href: "/services/social-media-management",
   },
   {
-    title: "Email Marketing",
+    title: "Email marketing",
     shortTitle: "Email Marketing",
     description:
       "Connect directly with your target audience through our strategic email campaigns. From welcome emails to follow-up messages, our team creates every campaign to get responses. We keep messages concise, relevant, and consistent so your brand stays top of mind. For consistent results, our digital marketing services include:",

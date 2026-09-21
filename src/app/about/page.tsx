@@ -6,8 +6,8 @@ import AboutStory from "@/components/about/AboutStory";
 import AboutBusinessMarketing from "@/components/about/AboutBusinessMarketing";
 
 export const metadata = buildMetadata({
-  title: "About",
-  description: `Learn about ${SITE_NAME} and how we approach digital projects.`,
+  title: "About Our Digital Marketing Agency",
+  description: `Learn about ${SITE_NAME}, our approach to digital marketing, and how we support businesses with brand development and growth strategies.`,
   path: "/about",
 });
 

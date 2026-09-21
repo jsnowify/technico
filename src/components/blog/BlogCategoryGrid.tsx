@@ -5,12 +5,14 @@ import Link from "next/link";
 import PixelRevealImage from "@/components/home/PixelRevealImage";
 import GridCorners from "@/components/ui/GridCorners";
 import HorizontalStaggerRows from "@/components/ui/HorizontalStaggerRows";
+import { formatPostDate } from "@/lib/utils/date";
 
 interface BlogCardData {
   slug: string;
   title: string;
   category: string;
   coverImage: string;
+  publishedAt: string;
   readTime: string;
 }
 
@@ -70,7 +72,12 @@ export default function BlogCategoryGrid({ posts }: { posts: BlogCardData[] }) {
             </div>
             <div className="relative flex min-h-44 flex-col p-5 sm:p-6">
               <div className="flex items-center justify-between gap-4 font-mono text-[11px] tracking-[0.04em] uppercase">
-                <span className="text-content-muted">{post.readTime}</span>
+                <span className="text-content-muted">
+                  <time dateTime={post.publishedAt}>
+                    {formatPostDate(post.publishedAt)}
+                  </time>{" "}
+                  · {post.readTime}
+                </span>
                 <span className="text-accent">
                   {String(index + 1).padStart(2, "0")}
                 </span>

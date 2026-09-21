@@ -1,6 +1,7 @@
 import EditorialHeader from "@/components/ui/EditorialHeader";
 import GridCorners from "@/components/ui/GridCorners";
 import PixelRevealImage from "@/components/home/PixelRevealImage";
+import { formatPostDate } from "@/lib/utils/date";
 
 interface BlogHeroProps {
   title: string;
@@ -17,11 +18,7 @@ export default function BlogHero({
   readTime,
   author,
 }: BlogHeroProps) {
-  const dateLabel = new Date(publishedAt).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const dateLabel = formatPostDate(publishedAt, "long");
 
   return (
     <section className="bg-black-bg">
@@ -45,7 +42,17 @@ export default function BlogHero({
             src={coverImage}
             alt={title}
             sizes="(min-width: 1920px) 1740px, 100vw"
+            priority
           />
+          <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-black-bg/86 p-4 font-mono text-[10px] tracking-[0.05em] text-content-muted uppercase sm:text-xs">
+            <span>
+              Published{" "}
+              <time dateTime={publishedAt} className="text-content">
+                {dateLabel}
+              </time>
+            </span>
+            <span>{readTime}</span>
+          </figcaption>
         </figure>
       </div>
     </section>

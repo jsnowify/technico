@@ -11,6 +11,8 @@ interface PixelRevealImageProps {
   fit?: "cover" | "contain";
   canvasClassName?: string;
   revealId?: string;
+  /** Preload only a true above-the-fold/LCP image. */
+  priority?: boolean;
 }
 
 type PixelRevealWindow = Window & {
@@ -35,6 +37,7 @@ export default function PixelRevealImage({
   fit = "cover",
   canvasClassName = "bg-black-bg",
   revealId,
+  priority = false,
 }: PixelRevealImageProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -60,7 +63,13 @@ export default function PixelRevealImage({
     }
 
     const buffer = document.createElement("canvas");
+    const mobile = window.matchMedia(
+      "(max-width: 767px), (pointer: coarse)",
+    ).matches;
     const animation = { pixelSize: 30 };
+    let lastDraw = 0;
+    let lastColumns = -1;
+    let lastRows = -1;
     let revealTween: gsap.core.Tween | null = null;
     let fadeTween: gsap.core.Tween | null = null;
     let observer: IntersectionObserver | null = null;
@@ -72,18 +81,29 @@ export default function PixelRevealImage({
       const rect = wrapper.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const maxPixels = mobile ? 450_000 : 1_000_000;
+      const dpr = Math.min(
+        window.devicePixelRatio || 1,
+        mobile ? 1 : 1.5,
+        Math.sqrt(maxPixels / (rect.width * rect.height)),
+      );
       const outputWidth = Math.max(1, Math.round(rect.width * dpr));
       const outputHeight = Math.max(1, Math.round(rect.height * dpr));
-      if (canvas.width !== outputWidth || canvas.height !== outputHeight) {
+      const outputResized =
+        canvas.width !== outputWidth || canvas.height !== outputHeight;
+      if (outputResized) {
         canvas.width = outputWidth;
         canvas.height = outputHeight;
       }
 
       const columns = Math.max(1, Math.ceil(rect.width / animation.pixelSize));
       const rows = Math.max(1, Math.ceil(rect.height / animation.pixelSize));
-      buffer.width = columns;
-      buffer.height = rows;
+      if (!outputResized && columns === lastColumns && rows === lastRows)
+        return;
+      lastColumns = columns;
+      lastRows = rows;
+      if (buffer.width !== columns) buffer.width = columns;
+      if (buffer.height !== rows) buffer.height = rows;
 
       const bufferContext = buffer.getContext("2d");
       const context = canvas.getContext("2d");
@@ -167,11 +187,16 @@ export default function PixelRevealImage({
       draw();
 
       revealTween = gsap.to(animation, {
-        pixelSize: 1,
-        duration: 1.25,
+        pixelSize: 3,
+        duration: 0.65,
         ease: "power3.inOut",
         snap: { pixelSize: 1 },
-        onUpdate: draw,
+        onUpdate: () => {
+          const now = performance.now();
+          if (now - lastDraw < (mobile ? 40 : 30)) return;
+          lastDraw = now;
+          draw();
+        },
         onComplete: () => {
           fadeTween = gsap.to(canvas, {
             opacity: 0,
@@ -221,12 +246,13 @@ export default function PixelRevealImage({
         alt={alt}
         fill
         sizes={sizes}
+        priority={priority}
         className={fit === "contain" ? "object-contain" : "object-cover"}
       />
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 h-full w-full ${canvasClassName}`}
+        className={`technico-pixel-canvas pointer-events-none absolute inset-0 h-full w-full ${canvasClassName}`}
       />
     </div>
   );

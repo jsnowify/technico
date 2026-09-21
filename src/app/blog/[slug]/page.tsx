@@ -5,11 +5,15 @@ import JsonLd from "@/components/seo/JsonLd";
 import BlogHero from "@/components/blog/BlogHero";
 import BlogContents from "@/components/blog/BlogContents";
 import BlogShare from "@/components/blog/BlogShare";
+import BlogMorePosts from "@/components/blog/BlogMorePosts";
 import { renderBlogBlock } from "@/components/blog/renderBlogBlock";
 import FAQ from "@/components/ui/FAQ";
 import { estimateReadingTime } from "@/lib/utils/reading-time";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import type { BlogBodyBlock, BlogContentBlock } from "@/lib/content/types";
+
+// The local content registry provides build-time slugs. Unknown paths 404.
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -19,13 +23,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) return {};
+  if (!post) notFound();
 
   return buildMetadata({
-    title: post.title,
-    description: post.excerpt,
+    title: post.seo?.title ?? post.title,
+    description: post.seo?.description ?? post.excerpt,
     path: `/blog/${slug}`,
-    image: post.coverImage,
+    canonicalPath: post.seo?.canonicalPath,
+    image: post.seo?.image ?? post.coverImage,
+    index: post.seo?.index,
+    follow: post.seo?.follow,
   });
 }
 
@@ -47,10 +54,52 @@ export default async function BlogPostPage({
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: { "@type": "Organization", name: post.author },
-    publisher: { "@type": "Organization", name: SITE_NAME },
+    publisher: {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+    },
+    mainEntityOfPage: `${SITE_URL}/blog/${slug}`,
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${SITE_URL}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `${SITE_URL}/blog/${slug}`,
+      },
+    ],
   };
 
   const readTime = estimateReadingTime(post.content);
+
+  // Up to three other posts for the "More posts" strip: same category
+  // first, then the newest of the rest (getAllPosts is newest-first).
+  const otherPosts = (await getAllPosts()).filter((p) => p.slug !== slug);
+  const morePosts = [
+    ...otherPosts.filter((p) => p.category === post.category),
+    ...otherPosts.filter((p) => p.category !== post.category),
+  ]
+    .slice(0, 3)
+    .map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      category: p.category,
+      coverImage: p.coverImage,
+      publishedAt: p.publishedAt,
+      readTime: estimateReadingTime(p.content),
+    }));
 
   // Headings become the ToC panel's topic list — a post with none
   // just renders without that panel (see BlogContents.tsx).
@@ -70,68 +119,72 @@ export default async function BlogPostPage({
   );
 
   return (
-    <article>
-      <JsonLd data={articleJsonLd} />
-      <BlogHero
-        title={post.title}
-        coverImage={post.coverImage}
-        publishedAt={post.publishedAt}
-        readTime={readTime}
-        author={post.author}
-      />
-      {/* ==============================================================
-          BODY — three-rail layout
-          --------------------------------------------------------------
-          Left rail: "CONTENT" table of contents (BlogContents) — its
-          active-heading underline and progress bar are scroll-driven,
-          computed client-side against the `id`s set on the <h2>s
-          below. Right rail: the SHARE panel. Both use the same
-          `lg:sticky lg:top-32` approach so they pin independently
-          within this row and release once the row (i.e. the article)
-          ends.
-
-          This site's theme is dark (see Hero, ContactSection, and
-          BlogHero right above this), so the article body stays on
-          the same black background rather than breaking into its
-          own white card — no bg class needed here since it now
-          inherits the page's own bg-black-bg (see globals.css).
-          Body copy uses text-white/70 (same convention as
-          ContactSection) instead of the dark text-black-text color
-          so it stays readable against black.
-          ============================================================== */}
-      <div className="container-x mx-auto grid w-full max-w-[1920px] grid-cols-1 items-start py-16 sm:py-20 lg:grid-cols-[220px_minmax(0,820px)_58px] lg:justify-between lg:gap-10 lg:py-24">
-        <BlogContents headings={headings} readTime={readTime} />
-
-        <div className="min-w-0 space-y-5 text-base leading-[1.75] text-content sm:text-lg">
-          {bodyBlocks.map((block, i) => renderBlogBlock(block, i))}
-        </div>
-
-        <BlogShare url={`${SITE_URL}/blog/${slug}`} title={post.title} />
-      </div>
-
-      {faqBlocks.map((block, i) => (
-        <FAQ
-          key={i}
-          heading={
-            <>
-              {block.headline[0]}
-              <br />
-              {block.headline[1]}
-            </>
-          }
-          cta={block.cta}
-          items={block.items}
-          includeJsonLd={false}
+    <>
+      <article>
+        <JsonLd data={articleJsonLd} />
+        <JsonLd data={breadcrumbJsonLd} />
+        <BlogHero
+          title={post.title}
+          coverImage={post.coverImage}
+          publishedAt={post.publishedAt}
+          readTime={readTime}
+          author={post.author}
         />
-      ))}
+        {/* ==============================================================
+            BODY — three-rail layout
+            --------------------------------------------------------------
+            Left rail: "CONTENT" table of contents (BlogContents) — its
+            active-heading underline and progress bar are scroll-driven,
+            computed client-side against the `id`s set on the <h2>s
+            below. Right rail: the SHARE panel. Both use the same
+            `lg:sticky lg:top-32` approach so they pin independently
+            within this row and release once the row (i.e. the article)
+            ends.
 
-      {post.disclaimer && (
-        <div className="container-x mx-auto pb-16">
-          <p className="font-mono text-sm leading-relaxed text-content-muted">
-            {post.disclaimer}
-          </p>
+            This site's theme is dark (see Hero, ContactSection, and
+            BlogHero right above this), so the article body stays on
+            the same black background rather than breaking into its
+            own white card — no bg class needed here since it now
+            inherits the page's own bg-black-bg (see globals.css).
+            Body copy uses text-white/70 (same convention as
+            ContactSection) instead of the dark text-black-text color
+            so it stays readable against black.
+            ============================================================== */}
+        <div className="container-x mx-auto grid w-full max-w-[1920px] grid-cols-1 items-start py-16 sm:py-20 lg:grid-cols-[220px_minmax(0,820px)_58px] lg:justify-between lg:gap-10 lg:py-24">
+          <BlogContents headings={headings} readTime={readTime} />
+
+          <div className="min-w-0 space-y-5 text-base leading-[1.75] text-content sm:text-lg">
+            {bodyBlocks.map((block, i) => renderBlogBlock(block, i))}
+          </div>
+
+          <BlogShare url={`${SITE_URL}/blog/${slug}`} title={post.title} />
         </div>
-      )}
-    </article>
+
+        {faqBlocks.map((block, i) => (
+          <FAQ
+            key={i}
+            heading={
+              <>
+                {block.headline[0]}
+                <br />
+                {block.headline[1]}
+              </>
+            }
+            cta={block.cta}
+            items={block.items}
+            includeJsonLd={false}
+          />
+        ))}
+
+        {post.disclaimer && (
+          <div className="container-x mx-auto pb-16">
+            <p className="font-mono text-sm leading-relaxed text-content-muted">
+              {post.disclaimer}
+            </p>
+          </div>
+        )}
+      </article>
+      <BlogMorePosts posts={morePosts} />
+    </>
   );
 }

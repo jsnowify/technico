@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { SITE_NAME } from "@/lib/constants";
-import type { Service } from "@/lib/content/types";
+import type { ServiceNavItem } from "@/lib/content/types";
 import HorizontalStagger from "./HorizontalStagger";
 import HeaderTile from "./HeaderTile";
 import HeaderDrop from "./HeaderDrop";
@@ -15,7 +15,7 @@ import MobileMenuButton from "./MobileMenuButton";
 import MobileNav from "./MobileNav";
 
 interface HeaderProps {
-  services: Service[];
+  services: ServiceNavItem[];
 }
 
 const LOGO = "/technico-digitals-solutions-inc-logo-black.svg";
@@ -416,7 +416,13 @@ export default function Header({ services }: HeaderProps) {
   );
 }
 
-function ServiceRow({ service, index }: { service: Service; index: number }) {
+function ServiceRow({
+  service,
+  index,
+}: {
+  service: ServiceNavItem;
+  index: number;
+}) {
   const [active, setActive] = useState(false);
 
   return (

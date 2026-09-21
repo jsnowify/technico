@@ -5,7 +5,8 @@ import PixelRevealImage from "./PixelRevealImage";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 
 // Replace this one path when the final Overview campaign image is ready.
-const OVERVIEW_IMAGE = "/technico-digital-solutions-inc-bg.webp";
+const OVERVIEW_IMAGE =
+  "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789960271/home-imgs/technico_boost_revenue_l1uld9.png";
 
 const STRATEGY_TEXT = (
   <>
@@ -87,7 +88,7 @@ export default function Overview() {
           <figure className="relative min-h-[300px] overflow-hidden bg-purple-secondary sm:col-span-2 sm:aspect-[16/9] sm:min-h-0 lg:col-span-7 lg:row-span-2 lg:aspect-auto">
             <PixelRevealImage
               src={OVERVIEW_IMAGE}
-              alt="Purple digital environment representing scalable online growth"
+              alt="Boosting revenue and business growth with digital marketing"
               sizes="(min-width: 1024px) 58vw, 100vw"
             />
             <div

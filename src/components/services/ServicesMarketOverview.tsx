@@ -2,7 +2,7 @@ import Link from "next/link";
 import PixelRevealImage from "@/components/home/PixelRevealImage";
 
 const MARKET_IMAGE =
-  "https://res.cloudinary.com/dp9bjis3z/image/upload/q_auto:best/v1789032026/temporary-placeholder/Gemini_Generated_Image_3f5bts3f5bts3f5b_qjxyw0.avif";
+  "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789960345/services-imgs/technico_connected_strategy_lpxjod.png";
 
 const CHANNELS = [
   {

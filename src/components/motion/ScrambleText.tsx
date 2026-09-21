@@ -3,10 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import {
-  isSiteReady,
-  SITE_READY_EVENT,
-} from "@/lib/site-ready";
+import { isSiteReady, SITE_READY_EVENT } from "@/lib/site-ready";
 
 /* ================================================================
    SCRAMBLE TEXT
@@ -92,12 +89,16 @@ export default function ScrambleText({
     const length = text.length;
     const pool = getScramblePool(text);
     const progress = { value: 0 };
+    let lastFrame = 0;
 
     tweenRef.current = gsap.to(progress, {
       value: 1,
       duration,
       ease: "none",
       onUpdate: () => {
+        const now = performance.now();
+        if (now - lastFrame < 40 && progress.value < 1) return;
+        lastFrame = now;
         const revealCount = Math.floor(progress.value * length);
         let out = "";
         for (let i = 0; i < length; i++) {

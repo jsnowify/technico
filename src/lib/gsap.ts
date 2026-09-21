@@ -1,28 +1,17 @@
 import { useSyncExternalStore } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Draggable } from "gsap/Draggable";
-import { InertiaPlugin } from "gsap/InertiaPlugin";
-import { Flip } from "gsap/Flip";
 
 /**
  * Header.tsx (and anything else animated) imports gsap/ScrollTrigger
  * from here rather than straight from the packages so plugin
  * registration happens exactly once, in exactly one place.
  *
- * Draggable + InertiaPlugin were added for TrustedBy.tsx's
- * click-and-drag logo strip (the momentum "throw" after you release
- * a drag is InertiaPlugin's job; Draggable just handles the pointer
- * tracking). Flip was added for ServicesTailoredStrategy.tsx's
- * scroll-scrubbed pinwheel (one persistent icon that FLIPs from card
- * to card as you scroll). All three used to be "Club GreenSock" paid
- * plugins but have shipped free in the plain `gsap` package since GSAP
- * went fully free in 2025 — this needs a reasonably current `gsap`
- * version installed (`npm install gsap@latest` if these imports fail
- * to resolve).
+ * Only register ScrollTrigger: no current component imports Draggable,
+ * InertiaPlugin or Flip, and eagerly bundling all three increases JS cost.
  */
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, Draggable, InertiaPlugin, Flip);
+  gsap.registerPlugin(ScrollTrigger);
 }
 
 /**
@@ -103,4 +92,4 @@ export function useSupportsFinePointer(): boolean {
   );
 }
 
-export { gsap, ScrollTrigger, Draggable, InertiaPlugin, Flip };
+export { gsap, ScrollTrigger };

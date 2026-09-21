@@ -106,15 +106,9 @@ import CursorLabel from "@/components/ui/CursorLabel";
    fighting with our own pointer handling.
    ================================================================ */
 
-// Rendered 6x back-to-back rather than just twice. With only two
-// copies there's exactly one loop-width of buffer past the wrap point
-// — fine for the slow, steady autoplay creep, but a manual drag/flick
-// can yank the strip past that single buffer in one throw, and for a
-// frame or two there's nothing left to render (a flash of empty
-// space). 6 copies gives a hard, fast flick (see MAX_COAST_LOOPS below)
-// enough room that its natural, uncapped coast distance almost never
-// needs truncating, without the DOM/image cost of the original 8x.
-const CLONE_COUNT = 6;
+// Three copies preserve the seamless loop while reducing the original
+// 6x markup. Fling distance is bounded to one loop-width below.
+const CLONE_COUNT = 3;
 const TRACK = Array.from({ length: CLONE_COUNT }, () => TRUSTED_BY).flat();
 
 // Autoplay speed in px/sec, independent of frame rate — tune this one
@@ -164,7 +158,7 @@ const MIN_FLING_VELOCITY = 30;
 // scroll view does, means the strip can never travel further in one
 // gesture than we've actually got buffered, no matter how fast or long
 // the swipe was.
-const MAX_COAST_LOOPS = 3;
+const MAX_COAST_LOOPS = 1;
 
 // Multiplies the raw release velocity before it's used for the coast.
 // This is the most direct knob for "quick drag + release feels too
@@ -325,7 +319,7 @@ export default function TrustedBy() {
     // a scroll-driven tilt kicks in, possibly mid-drag) is exactly the
     // kind of one-time cost that shows up as a hitch.
     cards.forEach((card) => {
-      card.style.willChange = "transform";
+      card.style.willChange = "auto";
     });
     const clampSkew = gsap.utils.clamp(-MAX_TILT, MAX_TILT);
     const skewRef = { current: 0 };
@@ -354,6 +348,7 @@ export default function TrustedBy() {
     let lastScrollY = window.scrollY;
     let lastTime = performance.now();
     const onScroll = () => {
+      if (!inView || document.hidden) return;
       const now = performance.now();
       const currentY = window.scrollY;
       const deltaY = currentY - lastScrollY;
@@ -448,7 +443,35 @@ export default function TrustedBy() {
       const renderX = wrap(xRef.current);
       gsap.set(track, { x: cruising ? Math.round(renderX) : renderX });
     };
-    gsap.ticker.add(tick);
+    // No perpetual 60fps ticker when the logo strip is offscreen or the
+    // tab is backgrounded. Resume only while visible and interactive.
+    let inView = false;
+    let tickerRunning = false;
+    const updatePlayback = () => {
+      const shouldRun = inView && !document.hidden;
+      if (shouldRun === tickerRunning) return;
+      tickerRunning = shouldRun;
+      if (shouldRun) {
+        lastScrollY = window.scrollY;
+        lastTime = performance.now();
+        gsap.ticker.add(tick);
+      } else gsap.ticker.remove(tick);
+      track.style.willChange = shouldRun ? "transform" : "auto";
+      cards.forEach((card) => {
+        // Avoid a GPU layer per logo on phones; keep one moving track layer.
+        card.style.willChange =
+          shouldRun && supportsFinePointer ? "transform" : "auto";
+      });
+    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry?.isIntersecting ?? false;
+        updatePlayback();
+      },
+      { threshold: 0, rootMargin: "100px 0px" },
+    );
+    observer.observe(wrapperRef.current ?? track);
+    document.addEventListener("visibilitychange", updatePlayback);
 
     // Actually flips drag mode on. Only called once
     // DRAG_ACTIVATION_DELAY_MS has elapsed since pointerdown without an
@@ -576,6 +599,8 @@ export default function TrustedBy() {
         dragActivationTimeoutRef.current = null;
       }
       gsap.ticker.remove(tick);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", updatePlayback);
       window.removeEventListener("scroll", onScroll);
       track.removeEventListener("pointerdown", onPointerDown);
       track.removeEventListener("pointermove", onPointerMove);
@@ -721,7 +746,7 @@ export default function TrustedBy() {
         onPointerEnter={handlePointerEnter}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
-        className="relative overflow-hidden py-14 sm:py-16 md:py-20"
+        className="technico-trusted-viewport relative overflow-hidden py-14 sm:py-16 md:py-20"
         style={{
           WebkitMaskImage:
             "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
@@ -731,8 +756,7 @@ export default function TrustedBy() {
       >
         <div
           ref={trackRef}
-          className="flex w-max cursor-grab items-center [-webkit-user-select:none] select-none"
-          style={{ touchAction: "pan-y" }}
+          className="flex w-max cursor-grab touch-pan-y items-center [-webkit-user-select:none] select-none"
         >
           {TRACK.map((brand, i) => (
             <div
@@ -740,21 +764,14 @@ export default function TrustedBy() {
               aria-hidden={i >= TRUSTED_BY.length || undefined}
               className="mr-8 flex aspect-square h-36 shrink-0 items-center justify-center border border-white/10 bg-white/3 p-6 sm:h-48 sm:p-8 md:mr-12 md:h-60 md:p-10"
             >
-              {/* No loading="lazy" here on purpose: this track gets
-                  moved by transform (autoplay + drag), not native
-                  scroll, so the browser's lazy-load heuristic has no
-                  reliable signal for "about to be visible" the way it
-                  does for a real scroll container. A hard flick can
-                  reveal a clone the browser never bothered to
-                  fetch/decode yet, and that decode landing mid-gesture
-                  is exactly the kind of one-frame stall that reads as
-                  the drag stuttering. These are small logo marks, not
-                  hero images, so loading everything up front is cheap. */}
+              {/* Fetch the first two cycles in advance so touch flings never
+                  expose undecoded images; the final buffer may load lazily. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={brand.logo}
                 alt=""
                 decoding="async"
+                loading={i < TRUSTED_BY.length * 2 ? "eager" : "lazy"}
                 draggable={false}
                 className="h-full w-full object-contain"
               />

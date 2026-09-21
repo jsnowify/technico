@@ -7,19 +7,22 @@ const STRATEGY_ROWS = [
     number: "01",
     text: "A Law Firm May Need Qualified Local Leads From High-Intent Searches, While A Solar Company May Need To Educate Homeowners Before Turning Interest Into Quote Requests.",
     image:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788935799/temporary-placeholder/Gemini_Generated_Image_3nu4uo3nu4uo3nu4_o2cn3b.jpg",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789960343/services-imgs/technico_law_firm_s3vkqa.png",
+    alt: "Law firm marketing built around high-intent local searches",
   },
   {
     number: "02",
     text: "Our Digital Team Works With Businesses Across Industries, Locations, And Stages Of Growth, Building Strategies That Focus On How Your Customers Search, Compare, And Take Action.",
     image:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788935799/temporary-placeholder/Gemini_Generated_Image_3nu4uo3nu4uo3nu4_o2cn3b.jpg",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789960343/services-imgs/technico_digital_team_work_oqjc5m.png",
+    alt: "Technico digital team working with businesses across industries",
   },
   {
     number: "03",
     text: "The Goal Is To Turn Your Digital Presence Into More Local Leads, Ecommerce Sales, Appointment Bookings, And Opportunities To Grow Into New Markets.",
     image:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788935799/temporary-placeholder/Gemini_Generated_Image_3nu4uo3nu4uo3nu4_o2cn3b.jpg",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789960345/services-imgs/technico_real_growth_ht4vlu.png",
+    alt: "Real business growth from local leads, sales, and bookings",
   },
 ] as const;
 
@@ -75,7 +78,7 @@ export default function ServicesTailoredStrategy() {
               >
                 <PixelRevealImage
                   src={row.image}
-                  alt="Technico digital marketing strategy planning session"
+                  alt={row.alt}
                   sizes="(min-width: 1024px) 50vw, 100vw"
                   revealId={`services-tailored-${row.number}`}
                 />

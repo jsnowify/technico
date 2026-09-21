@@ -22,6 +22,24 @@ export function fromISODate(value: string): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/**
+ * Formats a post's ISO date ("2026-09-09") for display. Date-only ISO
+ * strings parse as UTC midnight, so the label is formatted in UTC too —
+ * otherwise viewers west of UTC would see the previous day, and the
+ * server/client renders could disagree.
+ */
+export function formatPostDate(
+  iso: string,
+  style: "short" | "long" = "short",
+): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: style === "long" ? "long" : "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function isSameDay(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() &&

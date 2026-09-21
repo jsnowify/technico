@@ -2,7 +2,8 @@ import Button from "@/components/ui/Button";
 import { SITE_PHONE_HREF } from "@/lib/constants";
 import PixelRevealImage from "./PixelRevealImage";
 
-const EXPERTISE_IMAGE = "/technico-digital-solutions-inc-square.webp";
+const EXPERTISE_IMAGE =
+  "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/f_webp/q_auto:best/dpr_auto/f_avif/q_auto:best/home-imgs/technico_growth_mj93a5.png";
 
 export default function Strategy() {
   return (
@@ -15,8 +16,7 @@ export default function Strategy() {
           </div>
 
           <h2 className="h2-section max-w-[22ch] leading-[1.08] font-medium tracking-heading text-white">
-            We drive your brand forward, automate strategies, and boost
-            revenue.
+            We drive your brand forward, automate strategies, and boost revenue.
           </h2>
         </header>
 
@@ -24,7 +24,7 @@ export default function Strategy() {
           <figure className="relative aspect-square overflow-hidden bg-black-bg sm:aspect-[4/3] lg:col-span-5 lg:row-span-2 lg:aspect-square">
             <PixelRevealImage
               src={EXPERTISE_IMAGE}
-              alt="Purple digital control representing technology-led business growth"
+              alt="Technology-led business growth through digital marketing strategy"
               sizes="(min-width: 1024px) 42vw, 100vw"
             />
 

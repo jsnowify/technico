@@ -374,68 +374,6 @@ body::-webkit-scrollbar {
 }
 
 /* ================================================================
-   NOISE OVERLAY — TV-static flicker
-   ================================================================
-   Used by components/layout/NoiseOverlay.tsx. Lives here (a real
-   stylesheet rule) instead of a component-local `<style>` tag so it
-   compiles once and never re-injects/re-diffs on that component's
-   re-renders.
-
-   TRANSFORM, NOT BACKGROUND-POSITION — an earlier version stepped
-   `background-position` instead. That animates a paint property: the
-   browser has to repaint the affected region on the main thread on
-   every step, and here "the affected region" is the entire viewport
-   (the overlay is `fixed inset-0`), on every one of these 10 steps,
-   in a loop, for as long as the page sits idle. `transform` is a
-   compositor property — once the element has its own layer (see
-   `will-change: transform` on the element itself), animating this
-   costs the GPU compositor a matrix update per step and nothing on
-   the main thread at all. Same visual jump-cut (still `steps(1)`,
-   still literal pixel jumps, not a smooth pan), effectively free to
-   run continuously instead of a repeated full-screen repaint.
-
-   The element this animates is intentionally larger than the
-   viewport (see NoiseOverlay.tsx's `-inset-20`) so translating it
-   never reveals an edge — the max offset below is 63px, comfortably
-   inside that 80px margin.
-   ================================================================ */
-@keyframes noise-static-flicker {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  10% {
-    transform: translate3d(-37px, 12px, 0);
-  }
-  20% {
-    transform: translate3d(22px, -48px, 0);
-  }
-  30% {
-    transform: translate3d(-63px, -19px, 0);
-  }
-  40% {
-    transform: translate3d(41px, 33px, 0);
-  }
-  50% {
-    transform: translate3d(-18px, 57px, 0);
-  }
-  60% {
-    transform: translate3d(54px, -27px, 0);
-  }
-  70% {
-    transform: translate3d(-44px, -52px, 0);
-  }
-  80% {
-    transform: translate3d(16px, 40px, 0);
-  }
-  90% {
-    transform: translate3d(-29px, -8px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* ================================================================
    HERO EYEBROW — waving hand
    ================================================================
    Used by components/home/Hero.tsx's "[ ] YOOHOOOO HELLOOOO 👋"
@@ -484,4 +422,43 @@ body::-webkit-scrollbar {
 .eyebrow-wave {
   transform-origin: 70% 70%;
   animation: eyebrow-wave 2.4s ease-in-out infinite;
+}
+
+/* Reduced-motion preferences intentionally disable motion, never mobile width. */
+@media (prefers-reduced-motion: reduce) {
+  .technico-preloader {
+    display: none !important;
+  }
+  .technico-pixel-canvas {
+    display: none !important;
+  }
+  .technico-noise-overlay > div {
+    animation: none !important;
+  }
+}
+
+/* A small transform-only noise displacement maintains the original TV-static
+   treatment on phones while limiting the backing layer to a 16px overscan. */
+@keyframes noise-static-flicker-lite {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-9px, 5px, 0);
+  }
+  40% {
+    transform: translate3d(7px, -8px, 0);
+  }
+  60% {
+    transform: translate3d(-5px, -10px, 0);
+  }
+  80% {
+    transform: translate3d(10px, 7px, 0);
+  }
+}
+@media (max-width: 767px) {
+  .technico-noise-overlay {
+    opacity: 0.045;
+  }
 }

@@ -77,17 +77,19 @@ export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
   const motionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleRef = useRef<HTMLParagraphElement>(null);
   const exploreRef = useRef<HTMLAnchorElement>(null);
 
   useGSAP(
-    () => {
-      // Reduced motion: show the completed composition without animating it.
+    (_context, contextSafe) => {
       if (prefersReducedMotion) return;
+      const mobile = window.matchMedia(
+        "(max-width: 767px), (pointer: coarse)",
+      ).matches;
 
+      const section = sectionRef.current;
       const motion = motionRef.current;
-      if (!motion) return;
-
+      if (!section || !motion) return;
       const steps = gsap.utils.toArray<HTMLElement>(
         motion.querySelectorAll("[data-wave-step]"),
       );
@@ -100,14 +102,24 @@ export default function Hero() {
 
       let entrance: gsap.core.Timeline | undefined;
       const loops: gsap.core.Tween[] = [];
+      let inView = false;
+      let entranceComplete = false;
 
-      gsap.set(steps, { autoAlpha: 0 });
-      if (metaItems) gsap.set(metaItems, { autoAlpha: 0, y: 14 });
-      if (title) gsap.set(title, { autoAlpha: 0, y: 34 });
-      if (explore) gsap.set(explore, { autoAlpha: 0, y: 16 });
-
-      const startWaveMotion = () => {
+      const stopWaves = () => {
+        // Pause rather than kill: returning to the hero must not jump the
+        // seamless loop back to its first frame.
+        loops.forEach((loop) => loop.pause());
+        tracks.forEach((track) => (track.style.willChange = "auto"));
+      };
+      const updateWaves = () => {
+        if (!entranceComplete || !inView || document.hidden) return;
+        if (loops.length) {
+          tracks.forEach((track) => (track.style.willChange = "transform"));
+          loops.forEach((loop) => loop.resume());
+          return;
+        }
         tracks.forEach((track, index) => {
+          track.style.willChange = "transform";
           loops.push(
             gsap.fromTo(
               track,
@@ -123,39 +135,60 @@ export default function Hero() {
         });
       };
 
-      const playEntrance = () => {
-        if (entrance) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          inView = entry?.isIntersecting ?? false;
+          if (inView) updateWaves();
+          else stopWaves();
+        },
+        { threshold: 0, rootMargin: "100px 0px" },
+      );
+      observer.observe(section);
+      const onVisibility = () => {
+        if (document.hidden) stopWaves();
+        else updateWaves();
+      };
+      document.addEventListener("visibilitychange", onVisibility);
 
-        entrance = gsap.timeline({ defaults: { ease: "power3.out" } });
+      gsap.set(steps, { autoAlpha: 0 });
+      if (metaItems) gsap.set(metaItems, { autoAlpha: 0, y: 10 });
+      // Keep the mobile LCP heading visible during hydration and the loader.
+      if (title) gsap.set(title, mobile ? { y: 12 } : { autoAlpha: 0, y: 18 });
+      if (explore)
+        gsap.set(explore, mobile ? { y: 8 } : { autoAlpha: 0, y: 10 });
+
+      // This event is fired by PreLoader. Explicitly bind the deferred
+      // animation to the HERO's context, never to the loader's context.
+      const runEntrance = () => {
+        if (entrance) return;
+        entrance = gsap.timeline({ defaults: { ease: "power2.out" } });
         entrance
-          .to(steps, {
-            autoAlpha: 1,
-            duration: 0.65,
-            stagger: { each: 0.018, from: "center" },
-          })
-          .to(
-            metaItems ?? [],
-            { autoAlpha: 1, y: 0, stagger: 0.045, duration: 0.5 },
-            0.12,
-          )
-          .to(title, { autoAlpha: 1, y: 0, duration: 0.72 }, 0.32)
-          .to(explore, { autoAlpha: 1, y: 0, duration: 0.55 }, 0.48)
-          .call(startWaveMotion, [], 0.38)
+          // One batched fade replaces the old 80+ staggered individual
+          // tweens, leaving more of the first seconds for real content.
+          .to(steps, { autoAlpha: 1, duration: 0.22 }, 0)
+          .to(metaItems ?? [], { autoAlpha: 1, y: 0, duration: 0.28 }, 0.03)
+          .to(title, { autoAlpha: 1, y: 0, duration: 0.35 }, 0.08)
+          .to(explore, { autoAlpha: 1, y: 0, duration: 0.3 }, 0.12)
           .set(steps, { clearProps: "opacity,visibility" })
           .set([...(metaItems ? Array.from(metaItems) : []), title, explore], {
             clearProps: "transform,opacity,visibility",
+          })
+          .call(() => {
+            entranceComplete = true;
+            updateWaves();
           });
       };
+      const playEntrance = contextSafe?.(runEntrance) ?? runEntrance;
 
-      // Preserve your preloader's existing timing and site-ready event.
-      if (isSiteReady()) {
-        playEntrance();
-      } else {
+      if (isSiteReady()) playEntrance();
+      else
         window.addEventListener(SITE_READY_EVENT, playEntrance, { once: true });
-      }
 
       return () => {
         window.removeEventListener(SITE_READY_EVENT, playEntrance);
+        document.removeEventListener("visibilitychange", onVisibility);
+        observer.disconnect();
+        stopWaves();
         loops.forEach((loop) => loop.kill());
         entrance?.kill();
       };
@@ -173,7 +206,7 @@ export default function Hero() {
         color: "var(--color-black-bg, #080808)",
       }}
     >
-      <div className="container-x mx-auto flex min-h-[100svh] w-full max-w-[1920px] flex-col pt-[clamp(96px,13svh,138px)] pb-[clamp(18px,3svh,36px)]">
+      <div className="container-x mx-auto flex min-h-svh w-full max-w-[1920px] flex-col pt-[clamp(96px,13svh,138px)] pb-[clamp(18px,3svh,36px)]">
         <div className="mt-auto min-w-0 pt-[clamp(8px,2svh,20px)]">
           <div
             ref={metaRef}
@@ -249,7 +282,8 @@ export default function Hero() {
           </div>
 
           <div className="mt-[clamp(12px,1.8svh,18px)] flex min-w-0 flex-col items-start gap-2 sm:gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <h1
+            {/* Brand wordmark; the descriptive H1 lives in HeroReveal. */}
+            <p
               ref={titleRef}
               className="min-w-0 max-w-full whitespace-nowrap font-bold uppercase"
               style={{
@@ -259,7 +293,7 @@ export default function Hero() {
               }}
             >
               TECHNICO_
-            </h1>
+            </p>
             <a
               ref={exploreRef}
               href="#services"

@@ -86,7 +86,7 @@ export default function ContactForm() {
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
               <div>
                 <label htmlFor="firstName" className={LABEL_CLASSES}>
-                  First Name
+                  First name
                 </label>
                 <input
                   id="firstName"
@@ -102,7 +102,7 @@ export default function ContactForm() {
 
               <div>
                 <label htmlFor="lastName" className={LABEL_CLASSES}>
-                  Last Name
+                  Last name
                 </label>
                 <input
                   id="lastName"
@@ -150,7 +150,7 @@ export default function ContactForm() {
 
               <div className="sm:col-span-2">
                 <label htmlFor="company" className={LABEL_CLASSES}>
-                  Company / Organization
+                  Company / organization
                   <Optional />
                 </label>
                 <input
@@ -173,7 +173,7 @@ export default function ContactForm() {
 
             <fieldset className={FIELDSET_CLASSES}>
               <legend className={LABEL_CLASSES}>
-                Services You&rsquo;re Interested In
+                Services you&rsquo;re interested in
                 <Optional />
               </legend>
               <div className="mt-2 flex flex-wrap gap-2.5">
@@ -201,7 +201,7 @@ export default function ContactForm() {
 
             <div className="mt-10">
               <label htmlFor="projectDetails" className={LABEL_CLASSES}>
-                Project Details
+                Project details
                 <Optional />
               </label>
               <textarea
@@ -254,7 +254,7 @@ export default function ContactForm() {
 
               <div>
                 <label htmlFor="timezone" className={LABEL_CLASSES}>
-                  Time Zone
+                  Time zone
                 </label>
                 <TimezonePicker
                   id="timezone"

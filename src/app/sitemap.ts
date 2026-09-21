@@ -2,8 +2,12 @@ import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/content/blog";
 import { getAllServices } from "@/lib/content/services";
 import { SITE_URL } from "@/lib/constants";
+import { IS_PRODUCTION } from "@/lib/env";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Preview/staging must not advertise a discovery list of production URLs.
+  if (!IS_PRODUCTION) return [];
+
   const [posts, services] = await Promise.all([
     getAllPosts(),
     getAllServices(),
@@ -17,24 +21,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/contact",
   ].map((path) => ({
     url: `${SITE_URL}${path}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: path === "/" ? 1 : 0.8,
   }));
 
-  const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${SITE_URL}/blog/${post.slug}`,
-    lastModified: new Date(post.updatedAt),
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
+  const postRoutes: MetadataRoute.Sitemap = posts
+    .filter(
+      (post) =>
+        post.seo?.index !== false &&
+        (!post.seo?.canonicalPath ||
+          post.seo.canonicalPath === `/blog/${post.slug}`),
+    )
+    .map((post) => ({
+      url: `${SITE_URL}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedAt),
+    }));
 
-  const serviceRoutes: MetadataRoute.Sitemap = services.map((service) => ({
-    url: `${SITE_URL}/services/${service.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "yearly",
-    priority: 0.7,
-  }));
+  const serviceRoutes: MetadataRoute.Sitemap = services
+    .filter(
+      (service) =>
+        service.seo?.index !== false &&
+        (!service.seo?.canonicalPath ||
+          service.seo.canonicalPath === `/services/${service.slug}`),
+    )
+    .map((service) => ({
+      url: `${SITE_URL}/services/${service.slug}`,
+    }));
 
   return [...staticRoutes, ...postRoutes, ...serviceRoutes];
 }

@@ -51,7 +51,7 @@ interface Pillar {
 
 const PILLARS: Pillar[] = [
   {
-    title: "Partner-Focused",
+    title: "Partner-focused",
     tile: "purple",
     // Four-petal pinwheel — represents a close working partnership.
     icon: (
@@ -85,7 +85,7 @@ const PILLARS: Pillar[] = [
     ),
   },
   {
-    title: "Proven Track Record",
+    title: "Proven track record",
     tile: "light",
     // Open ring — represents a track record you can see straight through.
     icon: (
@@ -102,7 +102,7 @@ const PILLARS: Pillar[] = [
     ),
   },
   {
-    title: "Guaranteed Success",
+    title: "Guaranteed success",
     tile: "pink",
     // Pennant/flag — represents a guaranteed outcome.
     icon: (

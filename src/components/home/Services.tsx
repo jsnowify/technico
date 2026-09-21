@@ -191,7 +191,7 @@ export default function Services() {
           </div>
 
           <h2 className="h2-section max-w-[525px] leading-[1.08] font-medium tracking-heading text-white-text">
-            Accelerate Your Online Growth with Proven Digital Marketing Services
+            Accelerate your online growth with proven digital marketing services
           </h2>
 
           <p className="body-copy max-w-[420px] leading-[1.5] tracking-[-0.03em] text-white-text uppercase md:pt-2">

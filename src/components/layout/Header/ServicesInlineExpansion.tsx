@@ -2,12 +2,12 @@
 
 import type { RefObject } from "react";
 import Link from "next/link";
-import type { Service } from "@/lib/content/types";
+import type { ServiceNavItem } from "@/lib/content/types";
 
 interface ServicesInlineExpansionProps {
   wrapRef: RefObject<HTMLDivElement | null>;
   contentRef: RefObject<HTMLDivElement | null>;
-  columns: Service[][];
+  columns: ServiceNavItem[][];
   navExpanded: boolean;
   onPointerEnter: () => void;
   onPointerLeave: () => void;

@@ -44,34 +44,34 @@ const CHAPTERS: ChapterData[] = [
   {
     id: "industries",
     label: "Industries We Serve",
-    headingLines: ["Industries We", "Know"],
+    headingLines: ["Industries we", "know"],
     quote:
       "We’ve worked across industries where the customer journey, competition, and conversion goals can look very different. That experience includes:",
     secondary:
       "This range gives our digital marketers experience with different goals — from generating local service leads and appointment requests to supporting ecommerce sales and multi-location visibility. For a local service company, that may mean being discovered when customers search for a nearby service. For a multi-location business, it can mean building visibility across several cities without losing the relevance of each individual location. For ecommerce businesses, the focus shifts toward attracting shoppers and moving them from discovery to purchase.",
     items: [
       {
-        title: "Construction & Home Services",
+        title: "Construction & home services",
         desc: "Builders, renovation contractors, drywall and steel stud framing, electrical, solar, painting, fencing, decking, concrete, and other trades.",
       },
       {
-        title: "Healthcare & Wellness",
+        title: "Healthcare & wellness",
         desc: "Dental clinics, physiotherapy and rehabilitation, wellness, and aesthetics.",
       },
       {
-        title: "Legal Services",
+        title: "Legal services",
         desc: "Personal injury and family law.",
       },
       {
-        title: "Automotive & Transportation",
+        title: "Automotive & transportation",
         desc: "Car rentals, detailing, limousine, and transportation services.",
       },
       {
-        title: "Retail & Ecommerce",
+        title: "Retail & ecommerce",
         desc: "Online stores and multi-location retail businesses.",
       },
       {
-        title: "Renewable Energy & Technology",
+        title: "Renewable energy & technology",
         desc: "Solar energy and security businesses.",
       },
     ],
@@ -79,7 +79,7 @@ const CHAPTERS: ChapterData[] = [
   {
     id: "canada",
     label: "Where We Work",
-    headingLines: ["Strengthen Your Digital", "Presence Across Canada"],
+    headingLines: ["Strengthen your digital", "presence across Canada"],
     quote:
       "Our client experience extends beyond a single city, with businesses operating in markets across several Canadian provinces.",
     secondary:
@@ -98,34 +98,34 @@ const CHAPTERS: ChapterData[] = [
   {
     id: "deliverables",
     label: "What You Get",
-    headingLines: ["What Do You Get, Working", "With Technico?"],
+    headingLines: ["What do you get, working", "with Technico?"],
     quote:
       "Your digital marketing engagement should give you more than a list of services. Depending on your business’s needs, Technico Digital Solutions can bring together SEO, website development, content, paid advertising, social media, and email marketing to align with your business goals. That can include:",
     secondary:
       "This gives the reader a much stronger “what do I actually receive?” answer than simply saying Technico offers SEO, PPC, social, etc.",
     items: [
       {
-        title: "Research and Audits",
+        title: "Research and audits",
         desc: "To understand your current digital presence, competitors, and opportunities",
       },
       {
-        title: "A Tailored Strategy",
+        title: "A tailored strategy",
         desc: "That prioritizes the channels relevant to your audience and goals",
       },
       {
-        title: "Campaign Execution",
+        title: "Campaign execution",
         desc: "Across the digital marketing services included in your engagement",
       },
       {
-        title: "Content and Creative Work",
+        title: "Content and creative work",
         desc: "That supports search visibility, advertising, social media, and customer engagement",
       },
       {
-        title: "Ongoing Monitoring and Optimization",
+        title: "Ongoing monitoring and optimization",
         desc: "To identify what is working and where campaigns can improve",
       },
       {
-        title: "Performance Reporting",
+        title: "Performance reporting",
         desc: "Focused on the KPIs tied to your marketing goals",
       },
     ],
@@ -133,7 +133,7 @@ const CHAPTERS: ChapterData[] = [
   {
     id: "one-strategy",
     label: "One Strategy",
-    headingLines: ["One Strategy, Even If You", "Need More Than One Channel"],
+    headingLines: ["One strategy, even if you", "need more than one channel"],
     quote:
       "The strongest differentiator available from the material we currently have is the breadth of real client situations. Technico isn\u2019t being positioned only as an SEO provider or advertising agency. Its existing services cover the wider customer journey, from helping people find a business through search and advertising to providing a website and content that support conversion, and then using social and email to continue the relationship.",
     secondary:

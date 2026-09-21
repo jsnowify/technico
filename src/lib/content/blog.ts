@@ -214,7 +214,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789972251/blog-imgs/blog-posts-imgs/technico-blog-01-07-2026-2_hkbeyd.png",
         alt: "Grow your business with Technico Digital Solutions Inc.",
       },
       {
@@ -258,7 +258,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789972149/blog-imgs/blog-posts-imgs/technico-blog-01-07-2026_zr12ct.png",
     publishedAt: "2026-01-15",
     updatedAt: "2026-01-15",
     author: "Technico Digital Solutions",
@@ -472,7 +472,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789972449/blog-imgs/blog-posts-imgs/technico-blog-01-16-2026_rnvngg.png",
     publishedAt: "2026-01-16",
     updatedAt: "2026-01-16",
     author: "Technico Digital Solutions",
@@ -653,7 +653,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789972661/blog-imgs/blog-posts-imgs/technico-blog-02-13-2026_eluhzx.png",
     publishedAt: "2026-02-13",
     updatedAt: "2026-02-13",
     author: "Technico Digital Solutions",
@@ -815,7 +815,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789973178/blog-imgs/blog-posts-imgs/technico-blog-04-17-2026-2_gnzwh7.png",
         alt: "Graphic design work from a Vancouver design agency",
       },
       {
@@ -859,7 +859,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789973180/blog-imgs/blog-posts-imgs/technico-blog-04-17-2026_en9y5q.png",
     publishedAt: "2026-04-17",
     updatedAt: "2026-04-17",
     author: "Technico Digital Solutions",
@@ -1108,7 +1108,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789973484/blog-imgs/blog-posts-imgs/technico-blog-05-15-2026-2_etujyp.png",
         alt: "Ecommerce marketing dashboard showing revenue growth",
       },
       {
@@ -1152,7 +1152,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789973486/blog-imgs/blog-posts-imgs/technico-blog-05-15-2026_cywmxk.png",
     publishedAt: "2026-05-15",
     updatedAt: "2026-05-15",
     author: "Technico Digital Solutions",
@@ -1435,7 +1435,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789973803/blog-imgs/blog-posts-imgs/technico-blog-06-19-2026-2_bzzdoq.png",
         alt: "Social media manager reviewing content calendar and analytics",
       },
       {
@@ -1482,7 +1482,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789973806/blog-imgs/blog-posts-imgs/technico-blog-06-19-2026_s3qvdi.png",
     publishedAt: "2026-06-19",
     updatedAt: "2026-06-19",
     author: "Technico Digital Solutions",
@@ -1628,7 +1628,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789974208/blog-imgs/blog-posts-imgs/technico-blog-08-07-2026-2_lg42bw.png",
         alt: "Marketer reviewing AI-powered email campaign analytics",
       },
       {
@@ -1673,7 +1673,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789974126/blog-imgs/blog-posts-imgs/technico-blog-08-07-2026_uweezs.png",
     publishedAt: "2026-08-07",
     updatedAt: "2026-08-07",
     author: "Technico Digital Solutions",
@@ -1986,7 +1986,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789974502/blog-imgs/blog-posts-imgs/technico-blog-08-12-2026-2_cy42jc.png",
         alt: "Digital marketing team reviewing 2027 strategy performance data",
       },
       {
@@ -2034,7 +2034,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789974413/blog-imgs/blog-posts-imgs/technico-blog-08-12-2026_j0nryb.png",
     publishedAt: "2026-08-12",
     updatedAt: "2026-08-12",
     author: "Technico Digital Solutions",
@@ -2333,7 +2333,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789974898/blog-imgs/blog-posts-imgs/technico-blog-08-14-2026-2_y8piqz.png",
         alt: "SEO specialist reviewing website performance and rankings",
       },
       {
@@ -2377,7 +2377,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789974773/blog-imgs/blog-posts-imgs/technico-blog-08-14-2026_oj8ov5.png",
     publishedAt: "2026-08-14",
     updatedAt: "2026-08-14",
     author: "Technico Digital Solutions",
@@ -2815,7 +2815,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789975045/blog-imgs/blog-posts-imgs/technico-blog-08-21-2026_i8wf0d.png",
     publishedAt: "2026-08-21",
     updatedAt: "2026-08-21",
     author: "Technico Digital Solutions",
@@ -3119,7 +3119,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789975173/blog-imgs/blog-posts-imgs/technico-blog-08-28-2026_mbuwcs.png",
     publishedAt: "2026-08-28",
     updatedAt: "2026-08-28",
     author: "Technico Digital Solutions",
@@ -3204,7 +3204,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789975650/blog-imgs/blog-posts-imgs/technico-blog-09-04-2026-2_cust5s.png",
         alt: "A modern, crowded Google search results page showing AI Overviews, featured snippets, and other SERP features alongside traditional organic listings",
       },
       {
@@ -3537,7 +3537,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789975304/blog-imgs/blog-posts-imgs/technico-blog-09-04-2026_xj5q0f.png",
     publishedAt: "2026-09-04",
     updatedAt: "2026-09-04",
     author: "Technico Digital Solutions",
@@ -3655,7 +3655,7 @@ const posts: BlogPost[] = [
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+        src: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789975878/blog-imgs/blog-posts-imgs/technico-blog-09-09-2026-2_gcsddc.png",
         alt: "Comparison illustration showing high search volume versus high-intent, locally targeted search traffic",
       },
       {
@@ -3807,7 +3807,7 @@ const posts: BlogPost[] = [
       },
     ],
     coverImage:
-      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788140086/main-sample.png",
+      "https://res.cloudinary.com/dp9bjis3z/image/upload/v1789975794/blog-imgs/blog-posts-imgs/technico-blog-09-09-2026_sq0lty.png",
     publishedAt: "2026-09-09",
     updatedAt: "2026-09-09",
     author: "Technico Digital Solutions",

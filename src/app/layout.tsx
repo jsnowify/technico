@@ -8,8 +8,7 @@ import {
   SITE_PHONE,
   SITE_EMAIL,
   SOCIAL_LINKS,
-  SITE_ADDRESS,
-  SERVICE_AREAS,
+  NAV_LINKS,
 } from "@/lib/constants";
 import JsonLd from "@/components/seo/JsonLd";
 import Header from "@/components/layout/Header";
@@ -41,11 +40,8 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  // Staging/preview deploys must never be indexed — see
-  // https://developers.google.com/search/docs/crawling-indexing/block-indexing.
-  // This <meta name="robots"> tag is the reliable way to do that (as
-  // opposed to robots.txt, which only blocks crawling and can't stop
-  // an already-linked URL from still showing up in results).
+  // Do not index preview/staging; robots.txt must allow crawlers to read
+  // this noindex tag. Password-protect nonpublic staging independently.
   robots: IS_PRODUCTION
     ? {
         index: true,
@@ -68,11 +64,8 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  // Proves domain ownership to Google Search Console — renders as
-  // <meta name="google-site-verification" content="..." />. Kept
-  // independent of the noindex/robots logic above: Search Console
-  // still needs to be able to verify staging too if you ever check
-  // a staging property there, so this isn't gated on IS_PRODUCTION.
+  // Domain verification must be confirmed in the actual Search Console
+  // property at launch (this value is carried over from the source).
   verification: {
     google: "iB53T08hbGrfdsAmrKTVhocsuFV5rgOwT5imiFu2Iu8",
   },
@@ -85,18 +78,14 @@ export const viewport: Viewport = {
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
+  // The source contains only placeholder street/postal details. Do not
+  // publish a made-up physical location as LocalBusiness structured data.
+  // Add a verified LocalBusiness schema only when real NAP is supplied.
+  "@type": "Organization",
+  "@id": `${SITE_URL}/#organization`,
   name: SITE_NAME,
   url: SITE_URL,
   sameAs: Object.values(SOCIAL_LINKS),
-  address: {
-    "@type": "PostalAddress",
-    ...SITE_ADDRESS,
-  },
-  areaServed: SERVICE_AREAS.map((area) => ({
-    "@type": "Place",
-    name: area,
-  })),
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",
@@ -105,13 +94,26 @@ const organizationJsonLd = {
   },
 };
 
+const webSiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  name: SITE_NAME,
+  url: SITE_URL,
+  publisher: { "@id": `${SITE_URL}/#organization` },
+};
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Fetched here (Server Component) rather than inside Header itself
   // so the services list is resolved before the page ever reaches the
   // client — Header stays a plain client component that just renders
   // the prop it's given, and the nav content is present in the
   // initial HTML for crawlers instead of depending on a client fetch.
-  const services = await getAllServices();
+  // Avoid serializing every service's full content/sections into the Header
+  // Client Component on *every* route; it only displays these three fields.
+  const services = (await getAllServices()).map(
+    ({ slug, title, shortDescription }) => ({ slug, title, shortDescription }),
+  );
 
   return (
     <html
@@ -121,10 +123,34 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col font-sans">
         <div className="flex min-h-full flex-1 flex-col">
           <JsonLd data={organizationJsonLd} />
+          <JsonLd data={webSiteJsonLd} />
+          {/* Without JS, an unhydrated loader covers the server-rendered page.
+              Keep the animation intact when JavaScript is available. */}
+          <noscript>
+            <style>{`.technico-preloader,.technico-pixel-canvas{display:none!important}`}</style>
+          </noscript>
           <PreLoader />
           <PageTransition />
           <SmoothScrollProvider>
             <Header services={services} />
+            {/* The interactive mobile menu is hidden without hydration.
+                Supply ordinary, crawlable links as a no-JavaScript fallback. */}
+            <noscript>
+              <nav
+                aria-label="Mobile navigation without JavaScript"
+                className="relative z-20 flex flex-wrap gap-4 bg-white-bg px-5 py-4 font-mono text-sm text-black-text lg:hidden"
+              >
+                {NAV_LINKS.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="underline underline-offset-4"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+            </noscript>
             <main className="relative z-10 flex-1 bg-black-bg">
               {children}
               <ContactSection />

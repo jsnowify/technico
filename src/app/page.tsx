@@ -16,9 +16,10 @@ import Qualify from "@/components/home/Qualify";
 import TrustedBy from "@/components/home/TrustedBy";
 
 export const metadata = buildMetadata({
-  title: "Home",
+  title: "Digital Marketing Agency in Canada | Technico Digital Solutions",
   description: SITE_DESCRIPTION,
   path: "/",
+  absoluteTitle: true,
 });
 
 export default function Home() {
@@ -58,9 +59,9 @@ export default function Home() {
           <>
             Frequently
             <br />
-            Asked
+            asked
             <br />
-            Questions
+            questions
           </>
         }
         description="Answers to the questions we hear most from businesses evaluating a digital marketing partner. Still have one? Schedule a strategy call with Technico Digital Solutions today."

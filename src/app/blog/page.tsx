@@ -6,8 +6,9 @@ import BlogIndexHero from "@/components/blog/BlogIndexHero";
 import BlogIndexHeroReveal from "@/components/blog/BlogIndexHeroReveal";
 
 export const metadata = buildMetadata({
-  title: "Blog",
-  description: "Insights on web development, SEO, and technology strategy.",
+  title: "Digital Marketing, SEO & Web Development Insights",
+  description:
+    "Explore articles on SEO, website development, email marketing, advertising, and digital marketing strategies from Technico Digital Solutions.",
   path: "/blog",
 });
 
@@ -18,6 +19,7 @@ export default async function BlogIndexPage() {
     title: post.title,
     category: post.category,
     coverImage: post.coverImage,
+    publishedAt: post.publishedAt,
     readTime: estimateReadingTime(post.content),
   }));
 
@@ -32,7 +34,10 @@ export default async function BlogIndexPage() {
         </div>
       </div>
 
-      <section id="blog-journal" className="bg-black-bg py-16 sm:py-20 lg:py-24">
+      <section
+        id="blog-journal"
+        className="bg-black-bg py-16 sm:py-20 lg:py-24"
+      >
         <div className="container-x mx-auto w-full max-w-[1920px]">
           <BlogCategoryGrid posts={cards} />
         </div>

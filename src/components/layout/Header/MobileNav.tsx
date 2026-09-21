@@ -2,7 +2,7 @@
 
 import type { RefObject } from "react";
 import Link from "next/link";
-import type { Service } from "@/lib/content/types";
+import type { ServiceNavItem } from "@/lib/content/types";
 import { NAV_LINKS } from "./header.config";
 import styles from "./Header.module.css";
 
@@ -10,7 +10,7 @@ interface MobileNavProps {
   open: boolean;
   menuRef: RefObject<HTMLDivElement | null>;
   innerRef: RefObject<HTMLDivElement | null>;
-  services: Service[];
+  services: ServiceNavItem[];
   mobileServicesOpen: boolean;
   onToggleServices: () => void;
   onClose: () => void;

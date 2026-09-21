@@ -35,6 +35,8 @@ import {
   GRAPHIC_DESIGN_WORK,
 } from "@/lib/constants";
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const services = await getAllServices();
   return services.map((service) => ({ slug: service.slug }));
@@ -45,12 +47,21 @@ export async function generateMetadata({
 }: PageProps<"/services/[slug]">) {
   const { slug } = await params;
   const service = await getServiceBySlug(slug);
-  if (!service) return {};
+  if (!service) notFound();
+
+  const serviceName = service.subtitle ?? service.title;
+  const seoTitle = /\bservices?$/i.test(serviceName)
+    ? serviceName
+    : `${serviceName} Services`;
 
   return buildMetadata({
-    title: service.title,
-    description: service.shortDescription,
+    title: service.seo?.title ?? seoTitle,
+    description: service.seo?.description ?? service.shortDescription,
     path: `/services/${slug}`,
+    canonicalPath: service.seo?.canonicalPath,
+    image: service.seo?.image,
+    index: service.seo?.index,
+    follow: service.seo?.follow,
   });
 }
 
@@ -184,6 +195,7 @@ export default async function ServiceDetailPage({
     })),
     provider: {
       "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
       name: SITE_NAME,
       url: SITE_URL,
     },
@@ -451,9 +463,9 @@ export default async function ServiceDetailPage({
                     tooltip="Our work"
                     heading={
                       <>
-                        Our Recent
+                        Our recent
                         <br />
-                        Graphic Design Work
+                        graphic design work
                       </>
                     }
                   />

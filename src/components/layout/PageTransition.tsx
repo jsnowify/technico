@@ -16,12 +16,18 @@ import { isSiteReady } from "@/lib/site-ready";
  * No square fill, counter, router replacement, or experimental View
  * Transitions API. One GSAP owner per overlay; no animation of page children.
  */
-const STRIPE_COUNT = 12;
-const NAVIGATION_TIMEOUT_MS = 10_000;
-const STRIPE_DURATION = 0.44;
-const STRIPE_STAGGER = 0.026;
-const MARK_DURATION = 0.2;
-const TRANSITION_EASE = "power4.inOut";
+const STRIPE_COUNT = 4;
+const NAVIGATION_TIMEOUT_MS = 5_000;
+// Four staggered compositor-only stripes: ~0.55s to cover, a short readable
+// page-name hold, ~0.57s to reveal. Navigation is prefetched during the cover
+// but only committed AFTER the old page is fully hidden; this prevents the
+// destination hero from popping into view through unfinished stripes.
+const COVER_DURATION = 0.4;
+const REVEAL_DURATION = 0.42;
+const STRIPE_STAGGER = 0.05;
+const LABEL_HOLD_DURATION = 0.22;
+const MARK_DURATION = 0.22;
+const TRANSITION_EASE = "power3.inOut";
 
 type Phase = "idle" | "covering" | "waiting" | "revealing";
 
@@ -154,6 +160,9 @@ export default function PageTransition() {
     };
 
     const lockScroll = () => {
+      // The brief overlay itself intercepts taps; avoid toggling root
+      // overflow (a forced layout and iOS scroll-position jump) on phones.
+      if (window.matchMedia("(pointer: coarse)").matches) return;
       if (unlockRef.current) return;
       const html = document.documentElement;
       const previousHtmlOverflow = html.style.overflow;
@@ -197,21 +206,25 @@ export default function PageTransition() {
       pendingRef.current.phase = "revealing";
       cancelTimeout();
 
-      // The new route has committed while the overlay completely covers it.
-      // Header, Hero, Lenis, and ScrollTrigger have not been modified.
+      // The destination has committed beneath the fully covered overlay.
+      // Hold its label briefly, then reveal without animating page children.
       timelineRef.current?.kill();
       timelineRef.current = gsap.timeline({ onComplete: hideOverlay });
       timelineRef.current
-        .to(marks, { autoAlpha: 0, duration: 0.16 }, 0.06)
+        .to(
+          marks,
+          { autoAlpha: 0, y: -10, duration: 0.2, ease: "power2.in" },
+          LABEL_HOLD_DURATION,
+        )
         .to(
           stripes,
           {
             scaleX: 0,
-            duration: STRIPE_DURATION,
+            duration: REVEAL_DURATION,
             ease: TRANSITION_EASE,
             stagger: { each: STRIPE_STAGGER, from: "start" },
           },
-          0.1,
+          LABEL_HOLD_DURATION,
         );
     };
 
@@ -222,11 +235,16 @@ export default function PageTransition() {
         // One batched transform tween keeps all stripes on the compositor.
         .to(stripes, {
           scaleX: 1,
-          duration: STRIPE_DURATION,
+          duration: COVER_DURATION,
           ease: TRANSITION_EASE,
           stagger: { each: STRIPE_STAGGER, from: "start" },
         })
-        .to(marks, { autoAlpha: 1, duration: MARK_DURATION }, "-=0.1");
+        .fromTo(
+          marks,
+          { autoAlpha: 0, y: 10 },
+          { autoAlpha: 1, y: 0, duration: MARK_DURATION, ease: "power2.out" },
+          0.3,
+        );
     };
 
     const coverPage = (destination: URL) => {
@@ -245,17 +263,19 @@ export default function PageTransition() {
 
       const href = `${destination.pathname}${destination.search}${destination.hash}`;
 
-      // Visible Next links are usually prefetched already. This also warms
-      // plain internal anchors and dynamic destinations during the cover wipe.
-      routerRef.current.prefetch(
-        `${destination.pathname}${destination.search}`,
-      );
+      // Prefetch while the cover moves, but do NOT commit the new route yet.
+      // An immediate router.push can display the new hero through stripes
+      // that have not finished covering the previous page.
+      try {
+        routerRef.current.prefetch(href);
+      } catch {
+        // Prefetch is only a performance hint; navigation still works.
+      }
 
       animateCover(() => {
         if (pendingRef.current.phase !== "covering") return;
         pendingRef.current.phase = "waiting";
 
-        // Route navigation happens only once the OLD page is fully covered.
         try {
           routerRef.current.push(href, { scroll: true });
         } catch {
@@ -263,7 +283,10 @@ export default function PageTransition() {
           return;
         }
 
-        // Never leave the site blocked indefinitely if a route fails to load.
+        if (pendingRef.current.committed) {
+          revealPage();
+          return;
+        }
         timeoutRef.current = window.setTimeout(() => {
           if (pendingRef.current.phase === "waiting") hideOverlay();
         }, NAVIGATION_TIMEOUT_MS);

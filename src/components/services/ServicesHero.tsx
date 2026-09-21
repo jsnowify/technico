@@ -199,7 +199,7 @@ export default function ServicesHero() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(
-    () => {
+    (_context, contextSafe) => {
       const section = sectionRef.current;
       if (!section || prefersReducedMotion) return;
 
@@ -219,7 +219,8 @@ export default function ServicesHero() {
 
       let entrance: gsap.core.Timeline | undefined;
 
-      const reveal = () => {
+      // The loader dispatches this later; keep animation ownership here.
+      const runReveal = () => {
         if (entrance) return;
 
         entrance = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -259,6 +260,7 @@ export default function ServicesHero() {
             clearProps: "opacity,visibility,transform,transformOrigin",
           });
       };
+      const reveal = contextSafe?.(runReveal) ?? runReveal;
 
       // Same preloader handshake as the homepage; no new loader or scroll pin.
       if (isSiteReady()) {
@@ -279,7 +281,7 @@ export default function ServicesHero() {
     <section
       ref={sectionRef}
       aria-labelledby="services-hero-title"
-      className="relative isolate flex h-full min-h-[100svh] flex-col overflow-hidden bg-purple-hero text-black-bg"
+      className="relative isolate flex h-full min-h-svh flex-col overflow-hidden bg-purple-hero text-black-bg"
     >
       {/* Violet stage: a full-height composition like the real homepage Hero. */}
       <div className="container-x mx-auto flex w-full max-w-[1920px] flex-1 flex-col pt-[clamp(104px,14svh,154px)] pb-[clamp(30px,5svh,62px)]">
@@ -318,13 +320,10 @@ export default function ServicesHero() {
           <div className="min-w-0 self-end">
             <div
               data-services-reveal
-              className="mb-[clamp(22px,4svh,48px)] flex items-center gap-3 font-mono text-[10px] font-medium tracking-[0.05em] uppercase sm:text-xs"
+              className="mb-[clamp(22px,4svh,48px)] flex items-center gap-3 font-mono text-[10px] font-medium tracking-wider uppercase sm:text-xs"
             >
-              <span
-                aria-hidden="true"
-                className="h-[7px] w-[7px] bg-black-bg"
-              />
-              / WHAT WE DO
+              <span aria-hidden="true" className="h-1.75 w-1.75 bg-black-bg" />/
+              WHAT WE DO
             </div>
 
             <h1
