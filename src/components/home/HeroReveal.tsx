@@ -59,6 +59,7 @@ export default function HeroReveal() {
                 alt="Technico Digital Solutions, a digital marketing agency that prioritizes profit over traffic"
                 sizes="(min-width: 1024px) 42vw, 100vw"
                 revealId="home-hero-reveal"
+                priority
               />
               <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-black-bg/86 p-4 font-mono text-[9px] tracking-[0.05em] text-content-muted uppercase sm:text-[10px]">
                 <span>{"// Technico Digital Solutions"}</span>

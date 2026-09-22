@@ -101,7 +101,9 @@ import CursorLabel from "@/components/ui/CursorLabel";
    LOGOS ARE PLAIN <img>, NOT next/image: TRUSTED_BY's URLs are
    external Cloudinary assets, and this project's next.config isn't
    part of this component tree to confirm a matching `remotePatterns`
-   entry exists for that host. `draggable={false}` on each <img> stops
+   entry exists for that host. The constants request 320px, f_auto/q_auto
+   Cloudinary versions of the original artwork instead of 1080px PNGs.
+   `draggable={false}` on each <img> stops
    the browser's own native "drag this image out" affordance from
    fighting with our own pointer handling.
    ================================================================ */
@@ -764,14 +766,17 @@ export default function TrustedBy() {
               aria-hidden={i >= TRUSTED_BY.length || undefined}
               className="mr-8 flex aspect-square h-36 shrink-0 items-center justify-center border border-white/10 bg-white/3 p-6 sm:h-48 sm:p-8 md:mr-12 md:h-60 md:p-10"
             >
-              {/* Fetch the first two cycles in advance so touch flings never
-                  expose undecoded images; the final buffer may load lazily. */}
+              {/* Eagerly fetch one complete set of optimized logos so any
+                  logo can enter during a fling; clones reuse the same URL
+                  and load lazily rather than competing with the LCP. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={brand.logo}
                 alt=""
                 decoding="async"
-                loading={i < TRUSTED_BY.length * 2 ? "eager" : "lazy"}
+                loading={i < TRUSTED_BY.length ? "eager" : "lazy"}
+                width={320}
+                height={320}
                 draggable={false}
                 className="h-full w-full object-contain"
               />

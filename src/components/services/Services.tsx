@@ -1,14 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { SERVICES, type Service } from "@/lib/constants";
-import HorizontalStagger from "@/components/layout/Header/HorizontalStagger";
-import LetterSpinner from "@/components/layout/Header/LetterSpinner";
 import ServiceArtwork from "./ServiceArtwork";
+import ServiceLearnMore from "./ServiceLearnMore";
 
 /**
  * /services — full-width editorial service gallery.
@@ -55,7 +52,7 @@ interface DetailedService extends Service {
 const SERVICE_DETAILS: DetailedService[] = [
   {
     ...SERVICES[0],
-    title: "Search engine optimization (SEO)",
+    title: "Search Engine Optimization (SEO)",
     tagline: "Drive organic traffic and get quality leads",
     paragraphs: [
       "We at Technico Digital Solutions starts SEO work by looking at how your website currently performs in search, what your potential customers are searching for, and which competitors are taking visibility you could be capturing. Our team audits the site’s technical setup, existing pages, keyword targeting, content, and backlink profile to identify where improvements can have the most impact.",
@@ -75,7 +72,7 @@ const SERVICE_DETAILS: DetailedService[] = [
   },
   {
     ...SERVICES[1],
-    title: "Website design & development",
+    title: "Website Design & Development",
     tagline: "Create a strong digital presence with a user-centred website",
     paragraphs: [
       "Technico approaches website design around what visitors need to do once they arrive, not just how the site looks. Before designing or rebuilding a website, the team looks at your services, target customers, site structure, conversion points, and the marketing channels that will be sending traffic to it.",
@@ -94,7 +91,7 @@ const SERVICE_DETAILS: DetailedService[] = [
   },
   {
     ...SERVICES[2],
-    title: "Creative design & content services",
+    title: "Creative Design & Content Services",
     tagline: "Engage your audience with compelling content & visuals",
     paragraphs: [
       "Captivate your audience with high-quality, creative content that tells your brand story and drives engagement. From graphics to blog posts, our creative services focus on building brand authority and establishing a strong connection with your target audience.",
@@ -123,7 +120,7 @@ const SERVICE_DETAILS: DetailedService[] = [
   },
   {
     ...SERVICES[3],
-    title: "Media buying & digital advertising",
+    title: "Media Buying & Digital Advertising",
     tagline: "Maximize ROI with data-driven advertising campaigns",
     paragraphs: [
       "Our marketing team plans paid campaigns around who the business needs to reach, where that audience can be reached, and what action they should take after clicking an ad. Instead of putting your ad budget into different channels and hoping something works, we will have to discuss what you want to achieve first. We will plan out the right platforms to use, audiences, keywords, campaign types, and landing pages to put your budget where it has the strongest chance of generating results.",
@@ -153,7 +150,7 @@ const SERVICE_DETAILS: DetailedService[] = [
   },
   {
     ...SERVICES[4],
-    title: "Social media management",
+    title: "Social Media Management",
     tagline: "Build meaningful connections with your target market",
     paragraphs: [
       "Social media management at Technico goes beyond filling up your content calendar. The team looks at who you want to reach, where those people are active, what your competitors are doing, and which topics and formats are getting attention in your industry. We handle the day-to-day work behind your accounts, including content planning, copywriting, creative production, scheduling, publishing, and community management. Our marketers will then keep an eye on platform and industry trends, so content can respond to what audiences are interested in instead of following the same content plan month after month.",
@@ -198,7 +195,7 @@ const SERVICE_DETAILS: DetailedService[] = [
   },
   {
     ...SERVICES[5],
-    title: "Email marketing",
+    title: "Email Marketing",
     tagline: "Drive conversions with targeted campaigns",
     paragraphs: [
       "Although Technico is particularly focused on SEO as a core growth driver, we still strongly believe in the power of email marketing as a complementary channel. We do not create generic, mass-produced email campaigns that end up in spam folders or get ignored. Every email strategy we develop is tailored to the recipient, grounded in research, and designed with intent.",
@@ -208,77 +205,6 @@ const SERVICE_DETAILS: DetailedService[] = [
     capabilityGroups: [],
   },
 ];
-
-function ServiceLearnMore({
-  href,
-  title,
-  dark,
-}: {
-  href: string;
-  title: string;
-  dark: boolean;
-}) {
-  const [active, setActive] = useState(false);
-
-  const handlePointerEnter = (event: ReactPointerEvent<HTMLAnchorElement>) => {
-    if (event.pointerType !== "touch") setActive(true);
-  };
-
-  const handlePointerLeave = (event: ReactPointerEvent<HTMLAnchorElement>) => {
-    if (event.pointerType !== "touch") setActive(false);
-  };
-
-  return (
-    <Link
-      href={href}
-      data-cursor="circle"
-      aria-label={`Learn more about ${title}`}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onPointerCancel={() => setActive(false)}
-      onFocus={() => setActive(true)}
-      onBlur={() => setActive(false)}
-      className={`group/link relative isolate mt-5 inline-flex min-h-11 items-center overflow-hidden border px-4 font-mono text-[11px] tracking-[-0.025em] uppercase transition-[color,border-color] duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 sm:mt-6 sm:text-[12px] ${
-        active
-          ? "border-purple-accent text-black-bg"
-          : dark
-            ? "border-white-text/45 text-white-text"
-            : "border-black-text/45 text-black-text"
-      } ${dark ? "focus-visible:outline-white-text" : "focus-visible:outline-black-text"}`}
-    >
-      <HorizontalStagger active={active} rows={6} />
-
-      <span className="relative z-10 inline-flex items-center gap-5 leading-none">
-        <LetterSpinner text="Learn more" active={active} />
-
-        <span aria-hidden="true" className="relative h-4 w-5 overflow-hidden">
-          {[false, true].map((incoming) => (
-            <svg
-              key={String(incoming)}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="square"
-              strokeLinejoin="miter"
-              className={`absolute inset-0 h-4 w-5 transition-transform duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                incoming
-                  ? active
-                    ? "translate-x-0"
-                    : "-translate-x-full"
-                  : active
-                    ? "translate-x-full"
-                    : "translate-x-0"
-              }`}
-            >
-              <path d="M3 12h17M14 6l6 6-6 6" />
-            </svg>
-          ))}
-        </span>
-      </span>
-    </Link>
-  );
-}
 
 function ServiceSpread({
   service,
@@ -325,6 +251,7 @@ function ServiceSpread({
             href={service.href}
             title={service.title}
             dark={dark}
+            className="mt-5 sm:mt-6"
           />
         </div>
 

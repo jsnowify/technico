@@ -424,6 +424,12 @@ body::-webkit-scrollbar {
   animation: eyebrow-wave 2.4s ease-in-out infinite;
 }
 
+/* The 404 is a recovery page: reveal its SSR content immediately, even before
+   React hydrates and PreLoader removes itself. */
+body:has([data-technico-not-found]) .technico-preloader {
+  display: none !important;
+}
+
 /* Reduced-motion preferences intentionally disable motion, never mobile width. */
 @media (prefers-reduced-motion: reduce) {
   .technico-preloader {

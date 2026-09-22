@@ -343,10 +343,17 @@ export default function ServiceArtwork({
   index,
   title,
   dark,
+  compact = false,
 }: {
   index: number;
   title: string;
   dark: boolean;
+  /**
+   * Renders just the animated drawing (no header, caption or replay/pause
+   * controls) so the same artwork can drop into a small square icon slot,
+   * e.g. replacing a static <img> service icon.
+   */
+  compact?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const id = useId().replace(/:/g, "");
@@ -613,14 +620,17 @@ export default function ServiceArtwork({
       ref={root}
       data-service-visual
       data-dark={dark}
-      className={styles.card}
+      data-compact={compact}
+      className={compact ? styles.iconCard : styles.card}
     >
-      <div className={styles.header}>
-        <span>/ {String(index + 1).padStart(2, "0")}</span>
-        <span>{CAPTIONS[index][0]}</span>
-      </div>
+      {!compact && (
+        <div className={styles.header}>
+          <span>/ {String(index + 1).padStart(2, "0")}</span>
+          <span>{CAPTIONS[index][0]}</span>
+        </div>
+      )}
       <div
-        className={styles.stage}
+        className={compact ? styles.iconStage : styles.stage}
         role="img"
         aria-label={`${title} illustration`}
       >
@@ -649,50 +659,56 @@ export default function ServiceArtwork({
               />
             </linearGradient>
           </defs>
-          <rect
-            x="20"
-            y="20"
-            width="320"
-            height="320"
-            fill={`url(#${id}-grid)`}
-          />
-          <path
-            d="M20 40V20h20m280 0h20v20M20 320v20h20m280 0h20v-20"
-            className={styles.soft}
-          />
+          {!compact && (
+            <rect
+              x="20"
+              y="20"
+              width="320"
+              height="320"
+              fill={`url(#${id}-grid)`}
+            />
+          )}
+          {!compact && (
+            <path
+              d="M20 40V20h20m280 0h20v20M20 320v20h20m280 0h20v-20"
+              className={styles.soft}
+            />
+          )}
           <g data-parallax>
             <Drawing index={index} id={id} />
           </g>
         </svg>
       </div>
-      <div className={styles.footer}>
-        <span className={styles.caption}>{CAPTIONS[index][1]}</span>
-        <div className={styles.controls}>
-          <button
-            type="button"
-            aria-label={`Replay ${title} animation`}
-            onClick={() => {
-              pausedRef.current = false;
-              setPaused(false);
-              controls.current?.replay();
-            }}
-          >
-            ↻
-          </button>
-          <button
-            type="button"
-            aria-label={`Pause ${title} animation`}
-            aria-pressed={paused}
-            onClick={() => {
-              pausedRef.current = !pausedRef.current;
-              setPaused(pausedRef.current);
-              controls.current?.sync();
-            }}
-          >
-            {paused ? "▶" : "Ⅱ"}
-          </button>
+      {!compact && (
+        <div className={styles.footer}>
+          <span className={styles.caption}>{CAPTIONS[index][1]}</span>
+          <div className={styles.controls}>
+            <button
+              type="button"
+              aria-label={`Replay ${title} animation`}
+              onClick={() => {
+                pausedRef.current = false;
+                setPaused(false);
+                controls.current?.replay();
+              }}
+            >
+              ↻
+            </button>
+            <button
+              type="button"
+              aria-label={`Pause ${title} animation`}
+              aria-pressed={paused}
+              onClick={() => {
+                pausedRef.current = !pausedRef.current;
+                setPaused(pausedRef.current);
+                controls.current?.sync();
+              }}
+            >
+              {paused ? "▶" : "Ⅱ"}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

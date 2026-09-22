@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useRef, useState, type CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { SERVICES, type Service } from "@/lib/constants";
-import SlidingText from "@/components/motion/SlidingText";
-import PixelRevealImage from "./PixelRevealImage";
+import ServiceArtwork from "@/components/services/ServiceArtwork";
+import ServiceLearnMore from "@/components/services/ServiceLearnMore";
 
 /**
  * Inline links inside a service description, keyed by the service's href.
@@ -50,7 +49,6 @@ function renderDescription(service: Service) {
  * mobile header spacing cannot drift from the desktop stacking animation.
  */
 function ServiceSheet({ service, index }: { service: Service; index: number }) {
-  const [hovered, setHovered] = useState(false);
   const number = `S.01.${index + 1}`;
 
   return (
@@ -97,30 +95,23 @@ function ServiceSheet({ service, index }: { service: Service; index: number }) {
             ))}
           </ul>
 
-          <Link
+          <ServiceLearnMore
             href={service.href}
-            aria-label={`Learn more about ${service.title}`}
-            data-cursor="circle"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            className="col-start-1 row-start-3 inline-flex w-fit items-center self-center justify-self-center whitespace-nowrap font-mono text-[11px] leading-none tracking-[-0.025em] text-black-text uppercase transition-opacity hover:opacity-55 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black-text sm:text-[12px] md:mt-auto md:self-center md:pt-8"
-          >
-            <span aria-hidden="true">[&nbsp;</span>
-            <SlidingText text="Learn More" isHovered={hovered} />
-            <span aria-hidden="true">&nbsp;]</span>
-          </Link>
+            title={service.title}
+            dark={false}
+            className="col-start-1 row-start-3 mt-5 w-fit justify-self-center self-center md:mt-8"
+          />
         </div>
 
         {/* The slot gets its color by mixing the global black-bg token with
             the global white-bg sheet — no one-off background hex values. */}
         <div className="col-start-2 row-start-3 flex h-[104px] min-h-0 items-center justify-center bg-black-bg/10 p-3 sm:h-[132px] md:col-start-auto md:row-start-auto md:h-[330px] md:self-start md:p-5">
           <div className="service-sheet-icon relative h-16 w-16 sm:h-20 sm:w-20 md:h-[min(12vw,190px)] md:w-[min(12vw,190px)]">
-            <PixelRevealImage
-              src={service.icon}
-              alt=""
-              sizes="(min-width: 1024px) 190px, (min-width: 768px) 12vw, (min-width: 640px) 80px, 64px"
-              fit="contain"
-              canvasClassName="bg-transparent"
+            <ServiceArtwork
+              index={index}
+              title={service.title}
+              dark={false}
+              compact
             />
           </div>
         </div>

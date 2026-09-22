@@ -26,6 +26,15 @@ export default function PreLoader() {
     const counter = counterRef.current;
     if (!overlay || !square || !fill || !counter) return;
 
+    // A direct 404 visit must be useful immediately, without a blocking intro.
+    // globals.css hides this overlay before hydration; complete readiness here
+    // so other components do not wait for a preloader that never runs.
+    if (document.querySelector("[data-technico-not-found]")) {
+      announceSiteReady();
+      const frame = window.requestAnimationFrame(() => setVisible(false));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
     if (prefersReducedMotion) {
       announceSiteReady();
       const frame = window.requestAnimationFrame(() => setVisible(false));
@@ -35,6 +44,11 @@ export default function PreLoader() {
     const markers = Array.from(
       overlay.querySelectorAll<HTMLElement>("[data-loader-marker]"),
     );
+    // Read geometry once before GSAP writes transforms; callbacks for all
+    // four markers can then reuse the measurements without layout reads.
+    const markerOffsetX = square.offsetWidth / 2 + 6;
+    const markerOffsetY = square.offsetHeight / 2 + 6;
+
     let finished = false;
     const finish = () => {
       if (finished) return;
@@ -55,8 +69,8 @@ export default function PreLoader() {
         .to(
           markers,
           {
-            x: (i) => (i % 2 ? 1 : -1) * (square.offsetWidth / 2 + 6),
-            y: (i) => (i < 2 ? -1 : 1) * (square.offsetHeight / 2 + 6),
+            x: (i) => (i % 2 ? 1 : -1) * markerOffsetX,
+            y: (i) => (i < 2 ? -1 : 1) * markerOffsetY,
             duration: 0.34,
             ease: "power2.out",
           },

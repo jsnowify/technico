@@ -247,7 +247,7 @@ export interface Service {
 
 export const SERVICES: Service[] = [
   {
-    title: "SEO (search engine optimization)",
+    title: "SEO (Search Engine Optimization)",
     shortTitle: "SEO",
     description:
       "Let’s get your business found online. Our SEO work improves your search visibility through data, structure, and creative content. Every strategy we build aims to drive organic traffic, attract qualified leads, and improve long-term rankings. Our SEO process includes:",
@@ -261,7 +261,7 @@ export const SERVICES: Service[] = [
     href: "/services/search-engine-optimization",
   },
   {
-    title: "Website development & design",
+    title: "Website Development & Design",
     shortTitle: "Web Development",
     description:
       "Make your website fast, functional, and easy to use. Every project starts with a plan that matches your brand and supports your digital goals. Each page loads quickly, guides users naturally, and helps convert visitors into customers. With our web services, expect:",
@@ -275,7 +275,7 @@ export const SERVICES: Service[] = [
     href: "/services/website-design-and-development",
   },
   {
-    title: "Creative design & content services",
+    title: "Creative Design & Content Services",
     shortTitle: "Creative Design",
     description:
       "We combine visual creativity with strategic content planning. Every piece we create solidifies your brand and connects with your target market. From ad visuals to website copy, we keep your tone consistent and your message clear. Our creative digital marketing services cover:",
@@ -289,7 +289,7 @@ export const SERVICES: Service[] = [
     href: "/services/creative-design-and-content",
   },
   {
-    title: "Media buying & digital advertising",
+    title: "Media Buying & Digital Advertising",
     shortTitle: "Advertising",
     description:
       "We plan, manage, and optimize campaigns that bring impressive results. Our team uses data-backed strategies to make every ad dollar count. From keyword targeting to audience segmentation, each decision is made with performance in mind. Our focus areas include:",
@@ -302,7 +302,7 @@ export const SERVICES: Service[] = [
     href: "/services/advertising",
   },
   {
-    title: "Social media management",
+    title: "Social Media Management",
     shortTitle: "Social Media",
     description:
       "We create, manage, and maintain a consistent brand identity across all your social platforms. Each post, story, and caption is based on a clear content plan that supports your business goals. Every piece of content adds value and strengthens your social media presence. Our approach covers:",
@@ -316,7 +316,7 @@ export const SERVICES: Service[] = [
     href: "/services/social-media-management",
   },
   {
-    title: "Email marketing",
+    title: "Email Marketing",
     shortTitle: "Email Marketing",
     description:
       "Connect directly with your target audience through our strategic email campaigns. From welcome emails to follow-up messages, our team creates every campaign to get responses. We keep messages concise, relevant, and consistent so your brand stays top of mind. For consistent results, our digital marketing services include:",
@@ -389,7 +389,8 @@ export const PARTNERS: Partner[] = [
 /**
  * Content for the "Trusted by" logo loop (components/home/TrustedBy.tsx).
  *
- * These are hosted on Cloudinary rather than /public — no company names
+ * These use Cloudinary responsive delivery (320px, automatic modern format
+ * and compression) rather than the original 1080px PNGs. No company names
  * were supplied alongside the images, so `alt` is left empty (the logos
  * are decorative here; the section's "Trusted by" heading already carries
  * the meaning for assistive tech).
@@ -405,43 +406,43 @@ export interface TrustedBrand {
 
 export const TRUSTED_BY: TrustedBrand[] = [
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526316/trusted/technico-trusted-by-1_r1j2kq.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526316/trusted/technico-trusted-by-1_r1j2kq.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526316/trusted/technico-trusted-by-2_vtqyly.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526316/trusted/technico-trusted-by-2_vtqyly.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-3_cxj5my.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-3_cxj5my.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-4_ds72ds.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-4_ds72ds.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526316/trusted/technico-trusted-by-5_sbmbc9.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526316/trusted/technico-trusted-by-5_sbmbc9.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-6_yewoz3.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-6_yewoz3.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-7_iupzeh.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-7_iupzeh.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-8_zza1hu.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-8_zza1hu.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-9_ceji5a.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-9_ceji5a.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-10_hwtenh.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-10_hwtenh.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526317/trusted/technico-trusted-by-11_dadypu.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-11_dadypu.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526318/trusted/technico-trusted-by-12_zzhke2.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526318/trusted/technico-trusted-by-12_zzhke2.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/v1788526318/trusted/technico-trusted-by-13_wqkkvw.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526318/trusted/technico-trusted-by-13_wqkkvw.png",
   },
 ];
 

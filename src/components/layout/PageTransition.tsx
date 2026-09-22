@@ -112,10 +112,15 @@ function shouldAnimateLink(
   return destination;
 }
 
-export default function PageTransition() {
+export default function PageTransition({
+  knownPaths,
+}: {
+  knownPaths: string[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const routerRef = useRef(router);
+  const knownRoutesRef = useRef(new Set(knownPaths.map(normalizePath)));
   const overlayRef = useRef<HTMLDivElement>(null);
   const marksRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -137,6 +142,10 @@ export default function PageTransition() {
   useEffect(() => {
     routerRef.current = router;
   }, [router]);
+
+  useEffect(() => {
+    knownRoutesRef.current = new Set(knownPaths.map(normalizePath));
+  }, [knownPaths]);
 
   // Mounted once in app/layout.tsx. These refs survive every App Router page.
   useEffect(() => {
@@ -301,6 +310,15 @@ export default function PageTransition() {
       const destination = shouldAnimateLink(event, anchor);
       if (!destination) return;
 
+      // On a 404, recovery links navigate normally. Likewise, an unknown
+      // destination should go straight to Next.js's not-found boundary.
+      if (
+        document.querySelector("[data-technico-not-found]") ||
+        !knownRoutesRef.current.has(normalizePath(destination.pathname))
+      ) {
+        return;
+      }
+
       if (pendingRef.current.phase !== "idle") {
         event.preventDefault();
         return;
@@ -316,6 +334,14 @@ export default function PageTransition() {
       if (prefersReducedMotion || !isSiteReady()) return;
       const destination = normalizePath(window.location.pathname);
       if (destination === normalizePath(lastPathRef.current)) return;
+      // Browser Back/Forward cannot be delayed before the URL changes. Skip
+      // the overlay for error pages and when leaving a 404.
+      if (
+        document.querySelector("[data-technico-not-found]") ||
+        !knownRoutesRef.current.has(destination)
+      ) {
+        return;
+      }
 
       cancelTimeout();
       timelineRef.current?.kill();
@@ -371,7 +397,11 @@ export default function PageTransition() {
     lastPathRef.current = pathname;
     const pending = pendingRef.current;
     pending.committed = true;
-    if (pending.phase === "waiting") {
+    // A valid-looking URL can still call notFound() server-side. Never keep
+    // the overlay over a committed error page in that case.
+    if (document.querySelector("[data-technico-not-found]")) {
+      transitionControllerRef.current?.hideOverlay();
+    } else if (pending.phase === "waiting") {
       // If Next unexpectedly redirected, still reveal the resolved page.
       transitionControllerRef.current?.revealPage();
     }

@@ -20,6 +20,7 @@ import GlobalCursor from "@/components/layout/GlobalCursor";
 import PreLoader from "@/components/layout/PreLoader";
 import PageTransition from "@/components/layout/PageTransition";
 import { getAllServices } from "@/lib/content/services";
+import { getAllPosts } from "@/lib/content/blog";
 import { IS_INDEXABLE } from "@/lib/env";
 import StickyConnectCTA from "@/components/layout/StickyConnectCTA";
 
@@ -111,9 +112,27 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // initial HTML for crawlers instead of depending on a client fetch.
   // Avoid serializing every service's full content/sections into the Header
   // Client Component on *every* route; it only displays these three fields.
-  const services = (await getAllServices()).map(
-    ({ slug, title, shortDescription }) => ({ slug, title, shortDescription }),
-  );
+  const [allServices, posts] = await Promise.all([
+    getAllServices(),
+    getAllPosts(),
+  ]);
+  const services = allServices.map(({ slug, title, shortDescription }) => ({
+    slug,
+    title,
+    shortDescription,
+  }));
+
+  // Match the real static routes and dynamic content registries. Unknown URLs
+  // navigate immediately to the 404 instead of showing a branded page wipe.
+  const transitionRoutes = [
+    "/",
+    "/services",
+    "/about",
+    "/blog",
+    "/contact",
+    ...allServices.map(({ slug }) => `/services/${slug}`),
+    ...posts.map(({ slug }) => `/blog/${slug}`),
+  ];
 
   return (
     <html
@@ -130,7 +149,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <style>{`.technico-preloader,.technico-pixel-canvas{display:none!important}`}</style>
           </noscript>
           <PreLoader />
-          <PageTransition />
+          <PageTransition knownPaths={transitionRoutes} />
           <SmoothScrollProvider>
             <Header services={services} />
             {/* The interactive mobile menu is hidden without hydration.

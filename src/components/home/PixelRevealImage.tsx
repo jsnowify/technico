@@ -247,6 +247,7 @@ export default function PixelRevealImage({
         fill
         sizes={sizes}
         priority={priority}
+        fetchPriority={priority ? "high" : undefined}
         className={fit === "contain" ? "object-contain" : "object-cover"}
       />
       <canvas

@@ -14,6 +14,32 @@
   --art-accent: var(--color-purple-accent);
 }
 
+/* Compact variant: fills a small square slot (e.g. a service icon) with
+   just the animated drawing — no header, caption or transport controls. */
+.iconCard {
+  --art-surface: var(--color-white-bg);
+  --art-ink: var(--color-black-text);
+  --art-accent: var(--color-purple-secondary);
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: var(--art-ink);
+}
+.iconCard[data-dark="true"] {
+  --art-surface: var(--color-black-bg);
+  --art-ink: var(--color-white-text);
+  --art-accent: var(--color-purple-accent);
+}
+.iconStage {
+  width: 100%;
+  height: 100%;
+}
+.iconStage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .header,
 .footer {
   display: flex;
