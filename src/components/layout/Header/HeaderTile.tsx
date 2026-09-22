@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ScrambleText from "@/components/motion/ScrambleText";
 import HorizontalStagger from "./HorizontalStagger";
 import HeaderDrop from "./HeaderDrop";
 import styles from "./Header.module.css";
@@ -64,7 +65,7 @@ export default function HeaderTile({
         <HeaderDrop open={active} className="absolute inset-x-0 top-full">
           <p className="min-h-12 px-3 pb-4 pt-3 font-mono text-[12px] leading-tight uppercase tracking-[-0.045em] text-[#222]">
             {"// "}
-            {info}
+            {active ? <ScrambleText text={info} trigger="mount" /> : info}
           </p>
         </HeaderDrop>
       )}

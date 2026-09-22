@@ -29,13 +29,11 @@ const MARQUEE_BOOST_HALF_LIFE = 0.4;
 // big momentum-scroll jump between two samples) can't blow past the
 // boost cap in a single step.
 const MARQUEE_MAX_SAMPLE_VELOCITY = 4000;
-// Touch phones are frequently 90–120Hz displays now, and `pointer:
-// fine` is false for essentially all of them — running the tick
-// callback on every refresh-driven frame there is 1.5–2x the JS/style
-// work of a 60Hz screen for a purely decorative loop nobody's reading
-// pixel-by-pixel. Cap it to a flat 30fps on coarse-pointer devices;
-// desktop (mouse/trackpad) keeps the display's native rate.
-const MARQUEE_MOBILE_FPS = 30;
+// Mobile: scroll boosts are capped and smoothed rather than accumulated
+// per touch-scroll event. Rendering still runs at the display's native rate.
+const MARQUEE_MOBILE_MAX_BOOST = 85;
+const MARQUEE_MOBILE_BOOST_GAIN = 0.045;
+const MARQUEE_MOBILE_SMOOTHING = 0.12; // seconds
 
 const MARQUEE_WORD = "Let\u2019s connect";
 const MARQUEE_REPEAT = 3;
@@ -65,10 +63,12 @@ export default function StickyConnectCTA() {
 
     let frame = 0;
     let hidden = false;
+    // Cache geometry: measuring offsetTop/offsetHeight every scroll frame
+    // can force layout while the mobile marquee is trying to animate.
+    let mainBottom = main.offsetTop + main.offsetHeight;
 
     const update = () => {
       frame = 0;
-      const mainBottom = main.offsetTop + main.offsetHeight;
       const nextHidden = window.scrollY + window.innerHeight > mainBottom + 1;
       if (nextHidden === hidden) return;
       hidden = nextHidden;
@@ -93,52 +93,52 @@ export default function StickyConnectCTA() {
       if (!frame) frame = requestAnimationFrame(update);
     };
 
+    const onResize = () => {
+      mainBottom = main.offsetTop + main.offsetHeight;
+      requestUpdate();
+    };
+
     // --- marquee: seamless loop + scroll-velocity speed boost -------
     // One shared `gsap.ticker` callback drives the loop. The same
     // passive `scroll` listener already needed for show/hide also
     // feeds it a velocity sample below, so the marquee adds zero
     // extra event listeners on top of what this component already had.
     let period = track ? measurePeriod(track) : 0;
-    let wrap = gsap.utils.wrap(-period, 0);
+    let wrap = period > 0 ? gsap.utils.wrap(-period, 0) : (_value: number) => 0;
+    // quickSetter avoids building a GSAP vars object and parsing it each frame.
+    const setTrackX = track ? gsap.quickSetter(track, "x", "px") : null;
     let x = 0;
     let boost = 0;
+    let targetBoost = 0;
     let ticking = false;
 
-    // Coarse-pointer (touch) devices process at most MARQUEE_MOBILE_FPS
-    // of these a second; everything below still runs off a real
-    // elapsed-time `dt` rather than a fixed frame budget, so skipped
-    // frames don't change the perceived speed — only how often the
-    // (cheap) update work happens.
-    const minFrameGapMs = supportsFinePointer ? 0 : 1000 / MARQUEE_MOBILE_FPS;
-    let lastTickT = performance.now();
+    // Do not throttle mobile to 30fps: uneven frame skipping makes an
+    // otherwise smooth translate look especially choppy on 90/120Hz phones.
+    // GSAP supplies frame delta in ms; cap it to avoid jumps after stalls.
+    const tick = (_time: number, deltaTime: number) => {
+      if (!period || !setTrackX) return;
+      const dt = Math.min(deltaTime / 1000, 0.05);
+      const decay = Math.exp((-Math.LN2 * dt) / MARQUEE_BOOST_HALF_LIFE);
 
-    const tick = () => {
-      const now = performance.now();
-      if (minFrameGapMs && now - lastTickT < minFrameGapMs) return;
-      const dt = (now - lastTickT) / 1000; // seconds since last processed frame
-      lastTickT = now;
-
-      boost *= Math.pow(0.5, dt / MARQUEE_BOOST_HALF_LIFE);
-      const speed = MARQUEE_BASE_SPEED + boost;
-      x -= speed * dt;
-
-      // Keep the running total bounded over a long idle tab — folding
-      // by whole periods never changes where it wraps to, so it's
-      // invisible to the render.
-      if (period > 0 && Math.abs(x) > period * 50) {
-        x -= Math.round(x / period) * period;
+      if (supportsFinePointer) {
+        boost *= decay; // retain existing desktop scroll response
+      } else {
+        targetBoost *= decay;
+        // Ease mobile speed changes instead of stepping the text at each
+        // scroll event. Idle speed and direction stay the same.
+        boost +=
+          (targetBoost - boost) *
+          (1 - Math.exp(-dt / MARQUEE_MOBILE_SMOOTHING));
       }
-      if (track) gsap.set(track, { x: wrap(x) });
+
+      x = wrap(x - (MARQUEE_BASE_SPEED + boost) * dt);
+      setTrackX(x);
     };
 
     const startTicker = () => {
       if (ticking || !track) return;
       ticking = true;
-      // Otherwise the first frame after a pause (scrolled past main,
-      // tab backgrounded) sees a huge `dt` and jumps the marquee
-      // forward by however long it was paused, instead of resuming at
-      // its normal pace.
-      lastTickT = performance.now();
+      // Only promote the active marquee to its own composited layer.
       track.style.willChange = "transform";
       gsap.ticker.add(tick);
     };
@@ -171,10 +171,20 @@ export default function StickyConnectCTA() {
         // instead of speeding it up too.
         if (dy > 0) {
           const sampleVelocity = Math.min(MARQUEE_MAX_SAMPLE_VELOCITY, dy / dt);
-          boost = Math.min(
-            MARQUEE_MAX_BOOST,
-            boost + sampleVelocity * MARQUEE_BOOST_GAIN,
-          );
+          if (supportsFinePointer) {
+            boost = Math.min(
+              MARQUEE_MAX_BOOST,
+              boost + sampleVelocity * MARQUEE_BOOST_GAIN,
+            );
+          } else {
+            targetBoost = Math.max(
+              targetBoost,
+              Math.min(
+                MARQUEE_MOBILE_MAX_BOOST,
+                sampleVelocity * MARQUEE_MOBILE_BOOST_GAIN,
+              ),
+            );
+          }
         }
       }
       lastY = y;
@@ -183,8 +193,10 @@ export default function StickyConnectCTA() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("resize", onResize);
     document.addEventListener("visibilitychange", syncTicker);
+    const mainResizeObserver = new ResizeObserver(onResize);
+    mainResizeObserver.observe(main);
 
     // Re-measure the loop period whenever the track's rendered width
     // changes (a responsive text-size breakpoint, a window resize) so
@@ -200,6 +212,7 @@ export default function StickyConnectCTA() {
           period = next;
           wrap = gsap.utils.wrap(-period, 0);
           x = wrap(x);
+          setTrackX?.(x);
         });
       });
       ro.observe(track);
@@ -210,8 +223,9 @@ export default function StickyConnectCTA() {
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", requestUpdate);
+      window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", syncTicker);
+      mainResizeObserver.disconnect();
       if (frame) cancelAnimationFrame(frame);
       cancelAnimationFrame(resizeFrame);
       ro?.disconnect();
@@ -236,7 +250,7 @@ export default function StickyConnectCTA() {
       <HorizontalStaggerRows />
 
       <span className="relative z-[1] flex items-center justify-between border-b border-black-bg/25 px-2.5 font-mono text-[8px] tracking-[0.05em] uppercase">
-        <span>/ CTA</span>
+        <span>/ TECHNICO_ </span>
         <span>+</span>
       </span>
 
