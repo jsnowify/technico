@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { SITE_NAME } from "@/lib/constants";
 import type { ServiceNavItem } from "@/lib/content/types";
+import ScrambleText from "@/components/motion/ScrambleText";
 import HorizontalStagger from "./HorizontalStagger";
 import HeaderTile from "./HeaderTile";
 import HeaderDrop from "./HeaderDrop";
@@ -19,6 +20,24 @@ interface HeaderProps {
 }
 
 const LOGO = "/technico-digitals-solutions-inc-logo-black.svg";
+const MOBILE_LABEL_TEXT = "Digital Marketing Agency";
+const MOBILE_LABEL_LENGTH = MOBILE_LABEL_TEXT.length;
+const MOBILE_LABEL_POOL = [
+  ...new Set(MOBILE_LABEL_TEXT.toUpperCase().replace(/[^A-Z]/g, "")),
+];
+
+// Generate scramble frames once, rather than rebuilding a random string on
+// every GSAP tick. Each frame reveals one additional original character.
+const MOBILE_LABEL_FRAMES = Array.from(
+  { length: MOBILE_LABEL_LENGTH + 1 },
+  (_, revealCount) =>
+    Array.from(MOBILE_LABEL_TEXT, (char, index) => {
+      if (char === " " || index < revealCount) return char;
+      return MOBILE_LABEL_POOL[
+        Math.floor(Math.random() * MOBILE_LABEL_POOL.length)
+      ];
+    }).join(""),
+);
 
 export default function Header({ services }: HeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -28,12 +47,70 @@ export default function Header({ services }: HeaderProps) {
   const [activeNav, setActiveNav] = useState<string | null>(null);
   const [navVisible, setNavVisible] = useState(true);
   const servicesActive = activeNav === "SERVICES" && navVisible;
+  const mobileLabelRef = useRef<HTMLSpanElement>(null);
+  const mobileLabelTween = useRef<gsap.core.Tween | null>(null);
+  const mobileLabelProgress = useRef({ value: 0 });
+  const mobileLabelStep = useRef(-1);
 
   const lastScroll = useRef(0);
   const navCloseTimer = useRef<number | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileInnerRef = useRef<HTMLDivElement>(null);
   const mobileTimeline = useRef<gsap.core.Timeline | null>(null);
+
+  useEffect(() => {
+    const el = mobileLabelRef.current;
+    if (!el) return;
+
+    mobileLabelTween.current?.kill();
+    mobileLabelTween.current = null;
+
+    const progress = mobileLabelProgress.current;
+    const target = mobileOpen ? 1 : 0;
+
+    // No animation on initial closed mount, or when the requested state is
+    // already reached. Respect the user's reduced-motion preference.
+    if (prefersReducedMotion || progress.value === target) {
+      progress.value = target;
+      el.textContent = mobileOpen ? MOBILE_LABEL_TEXT : "";
+      mobileLabelStep.current = mobileOpen ? MOBILE_LABEL_LENGTH : -1;
+      return;
+    }
+
+    const renderFrame = () => {
+      const step = Math.max(
+        0,
+        Math.min(
+          MOBILE_LABEL_LENGTH,
+          Math.round(progress.value * MOBILE_LABEL_LENGTH),
+        ),
+      );
+      if (step === mobileLabelStep.current) return;
+      mobileLabelStep.current = step;
+      el.textContent = MOBILE_LABEL_FRAMES[step];
+    };
+
+    // Preserve current progress when rapidly opening/closing the menu.
+    // Write to the DOM only when the revealed character count changes.
+    renderFrame();
+    const tween = gsap.to(progress, {
+      value: target,
+      duration: mobileOpen ? 0.6 : 0.4,
+      ease: "none",
+      onUpdate: renderFrame,
+      onComplete: () => {
+        el.textContent = mobileOpen ? MOBILE_LABEL_TEXT : "";
+        mobileLabelStep.current = mobileOpen ? MOBILE_LABEL_LENGTH : -1;
+        mobileLabelTween.current = null;
+      },
+    });
+    mobileLabelTween.current = tween;
+
+    return () => {
+      tween.kill();
+      if (mobileLabelTween.current === tween) mobileLabelTween.current = null;
+    };
+  }, [mobileOpen]);
 
   const cancelNavClose = () => {
     if (navCloseTimer.current !== null) {
@@ -239,7 +316,7 @@ export default function Header({ services }: HeaderProps) {
                 setMobileOpen(false);
                 setLogoActive(false);
               }}
-              className="relative isolate flex h-16 w-[150px] items-start justify-start overflow-hidden bg-[var(--header-paper)] px-3 pt-2.5 text-[#101010] lg:h-12 lg:w-[156px] xl:w-[164px] lg:items-center lg:justify-center lg:px-4 lg:pt-0"
+              className="relative isolate flex h-16 w-[164px] items-center justify-start overflow-hidden bg-[var(--header-paper)] px-3 text-[#101010] lg:h-12 lg:w-[172px] xl:w-[184px] lg:justify-center lg:px-4"
             >
               <HorizontalStagger
                 active={logoActive}
@@ -247,37 +324,54 @@ export default function Header({ services }: HeaderProps) {
                 rows={6}
               />
 
-              <span className="relative z-10 flex items-center gap-2.5">
+              <span className="relative z-10 flex items-center gap-3">
                 <Image
                   src={LOGO}
                   alt=""
                   aria-hidden="true"
-                  width={30}
-                  height={30}
-                  className="h-[30px] w-[30px] shrink-0 object-contain"
+                  width={38}
+                  height={38}
+                  className="h-[38px] w-[38px] shrink-0 object-contain"
                 />
-                <span className="font-mono text-[12px] font-bold tracking-[-0.055em] uppercase lg:text-[14px]">
+                <span className="font-mono text-[13px] font-bold tracking-[-0.055em] uppercase lg:text-[16px]">
                   TCHNIC_
                 </span>
               </span>
 
-              <span className="absolute bottom-1 left-[52px] z-10 font-mono text-[7px] leading-[1.05] uppercase tracking-[-0.04em] lg:hidden">
-                Digital marketing
-                <br />
-                agency
-              </span>
               <span className="sr-only">{SITE_NAME}</span>
             </Link>
 
             <div className="absolute inset-x-0 top-full hidden lg:block">
               <HeaderDrop open={logoActive}>
                 <p className="px-3 pb-5 pt-3 font-mono text-[12px] leading-[1.2] uppercase tracking-[-0.04em]">
-                  {"// "}Digital marketing
+                  {"// "}
+                  <ScrambleText
+                    key={`logo-drop-line1-${logoActive}`}
+                    text="Digital marketing"
+                    trigger="mount"
+                  />
                   <br />
-                  &nbsp;&nbsp;&nbsp;agency
+                  &nbsp;&nbsp;&nbsp;
+                  <ScrambleText
+                    key={`logo-drop-line2-${logoActive}`}
+                    text="agency"
+                    trigger="mount"
+                  />
                 </p>
               </HeaderDrop>
             </div>
+
+            <p
+              aria-hidden={!mobileOpen}
+              className={`absolute inset-x-0 top-full z-10 bg-[var(--header-paper)] px-3 pb-3 pt-1 font-mono text-[11px] leading-none uppercase tracking-[-0.04em] text-black/60 transition-[opacity,transform] duration-[400ms] [transition-timing-function:var(--header-ease)] lg:hidden ${
+                mobileOpen
+                  ? "translate-y-0 opacity-100"
+                  : "pointer-events-none -translate-y-1.5 opacity-0"
+              }`}
+            >
+              <span ref={mobileLabelRef} aria-hidden="true" />
+              <span className="sr-only">{MOBILE_LABEL_TEXT}</span>
+            </p>
           </div>
 
           <div className="pointer-events-auto absolute left-1/2 top-0 z-30 hidden w-max -translate-x-1/2 lg:block">

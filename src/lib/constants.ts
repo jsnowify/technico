@@ -389,8 +389,7 @@ export const PARTNERS: Partner[] = [
 /**
  * Content for the "Trusted by" logo loop (components/home/TrustedBy.tsx).
  *
- * These use Cloudinary responsive delivery (320px, automatic modern format
- * and compression) rather than the original 1080px PNGs. No company names
+ * These use the 13 supplied Cloudinary AVIF delivery URLs. No company names
  * were supplied alongside the images, so `alt` is left empty (the logos
  * are decorative here; the section's "Trusted by" heading already carries
  * the meaning for assistive tech).
@@ -406,43 +405,43 @@ export interface TrustedBrand {
 
 export const TRUSTED_BY: TrustedBrand[] = [
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526316/trusted/technico-trusted-by-1_r1j2kq.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-1_r1j2kq.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526316/trusted/technico-trusted-by-2_vtqyly.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-2_vtqyly.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-3_cxj5my.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-3_cxj5my.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-4_ds72ds.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-4_ds72ds.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526316/trusted/technico-trusted-by-5_sbmbc9.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-5_sbmbc9.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-6_yewoz3.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-6_yewoz3.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-7_iupzeh.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-7_iupzeh.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-8_zza1hu.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-8_zza1hu.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-9_ceji5a.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-9_ceji5a.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-10_hwtenh.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-10_hwtenh.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526317/trusted/technico-trusted-by-11_dadypu.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-11_dadypu.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526318/trusted/technico-trusted-by-12_zzhke2.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-12_zzhke2.png",
   },
   {
-    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_auto,q_auto,w_320/v1788526318/trusted/technico-trusted-by-13_wqkkvw.png",
+    logo: "https://res.cloudinary.com/dp9bjis3z/image/upload/f_avif/q_auto:best/cs_srgb/dpr_auto/trusted/technico-trusted-by-13_wqkkvw.png",
   },
 ];
 
