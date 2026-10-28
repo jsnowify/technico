@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { FORCE_NOINDEX } from "@/lib/env";
 
 /**
  * This project's public canonical domain is technicosolutions.com. Vercel
@@ -19,7 +20,7 @@ export function proxy(request: NextRequest) {
 
   const response = NextResponse.next();
 
-  if (isTestHost) {
+  if (FORCE_NOINDEX || isTestHost) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
 

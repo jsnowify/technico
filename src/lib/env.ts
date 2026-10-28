@@ -23,10 +23,19 @@ const siteEnv = (process.env.SITE_ENV ?? process.env.NEXT_PUBLIC_SITE_ENV ?? "")
   .trim()
   .toLowerCase();
 
+/**
+ * Master switch: while true, EVERY environment (including production and the
+ * live custom domain) is noindex/nofollow with an empty sitemap. Set to false
+ * at launch to restore the environment-based policy below.
+ */
+export const FORCE_NOINDEX = true;
+
 /** Only the real, publicly indexable production deployment. */
-export const IS_PRODUCTION: boolean = vercelEnv
-  ? vercelEnv === "production" && (siteEnv === "" || siteEnv === "production")
-  : siteEnv === "production";
+export const IS_PRODUCTION: boolean =
+  !FORCE_NOINDEX &&
+  (vercelEnv
+    ? vercelEnv === "production" && (siteEnv === "" || siteEnv === "production")
+    : siteEnv === "production");
 
 /**
  * Local Lighthouse checks should not fail on noindex; this DOES NOT make
@@ -34,7 +43,8 @@ export const IS_PRODUCTION: boolean = vercelEnv
  * robots.txt and sitemap.ts use IS_PRODUCTION, not this localhost exception.
  */
 export const IS_INDEXABLE: boolean =
-  IS_PRODUCTION ||
+  !FORCE_NOINDEX &&
+  (IS_PRODUCTION ||
   (!vercelEnv &&
     process.env.NODE_ENV === "development" &&
-    ["", "local", "development"].includes(siteEnv));
+    ["", "local", "development"].includes(siteEnv)));
